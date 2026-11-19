@@ -1,0 +1,1603 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f6fb">
+<title>Enredo — Story planner</title>
+<style>
+:root{color-scheme:light;--ink:#211c31;--muted:#686277;--quiet:#827b91;--line:#e7e3ef;--white:#fff;--accent:#693dc7;--accent-dark:#542aad;--accent-soft:#efe8ff;--canvas:#faf9fd;--sidebar:#f6f4fa;--shadow:0 3px 8px #3123540a;font:16px/1.5 "Aptos","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);background:#fff}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default;opacity:.44}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid #9e73f5;outline-offset:2px}
+button svg,span svg{flex:none}
+button svg,.icon{width:18px;height:18px;vertical-align:middle}
+[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100dvh}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+.brand{height:74px;display:flex;align-items:center;gap:11px;padding:0 22px;border-bottom:1px solid var(--line)}
+.brand-mark{width:35px;height:35px;display:grid;place-items:center;background:#6c41cf;color:white;border-radius:10px;box-shadow:0 3px 7px #693dc742}
+.brand-mark svg{height:23px;width:23px}
+.brand strong{font-size:22px;letter-spacing:-.8px;line-height:1}
+.side-body{padding:23px 14px}
+.side-home{margin-bottom:21px}
+.side-home .chapter-link svg{width:17px;height:17px;margin-left:3px}
+.side-label,.eyebrow{font-size:.75rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--quiet)}
+.side-label{padding-left:8px}
+.project-picker{position:relative;margin:8px 0 24px}
+.project-button{display:flex;align-items:center;gap:10px;background:white;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:10px;padding:8px 9px;width:100%;text-align:left;font-size:.875rem;font-weight:700}
+.project-glyph{width:30px;height:30px;display:grid;place-items:center;border-radius:7px;background:var(--accent-soft);color:var(--accent)}
+.project-button .chevron{height:14px;width:14px;margin-left:auto;color:var(--quiet)}
+.clip{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.side-section{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.chapter-list{display:grid;gap:4px}
+.chapter-link{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:none;border:1px solid transparent;border-radius:8px;padding:9px 8px;color:var(--muted);font-size:.9rem;min-height:41px}
+.chapter-link:hover{background:#eeebf6}
+.chapter-link.active{background:#ebe3fb;color:#512b9d;border-color:#e5d9fa;font-weight:750}
+.chapter-row{display:flex;align-items:center;min-width:0;gap:2px}
+.chapter-row .chapter-link{flex:1;min-width:0}
+.remove-button:hover:not(:disabled){background:#f9e3ec;color:#962d4e}
+.chapter-no{width:24px;height:23px;border-radius:5px;display:grid;place-items:center;background:#eae6f1;color:#6d657c;font-size:.75rem;font-weight:700;font-variant-numeric:tabular-nums;flex:none}
+.active .chapter-no{background:#ddd0f7;color:#5f35ad}
+.side-footer{margin-top:auto;padding:14px;border-top:1px solid var(--line)}
+.side-footer .btn{width:100%;justify-content:flex-start;color:var(--muted)}
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{height:74px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 30px;border-bottom:1px solid var(--line)}
+.crumb,.top-actions,.heading-actions,.graph-actions{display:flex;align-items:center;gap:12px;min-width:0}
+.crumb{font-size:.875rem;color:var(--muted)}
+.crumb svg{width:15px;height:15px;color:var(--quiet)}
+.crumb strong{color:var(--ink);font-weight:650}
+.top-actions{gap:16px;flex:none;margin-left:auto}
+.language-picker{position:relative;display:flex;align-items:center;flex:none}
+.language-picker>span{position:absolute;top:50%;left:9px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.language-picker svg{display:block;width:18px;height:18px}
+.language-picker select{width:auto;min-height:36px;padding-left:32px;font-weight:650}
+.save{display:flex;align-items:center;gap:6px;color:#4d665d;font-size:.81rem;white-space:nowrap}
+.save svg{color:#4e826c;width:16px;height:16px}
+.save.failed,.save.failed svg{color:#ae3b58}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;border-radius:8px;border:1px solid var(--line);background:white;padding:8px 12px;min-height:36px;font-size:.875rem;font-weight:650;line-height:1.25}
+.btn:hover{background:#f7f4fc;border-color:#dcd2eb}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:#f0ebf8}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:white;box-shadow:0 3px 7px #6137bf28}
+.btn.primary:hover{background:var(--accent-dark)}
+.btn.danger{color:#a72c50;border-color:#edcfd8}
+.icon-btn{display:inline-grid;place-items:center;flex:none;width:33px;height:33px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--muted);padding:0}
+.icon-btn:hover:not(:disabled),.icon-btn.on{background:#eee7fa;color:#5b30aa}
+.icon-btn.on{border-color:#e1d5f7}
+.icon-btn.small{width:28px;height:28px}
+.icon-btn.small svg{width:15px;height:15px}
+.menu-wrap{position:relative}
+.menu{position:absolute;z-index:12;top:calc(100% + 6px);left:0;min-width:100%;width:max-content;max-width:min(300px,90vw);padding:5px;background:white;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 27px #27124b25}
+.menu.align-right{left:auto;right:0}
+.menu button{display:flex;align-items:center;gap:9px;padding:8px 10px;width:100%;border:0;background:white;border-radius:6px;text-align:left;font-size:.875rem}
+.menu button:hover,.menu button.current{background:var(--accent-soft);color:var(--accent-dark)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px}
+.content{padding:24px 28px 20px;display:flex;flex-direction:column;flex:1;min-width:0}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
+.heading h1{font-size:clamp(1.65rem,2.35vw,2.15rem);line-height:1.15;letter-spacing:-.045em;margin:3px 0 6px}
+.heading-title{display:flex;align-items:center;gap:7px;overflow-wrap:anywhere}
+.heading p{font-size:.875rem;color:var(--muted);margin:0}
+.space-heading{margin:5px 0 24px}
+.space-heading h1{margin:0 0 5px}
+.space-heading .heading-actions{gap:6px}
+.space-heading .primary{margin-left:6px}
+.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,264px),1fr));gap:14px}
+.project-card{display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);border-radius:12px;background:white;box-shadow:var(--shadow)}
+.project-card:hover{border-color:#d9c9f2}
+.project-open{flex:1;display:flex;align-items:flex-start;gap:13px;min-width:0;width:100%;padding:17px;border:0;border-radius:12px 12px 0 0;background:transparent;text-align:left}
+.project-open:hover{background:#fbf9ff}
+.project-open .project-glyph{width:40px;height:40px;border-radius:9px;flex:none}
+.project-open .project-glyph svg{width:21px;height:21px}
+.project-card-name{display:block;font-size:1.025rem;line-height:1.3;font-weight:750;overflow-wrap:anywhere}
+.project-card-summary{display:block;font-size:.8125rem;color:var(--muted);margin-top:4px}
+.project-card-actions{display:flex;align-items:center;justify-content:flex-end;border-top:1px solid var(--line);padding:5px 9px}
+.project-card-actions .btn{font-size:.8125rem;min-height:31px;color:var(--muted);padding:5px 8px}
+.project-card-actions .btn:hover{color:#962d4e;background:#f9e3ec}
+.empty-library{display:grid;justify-items:start;gap:7px;padding:23px;border:1px dashed #d8cceb;border-radius:12px;background:#fbf9ff}
+.empty-library strong{font-size:1.08rem}
+.empty-library p{margin:0 0 6px;color:var(--muted);font-size:.9rem}
+.empty-library-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chapter-empty{margin:0 0 16px}
+.workspace{flex:1;min-height:570px;display:grid;grid-template-columns:minmax(0,1fr) 292px;border:1px solid var(--line);border-radius:13px;box-shadow:0 2px 8px #27124b08;overflow:hidden}
+.graph-shell{display:flex;flex-direction:column;min-width:0}
+.graph-bar{display:flex;justify-content:space-between;align-items:center;gap:4px;padding:0 9px 0 12px;min-height:53px;border-bottom:1px solid var(--line)}
+.tabs{align-self:stretch;display:flex;gap:12px;min-width:0}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:0 3px;font-size:.875rem;font-weight:650;color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.tab:hover,.tab.active{color:var(--accent-dark)}
+.tab.active{border-bottom-color:var(--accent)}
+.tab svg{width:16px;height:16px}
+.graph-actions{gap:2px}
+.split{width:1px;height:20px;background:var(--line);margin:0 4px}
+.graph{position:relative;isolation:isolate;flex:1;min-height:450px;overflow:hidden;background-color:var(--canvas);background-image:radial-gradient(circle,#d8d0e7 1px,transparent 1.1px);background-size:20px 20px;touch-action:none;cursor:grab}
+.graph.panning,.graph.panning .node{cursor:grabbing}
+.graph.connecting,.graph.connecting .node{cursor:crosshair}
+.world{position:absolute;inset:0;transform-origin:0 0;pointer-events:none}
+.wires{position:absolute;inset:0;width:1px;height:1px;overflow:visible}
+.wire{fill:none;stroke:#a198b5;stroke-width:1.65;pointer-events:none}
+.wire.active{stroke:#8d66d7;stroke-width:2}
+.wire-hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer}
+.wire-label{pointer-events:auto;cursor:pointer}
+.wire-label rect{fill:#fff;stroke:#ddd3ee;stroke-width:1}
+.wire-label text{font:650 12px "Aptos","Segoe UI",sans-serif;fill:#5c477e}
+.wire-label:hover rect{fill:#ede3ff}
+.world-label{position:absolute;display:block;color:#5b4d75;font-size:15px;font-weight:750;white-space:nowrap;background:#f0eaf9;border:1px solid #e0d5f0;border-radius:6px;padding:5px 9px}
+.node{width:170px;height:96px;position:absolute;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;padding:12px;border:1px solid #ddd6e9;border-radius:10px;background:#fff;box-shadow:0 4px 9px #34235014;text-align:left;pointer-events:auto;cursor:grab;user-select:none;color:var(--ink)}
+.node:hover,.node.selected{border-color:#a478ed}
+.graph.overview:not(.connecting) .node{cursor:pointer}
+.node.selected{background:#fcfaff;box-shadow:0 0 0 3px #dcc9f7,0 4px 12px #4b23861f}
+.node.connection-source{border-style:dashed;border-color:var(--accent);box-shadow:0 0 0 4px #dac4ff}
+.node-title{font-size:16px;font-weight:750;letter-spacing:-.02em;line-height:1.15;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.tag{--tag-bg:#e9eefc;--tag-ink:#415389;display:inline-flex;align-items:center;gap:4px;background:var(--tag-bg);color:var(--tag-ink);padding:3px 6px;border-radius:5px;font-size:12px;font-weight:700;line-height:1.15;white-space:nowrap}
+.tag svg{width:13px;height:13px}
+[data-kind="decision"]{--tag-bg:#eee3ff;--tag-ink:#6533a8}
+[data-kind="outcome"]{--tag-bg:#f9eddb;--tag-ink:#8f511f}
+[data-kind="merge"]{--tag-bg:#dff4ea;--tag-ink:#24674e}
+[data-kind="ending"]{--tag-bg:#f9e3ec;--tag-ink:#963d60}
+.port{position:absolute;background:#fff;border:1.5px solid #a99abf;width:9px;height:9px;border-radius:50%;top:calc(50% - 4.5px);left:-5px}
+.port.out{left:auto;right:-5px}
+.selected .port{border-color:#9766e6}
+.graph-controls{position:absolute;left:14px;bottom:14px;display:flex;gap:2px;align-items:center;background:white;border:1px solid var(--line);border-radius:8px;padding:3px;box-shadow:var(--shadow);cursor:default}
+.zoom-level{padding:0 4px;min-width:46px;text-align:center;font-size:.8125rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.minimap{position:absolute;right:14px;bottom:14px;border:1px solid #e0d8ed;border-radius:8px;width:128px;height:76px;background:#fff;box-shadow:var(--shadow);cursor:crosshair}
+.canvas-note{position:absolute;left:50%;top:13px;transform:translateX(-50%);width:max-content;max-width:90%;background:#f0e6ff;color:#53259a;border:1px solid #ddc8f8;border-radius:8px;padding:6px 10px;font-size:.875rem;font-weight:650}
+.empty-canvas{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:21px 24px;max-width:90%;width:320px;cursor:default}
+.empty-canvas strong{display:block;font-size:1.05rem}
+.empty-canvas p{font-size:.875rem;color:var(--muted);margin:6px 0 14px}
+.graph-footer{display:flex;align-items:center;gap:12px;min-height:41px;padding:7px 12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.legend-item{--tag-ink:#415389;display:inline-flex;gap:5px;align-items:center;color:var(--muted);font-size:.77rem;white-space:nowrap}
+.legend-item[data-kind="decision"]{--tag-ink:#6533a8}
+.legend-item[data-kind="outcome"]{--tag-ink:#8f511f}
+.legend-item[data-kind="merge"]{--tag-ink:#24674e}
+.legend-item[data-kind="ending"]{--tag-ink:#963d60}
+.legend-item i{width:8px;height:8px;border-radius:50%;background:var(--tag-ink);opacity:.84}
+.inspector{background:#fff;border-left:1px solid var(--line);min-width:0;display:flex;flex-direction:column}
+.inspector-header{height:53px;display:flex;align-items:center;justify-content:space-between;padding:0 14px 0 17px;border-bottom:1px solid var(--line);gap:6px}
+.inspector-header strong{font-size:.875rem;display:flex;align-items:center;gap:8px}
+.inspector-header strong svg{color:var(--accent);width:16px;height:16px}
+.inspector-body{padding:15px 17px 14px;overflow:auto;max-height:calc(100dvh - 245px);min-height:435px}
+.fields{display:grid;gap:13px}
+.field{display:grid;gap:5px;min-width:0}
+.field>span,.paths-title,.section-title{font-weight:700;font-size:.875rem}
+input,select,textarea{min-width:0;width:100%;border:1px solid #e0dbea;background:#fff;border-radius:7px;padding:7px 9px;font-size:.875rem;line-height:1.4}
+textarea{resize:vertical;min-height:79px}
+select{appearance:none;padding-right:29px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23686277' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+::placeholder{color:#817a91}
+.paths{margin-top:16px;padding-top:13px;border-top:1px solid var(--line)}
+.paths-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.count{font-size:.75rem;font-weight:700;color:#695887;background:#f0ebf8;padding:1px 7px;border-radius:12px}
+.path-list{display:grid;gap:6px}
+.path-item{display:flex;gap:5px;align-items:center;border:1px solid var(--line);border-radius:7px;background:#fbfafc;padding:3px 3px 3px 7px;min-width:0}
+.path-target{display:flex;align-items:center;gap:7px;min-width:0;flex:1;text-align:left;background:none;border:0;padding:3px 0;color:var(--ink);font-size:.8rem;font-weight:700}
+.path-target:hover{color:var(--accent-dark)}
+.path-target svg{color:var(--accent);width:15px;height:15px}
+.path-target small{display:block;color:var(--muted);font-weight:500;font-size:.75rem}
+.path-add{width:100%;margin-top:8px;justify-content:flex-start;border-style:dashed;color:var(--accent-dark)}
+.node-actions{margin-top:12px;padding-top:9px;border-top:1px solid var(--line);display:flex;justify-content:space-between}
+.node-actions button{font-size:.8rem;padding:5px;min-height:28px}
+.node-actions .remove{color:#a02d50}
+.hint{margin:5px 0;color:var(--muted);font-size:.875rem}
+.overview-chapters{display:grid;gap:7px;margin-top:12px}
+.overview-chapters .chapter-link{border:1px solid var(--line)}
+.footer-note{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;color:var(--quiet);font-size:.77rem}
+.footer-note span{display:flex;align-items:center;gap:5px}
+.footer-note svg{width:14px;height:14px}
+dialog{border:1px solid var(--line);border-radius:14px;padding:0;width:min(450px,calc(100vw - 28px));max-height:90dvh;box-shadow:0 15px 65px #22103d47}
+dialog::backdrop{background:#29194155}
+.dialog-head{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.dialog-head h2{font-size:1.125rem;margin:0}
+.dialog-form{padding:17px 18px}
+.dialog-actions{margin-top:18px;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:7px}
+.dialog-actions .danger{margin-right:auto}
+.dialog-actions button[type="submit"].danger{margin-right:0;background:#a52f51;color:white;border-color:#a52f51}
+.dialog-actions button[type="submit"].danger:hover{background:#8e2947}
+.dialog-form p{margin:0 0 10px}
+.dialog-form ul{padding-left:20px;margin:0;color:var(--muted);font-size:.9rem}
+.dialog-form li+li{margin-top:6px}
+.toast{z-index:20;position:fixed;right:24px;bottom:24px;max-width:calc(100vw - 48px);padding:10px 14px;border-radius:9px;background:#2c2040;color:#fff;box-shadow:0 6px 25px #28134932;font-size:.875rem}
+@media(min-width:1151px){.workspace{height:calc(100dvh - 260px);flex:none}}
+@media(max-width:1150px){.app{grid-template-columns:185px minmax(0,1fr)}.content{padding:20px 17px}.topbar{padding:0 17px}.workspace{grid-template-columns:minmax(0,1fr) 245px}.inspector-body{padding-inline:12px}.graph-actions .undo-control{display:none}.tabs{gap:8px}.tab{gap:4px}.tab svg{display:none}}
+@media(max-width:940px){.app{grid-template-columns:155px minmax(0,1fr)}.brand{padding-inline:12px}.side-body{padding:17px 8px}.workspace{grid-template-columns:minmax(0,1fr)}.inspector{border-left:0;border-top:1px solid var(--line)}.inspector-body{max-height:none;min-height:0}.graph{height:58vh;flex:none;min-height:330px}.graph-actions .undo-control{display:inline-grid}}
+@media(max-width:600px){.app{display:block}.sidebar{border:0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto 1fr}.brand{height:auto;align-self:start;padding-top:10px;border:0}.brand strong{font-size:18px}.brand-mark{height:28px;width:28px}.brand-mark svg{height:19px;width:19px}.side-body{padding:7px 9px 8px 0;min-width:0}.side-label{display:none}.project-picker{margin:0 0 3px}.project-button{padding:4px 6px}.project-glyph{height:24px;width:24px}.side-section{margin:0;float:right}.chapter-list{display:flex;overflow:auto;margin-right:31px}.chapter-link{white-space:nowrap;width:auto;min-height:32px;padding:3px 5px;font-size:.8rem}.side-footer{display:none}.topbar{height:46px;padding-inline:10px}.crumb>span,.crumb>svg{display:none}.top-actions{gap:7px}.content{padding:13px 8px}.heading{margin-bottom:12px}.heading p{font-size:.8rem}.heading-actions .btn{font-size:.8rem;padding-inline:6px}.graph-actions .undo-control,.graph-actions .split,.footer-note span:first-child{display:none}.graph-bar{padding:0 5px;min-height:44px}.tab{font-size:.8rem}.minimap{width:100px;height:60px}.graph-footer{gap:8px}.footer-note{justify-content:flex-end}}
+@media(max-width:600px){.side-home{margin-bottom:3px}.chapter-row{flex:none;max-width:180px}.chapter-row .chapter-link{width:auto}.space-heading{align-items:flex-start;gap:8px}.space-heading .heading-actions{gap:2px}.space-heading .primary{margin-left:2px}.space-heading .icon-btn{width:24px}.empty-library-actions .btn{white-space:normal}}
+@media(max-width:600px){.save:not(.failed) .save-copy{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.save.failed .save-copy{max-width:75px;white-space:normal;line-height:1.2}.top-actions{gap:6px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" aria-label="Project and chapters" data-i18n-label="projectNavigation">
+    <div class="brand"><span class="brand-mark" data-icon="branch"></span><strong>Enredo</strong></div>
+    <div class="side-body">
+      <nav class="side-home" aria-label="My space" data-i18n-label="home"><button type="button" class="chapter-link" id="goHome"><span data-icon="home"></span> <span data-i18n="home">My space</span></button></nav>
+      <div id="projectNavigation" hidden>
+        <div class="side-label" data-i18n="project">Project</div>
+        <div class="project-picker">
+          <button class="project-button" id="projectButton" data-menu="projectMenu" aria-expanded="false"><span class="project-glyph" data-icon="book"></span><span class="clip" id="projectName"></span><span class="chevron" data-icon="chevron"></span></button>
+          <div class="menu" id="projectMenu" hidden></div>
+        </div>
+        <div class="side-section"><span class="side-label" data-i18n="chapters">Chapters</span><button class="icon-btn small" id="addChapter" title="New chapter" aria-label="New chapter" data-i18n-label="newChapter" data-i18n-title="newChapter" data-icon="plus"></button></div>
+        <nav class="chapter-list" id="chapters" aria-label="Chapters" data-i18n-label="chapters"></nav>
+      </div>
+    </div>
+    <div class="side-footer"><button class="btn ghost" id="helpButton"><span data-icon="help"></span> <span data-i18n="help">How to use</span></button></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb" id="projectCrumb" hidden><span data-i18n="home">My space</span><span data-icon="right"></span><strong class="clip" id="breadcrumb"></strong></div>
+      <div class="top-actions">
+        <span class="save" id="saveStatus" role="status"></span>
+        <label class="language-picker">
+          <span class="icon" data-icon="globe"></span>
+          <select id="languageSelect" aria-label="Language" data-i18n-label="language">
+            <option value="en" lang="en">English</option>
+            <option value="pt" lang="pt-BR">Português</option>
+          </select>
+        </label>
+        <div class="menu-wrap"><button class="btn" data-menu="fileMenu" aria-expanded="false"><span data-icon="folder"></span> <span data-i18n="files">Files</span> <span data-icon="chevron"></span></button>
+          <div class="menu align-right" id="fileMenu" hidden>
+            <button id="exportProject"><span data-icon="download"></span> <span data-i18n="exportJson">Export project (.json)</span></button>
+            <button id="importProject"><span data-icon="upload"></span> <span data-i18n="importJson">Import project (.json)</span></button>
+            <hr><button id="fileHelp"><span data-icon="help"></span> <span data-i18n="help">How to use</span></button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <section class="content" id="spaceView" aria-labelledby="spaceTitle">
+      <div class="heading space-heading">
+        <div><h1 id="spaceTitle" tabindex="-1" data-i18n="home">My space</h1><p id="projectCount"></p></div>
+        <div class="heading-actions">
+          <button type="button" class="icon-btn" id="undoHome" title="Undo (Ctrl+Z)" aria-label="Undo" data-i18n-label="undo" data-i18n-title="undo" data-shortcut="Ctrl+Z" data-icon="undo"></button>
+          <button type="button" class="icon-btn" id="redoHome" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" data-i18n-label="redo" data-i18n-title="redo" data-shortcut="Ctrl+Shift+Z" data-icon="redo"></button>
+          <button type="button" class="btn primary" id="newHomeProject"><span data-icon="plus"></span> <span data-i18n="newProject">New project</span></button>
+        </div>
+      </div>
+      <div class="project-grid" id="projectGrid"></div>
+      <div class="empty-library" id="emptyProjects" hidden>
+        <strong data-i18n="noProjects">You have no projects yet</strong>
+        <p data-i18n="noProjectsHint">Create a story or import an existing project from a JSON file.</p>
+        <button type="button" class="btn" id="emptyImport"><span data-icon="upload"></span> <span data-i18n="importProject">Import project</span></button>
+      </div>
+    </section>
+    <div class="content" id="editorView" hidden>
+      <section class="heading">
+        <div><div class="eyebrow" id="chapterLabel"></div><div class="heading-title"><h1 id="chapterTitle" tabindex="-1"></h1><button class="icon-btn small" id="renameChapter" title="Edit chapter" aria-label="Edit chapter" data-i18n-label="editChapter" data-i18n-title="editChapter" data-icon="edit"></button></div><p id="stats"></p></div>
+        <div class="heading-actions"><button class="btn primary" id="addNode"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
+      </section>
+      <section class="empty-library chapter-empty" id="emptyChapters" hidden>
+        <strong data-i18n="noChapters">This project has no chapters yet</strong>
+        <p data-i18n="noChaptersHint">Create a chapter to start building your timeline.</p>
+        <div class="empty-library-actions">
+          <button type="button" class="btn primary" id="newEmptyChapter"><span data-icon="plus"></span> <span data-i18n="newChapter">New chapter</span></button>
+          <button type="button" class="btn" id="undoEmptyChapter"><span data-icon="undo"></span> <span data-i18n="undo">Undo</span></button>
+          <button type="button" class="btn" id="redoEmptyChapter"><span data-icon="redo"></span> <span data-i18n="redo">Redo</span></button>
+        </div>
+      </section>
+      <section class="workspace" id="editorWorkspace" aria-label="Story map" data-i18n-label="storyMap">
+        <div class="graph-shell">
+          <div class="graph-bar">
+            <div class="tabs" aria-label="View" data-i18n-label="view">
+              <button class="tab" id="currentTab"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
+              <button class="tab" id="overviewTab"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
+            </div>
+            <div class="graph-actions" aria-label="Map tools" data-i18n-label="mapTools">
+              <button class="icon-btn undo-control" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo" data-i18n-label="undo" data-i18n-title="undo" data-shortcut="Ctrl+Z" data-icon="undo"></button>
+              <button class="icon-btn undo-control" id="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" data-i18n-label="redo" data-i18n-title="redo" data-shortcut="Ctrl+Shift+Z" data-icon="redo"></button>
+              <span class="split"></span>
+              <button class="icon-btn" id="connect" title="Connect story beats (C)" aria-label="Connect story beats" data-i18n-label="connectNodes" data-i18n-title="connectNodes" data-shortcut="C" data-icon="link"></button>
+              <button class="icon-btn" id="layout" title="Auto-arrange" aria-label="Auto-arrange" data-i18n-label="autoLayout" data-i18n-title="autoLayout" data-icon="layout"></button>
+            </div>
+          </div>
+          <div class="graph" id="graph" tabindex="0" aria-label="Story beat diagram" data-i18n-label="nodeDiagram">
+            <div class="world" id="world"><svg class="wires" id="wires" aria-hidden="true"></svg><div id="cards"></div></div>
+            <div class="empty-canvas" id="emptyCanvas" hidden><strong data-i18n="firstNode">Start with a story beat</strong><p data-i18n="firstNodeHint">Add a scene or choice, then connect the paths that follow.</p><button class="btn primary" id="emptyAdd"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
+            <div class="canvas-note" id="connectNote" hidden></div>
+            <div class="graph-controls">
+              <button class="icon-btn small" id="zoomOut" title="Zoom out" aria-label="Zoom out" data-i18n-label="zoomOut" data-i18n-title="zoomOut" data-icon="minus"></button>
+              <span class="zoom-level" id="zoomLevel"></span>
+              <button class="icon-btn small" id="zoomIn" title="Zoom in" aria-label="Zoom in" data-i18n-label="zoomIn" data-i18n-title="zoomIn" data-icon="plus"></button>
+              <span class="split"></span>
+              <button class="icon-btn small" id="fit" title="Fit map to view (F)" aria-label="Fit map to view" data-i18n-label="fitMap" data-i18n-title="fitMap" data-shortcut="F" data-icon="fit"></button>
+            </div>
+            <svg class="minimap" id="minimap" viewBox="0 0 128 76" preserveAspectRatio="none" aria-hidden="true"></svg>
+          </div>
+          <div class="graph-footer" id="legend"></div>
+        </div>
+        <aside class="inspector" aria-label="Details" data-i18n-label="details">
+          <div class="inspector-header"><strong id="inspectorTitle"></strong><button class="icon-btn small" id="clearSelection" title="Clear selection" aria-label="Clear selection" data-i18n-label="clearSelection" data-i18n-title="clearSelection" data-icon="close"></button></div>
+          <div class="inspector-body" id="inspector"></div>
+        </aside>
+      </section>
+      <footer class="footer-note" id="editorFooter"><span><span data-icon="hand"></span> <span data-i18n="graphHint">Drag the background to pan. Use Ctrl + scroll to zoom.</span></span><span><span data-icon="device"></span> <span data-i18n="storedHere">Stored in this browser</span></span></footer>
+    </div>
+  </main>
+</div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+<dialog id="dialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle"></h2><button class="icon-btn" id="dialogClose" aria-label="Close" data-i18n-label="close" data-icon="close"></button></div><form class="dialog-form" id="dialogForm"></form></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<script>
+'use strict';
+const icons = {
+  branch: '<circle cx="6" cy="5" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="19" r="2"/><path d="M6 7v10M6 13h5a7 7 0 0 0 7-5"/>',
+  book: '<path d="M12 6a8 8 0 0 0-9-2v15a9 9 0 0 1 9 1 9 9 0 0 1 9-1V4a8 8 0 0 0-9 2zm0 0v14"/>',
+  home: '<path d="m3 10 9-7 9 7M5 9v11h14V9m-10 11v-6h6v6"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>',
+  chevron: '<path d="m6 9 6 6 6-6"/>', right: '<path d="m9 6 6 6-6 6"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 2.8c-.8.3-1 1.2-1 2.2m0 3h.01"/>',
+  folder: '<path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  download: '<path d="M12 3v12m-4-4 4 4 4-4M4 16v4h16v-4"/>',
+  upload: '<path d="M12 15V3m-4 4 4-4 4 4M4 16v4h16v-4"/>',
+  edit: '<path d="m14 5 5 5M4 20l5-1L20 8a2 2 0 0 0 0-3l-1-1a2 2 0 0 0-3 0L5 15z"/>',
+  timeline: '<path d="M3 12h18M7 12V5m5 7v7m5-7V5"/>',
+  undo: '<path d="M9 5l-5 5 5 5m-5-5h10a5 5 0 0 1 0 10h-2"/>',
+  redo: '<path d="m15 5 5 5-5 5m5-5H10a5 5 0 0 0 0 10h2"/>',
+  link: '<path d="m10 13 4-4m-7 2-2 2a4 4 0 0 0 6 6l2-2m-2-10 2-2a4 4 0 0 1 6 6l-2 2"/>',
+  layout: '<rect x="2" y="9" width="6" height="6" rx="1"/><rect x="16" y="2" width="6" height="6" rx="1"/><rect x="16" y="16" width="6" height="6" rx="1"/><path d="M8 12h4m4-7h-4v14h4"/>',
+  fit: '<path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/><rect x="9" y="9" width="6" height="6" rx="1"/>',
+  close: '<path d="m6 6 12 12M6 18 18 6"/>',
+  hand: '<path d="M8 12V6a1.5 1.5 0 0 1 3 0v4-6a1.5 1.5 0 0 1 3 0v6-4a1.5 1.5 0 0 1 3 0v5-2a1.5 1.5 0 0 1 3 0v5a7 7 0 0 1-7 7h-1a6 6 0 0 1-4.7-2.3L4 14a1.5 1.5 0 0 1 2.2-2L8 14"/>',
+  device: '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+  scene: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8m-8 5h6"/>',
+  decision: '<path d="m12 2 10 10-10 10L2 12z"/><path d="M10 9a2 2 0 1 1 3.2 1.6A2.8 2.8 0 0 0 12 13m0 3h.01"/>',
+  outcome: '<path d="m12 3 2.3 5.7 6.2.5-4.8 4 1.5 6-5.2-3.3-5.2 3.3 1.5-6-4.8-4 6.2-.5z"/>',
+  merge: '<circle cx="5" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 5c5 0 3 7 10 7M7 19c5 0 3-7 10-7"/>',
+  ending: '<path d="M5 21V4m0 1c5-4 9 4 14 0v10c-5 4-9-4-14 0"/>',
+  panel: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M10 4v16m3-11h4m-4 4h3"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13m-8 4v5m4-5v5"/>'
+};
+const icon = name => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + icons[name] + '</svg>';
+document.querySelectorAll('[data-icon]').forEach(element => { element.innerHTML = icon(element.dataset.icon); });
+const kinds = ['scene','decision','outcome','merge','ending'];
+const $ = id => document.getElementById(id);
+const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+const W = 170, H = 96;
+const storageKey = 'enredo.story-planner.v1';
+const languageKey = 'enredo.language';
+const number = index => String(index + 1).padStart(2,'0');
+
+// Each pair contains English first and Brazilian Portuguese second.
+const messages = {
+  pageTitle: ['Enredo — Story planner','Enredo — Planejador de histórias'],
+  language: ['Language','Idioma'],
+  projectNavigation: ['Project and chapters','Projeto e capítulos'],
+  home: ['My space','Meu espaço'],
+  project: ['Project','Projeto'],
+  chapters: ['Chapters','Capítulos'],
+  chapterNumber: ['Chapter {number}','Capítulo {number}'],
+  overview: ['Overview','Visão geral'],
+  help: ['How to use','Como usar'],
+  files: ['Files','Arquivos'],
+  exportJson: ['Export project (.json)','Exportar projeto (.json)'],
+  importJson: ['Import project (.json)','Importar projeto (.json)'],
+  importProject: ['Import project','Importar projeto'],
+  newProject: ['New project','Novo projeto'],
+  openProject: ['Open project {name}','Abrir projeto {name}'],
+  renameProject: ['Rename project','Renomear projeto'],
+  deleteProject: ['Delete project','Excluir projeto'],
+  deleteNamedProject: ['Delete project {name}','Excluir projeto {name}'],
+  noProjects: ['You have no projects yet','Você ainda não tem projetos'],
+  noProjectsHint: ['Create a story or import an existing project from a JSON file.','Crie uma história ou importe um projeto que você já tenha em JSON.'],
+  newChapter: ['New chapter','Novo capítulo'],
+  editChapter: ['Edit chapter','Editar capítulo'],
+  deleteChapter: ['Delete chapter','Excluir capítulo'],
+  deleteNamedChapter: ['Delete chapter {name}','Excluir capítulo {name}'],
+  noChapters: ['This project has no chapters yet','Este projeto ainda não tem capítulos'],
+  noChaptersHint: ['Create a chapter to start building your timeline.','Crie um capítulo para começar a montar a timeline.'],
+  countProject: ['project','projeto'],
+  countProjectPlural: ['projects','projetos'],
+  countChapter: ['chapter','capítulo'],
+  countChapterPlural: ['chapters','capítulos'],
+  countNode: ['story beat','situação'],
+  countNodePlural: ['story beats','situações'],
+  countConnection: ['connection','conexão'],
+  countConnectionPlural: ['connections','conexões'],
+  storyMap: ['Story map','Mapa da história'],
+  view: ['View','Visualização'],
+  timeline: ['Timeline','Timeline'],
+  wholeStory: ['Whole story','História inteira'],
+  mapTools: ['Map tools','Ferramentas do mapa'],
+  connectNodes: ['Connect story beats','Conectar situações'],
+  autoLayout: ['Auto-arrange','Organizar automaticamente'],
+  nodeDiagram: ['Story beat diagram','Diagrama de situações'],
+  firstNode: ['Start with a story beat','Comece pela primeira situação'],
+  firstNodeHint: ['Add a scene or choice, then connect the paths that follow.','Adicione uma cena ou escolha e conecte os caminhos a partir dela.'],
+  zoomOut: ['Zoom out','Diminuir zoom'],
+  zoomIn: ['Zoom in','Aumentar zoom'],
+  fitMap: ['Fit map to view','Enquadrar mapa'],
+  details: ['Details','Detalhes'],
+  clearSelection: ['Clear selection','Limpar seleção'],
+  graphHint: ['Drag the background to pan. Use Ctrl + scroll to zoom.','Arraste o fundo para navegar. Use Ctrl + rolagem para ampliar.'],
+  storedHere: ['Stored in this browser','Armazenado neste navegador'],
+  saved: ['Saved locally','Salvo localmente'],
+  saveFailed: ['Local storage unavailable','Sem salvamento local'],
+  undo: ['Undo','Desfazer'],
+  redo: ['Redo','Refazer'],
+  close: ['Close','Fechar'],
+  cancel: ['Cancel','Cancelar'],
+  save: ['Save','Salvar'],
+  delete: ['Delete','Excluir'],
+  add: ['Add','Adicionar'],
+  addNode: ['Add story beat','Adicionar situação'],
+  untitled: ['Untitled','Sem título'],
+  nodeDetails: ['Story beat details','Detalhes da situação'],
+  navigation: ['Navigation','Navegação'],
+  selectNodeHint: ['Select a story beat on the map to edit its notes and paths.','Selecione uma situação no mapa para editar suas notas e seus caminhos.'],
+  noLabel: ['No label','Sem rótulo'],
+  editConnection: ['Edit connection','Editar conexão'],
+  editNamedConnection: ['Edit connection to {name}','Editar conexão com {name}'],
+  title: ['Title','Título'],
+  nodeType: ['Story beat type','Tipo de situação'],
+  notes: ['Notes','Notas'],
+  notesHint: ['What happens at this point in the story?','O que acontece nesta situação?'],
+  outgoingPaths: ['Outgoing paths','Caminhos de saída'],
+  noPaths: ['No paths lead from here yet.','Nenhum caminho a partir daqui.'],
+  addPath: ['Add path','Adicionar caminho'],
+  duplicate: ['Duplicate','Duplicar'],
+  scene: ['Scene','Cena'],
+  decision: ['Decision','Decisão'],
+  outcome: ['Consequence','Consequência'],
+  merge: ['Convergence','Convergência'],
+  ending: ['Ending','Desfecho'],
+  chooseSource: ['Select the starting beat · Esc to cancel','Clique na situação de origem · Esc para cancelar'],
+  chooseDestination: ['Select the destination beat · Esc to cancel','Clique na situação de destino · Esc para cancelar'],
+  helpTitle: ['How to use Enredo','Como usar o Enredo'],
+  helpHome: ['Open or create a story in <strong>My space</strong>.','Abra ou crie uma história em <strong>Meu espaço</strong>.'],
+  helpChapter: ['Create chapters in the sidebar and add story beats to each one.','Crie capítulos na barra lateral e adicione as situações de cada um.'],
+  helpPath: ['Select a story beat to add notes and <strong>Add path</strong> to connect it to a new or existing beat, even in another chapter.','Selecione uma situação para escrever notas e use <strong>Adicionar caminho</strong> para ligá-la a uma situação nova ou existente, inclusive em outro capítulo.'],
+  helpStory: ['Use <strong>Whole story</strong> to see connections across chapters. Drag the cards in <strong>Timeline</strong> to rearrange them.','Use <strong>História inteira</strong> para ver as conexões entre capítulos. Arraste os cartões na aba <strong>Timeline</strong> para reorganizá-los.'],
+  helpZoom: ['Drag the background to pan, use <strong>Ctrl + scroll</strong> to zoom, and press <strong>F</strong> to fit the map to the view.','Arraste o fundo para navegar, use <strong>Ctrl + rolagem</strong> para mudar o zoom e <strong>F</strong> para enquadrar.'],
+  helpFiles: ['Use <strong>Files</strong> to export a JSON backup or move a story to another browser.','Em <strong>Arquivos</strong>, exporte um JSON para guardar uma cópia ou levar a história para outro navegador.'],
+  name: ['Name','Nome'],
+  confirmProject: ['Delete project?','Excluir projeto?'],
+  confirmProjectMessage: ['“{name}” and all its chapters, story beats, and connections will be deleted. You can undo this while the tab is open.','“{name}” será excluído com todos os seus capítulos, situações e conexões. Você pode desfazer nesta sessão.'],
+  projectDeleted: ['Project deleted.','Projeto excluído.'],
+  storyName: ['Story name','Nome da história'],
+  myStory: ['My story','Minha história'],
+  createProject: ['Create project','Criar projeto'],
+  chapterPosition: ['Position in project','Posição no projeto'],
+  chapterName: ['Chapter name','Nome do capítulo'],
+  createChapter: ['Create chapter','Criar capítulo'],
+  confirmChapter: ['Delete chapter?','Excluir capítulo?'],
+  confirmChapterMessage: ['“{name}” will be deleted along with its story beats and all incoming and outgoing connections. You can undo this while the tab is open.','“{name}” será excluído com suas situações e as conexões que chegam a elas ou saem delas. Você pode desfazer nesta sessão.'],
+  chapterDeleted: ['Chapter deleted.','Capítulo excluído.'],
+  nodeExample: ['Example: The protagonist finds a clue','Ex.: A protagonista encontra uma pista'],
+  chapter: ['Chapter','Capítulo'],
+  confirmNode: ['Delete story beat?','Excluir situação?'],
+  confirmNodeMessage: ['“{name}” and its connections will be deleted. You can undo this while the tab is open.','“{name}” e suas conexões serão removidas. Você pode desfazer nesta sessão.'],
+  copySuffix: [' (copy)',' (cópia)'],
+  newNodeTitle: ['Title of the new story beat','Título da nova situação'],
+  newNodeExample: ['Example: Find the exit','Ex.: Encontrar a saída'],
+  destinationChapter: ['Destination chapter','Capítulo de destino'],
+  connectionLabel: ['Connection label','Rótulo da conexão'],
+  connectionExample: ['Example: Accept the offer','Ex.: Aceitar a proposta'],
+  destination: ['Destination','Destino'],
+  createNode: ['Create a story beat','Criar uma situação'],
+  useExistingNode: ['Use an existing story beat','Usar situação existente'],
+  destinationNode: ['Destination beat','Situação de destino'],
+  chooseNode: ['Select a story beat','Selecione uma situação'],
+  duplicateConnection: ['A connection with this destination and label already exists.','Já existe uma conexão com esse destino e rótulo.'],
+  confirmConnection: ['Delete connection?','Excluir conexão?'],
+  confirmConnectionMessage: ['Both story beats will be kept.','As situações nas duas pontas serão preservadas.'],
+  backupName: ['story','historia'],
+  exported: ['Project backup exported.','Cópia do projeto exportada.'],
+  importSuffix: [' (imported)',' (importado)'],
+  imported: ['Project imported.','Projeto importado.'],
+  invalidImport: ['The selected file is not a valid Enredo project.','O arquivo escolhido não é um projeto válido do Enredo.']
+};
+
+let language = readLanguage();
+function readLanguage() {
+  try {
+    return localStorage.getItem(languageKey) === 'pt' ? 'pt' : 'en';
+  } catch {
+    return 'en';
+  }
+}
+function t(key, values = {}) {
+  return messages[key][language === 'pt' ? 1 : 0].replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ''));
+}
+const tx = (key, values) => esc(t(key, values));
+
+function sample() {
+  const choose = (english,portuguese) => language === 'pt' ? portuguese : english;
+  const chapters = [
+    {id:'sinal',title:choose('The last signal','O último sinal')},
+    {id:'farol',title:choose('Inside the lighthouse','Dentro do farol')},
+    {id:'mare',title:choose('The tide rises','A maré sobe')}
+  ];
+  const nodes = [
+    ['radio','sinal','scene',choose('The broadcast','A transmissão'),0,147,
+      choose('An old radio comes back to life. A voice on the other end points the way to the lighthouse.','Um rádio antigo volta a funcionar. Do outro lado, uma voz indica o caminho para o farol.')],
+    ['escolha','sinal','decision',choose('Which way to go?','Qual caminho seguir?'),204,147,
+      choose('Mara hears a voice on the radio. She can trust the message or follow the coast to the lighthouse.','Mara ouve uma voz no rádio. Ela pode confiar na mensagem ou seguir pela costa até o farol.')],
+    ['voz','sinal','outcome',choose('Follow the voice','Seguir a voz'),423,0,
+      choose('Mara takes the road she was told to follow and meets someone who knows where the signal came from.','Mara segue pela estrada indicada e encontra alguém que conhece a origem do sinal.')],
+    ['costa','sinal','outcome',choose('Take the coast','Cruzar a costa'),423,294,
+      choose('Mara skirts the rocks and finds the service entrance.','Mara contorna as rochas e encontra a entrada de serviço.')],
+    ['encontro','sinal','merge',choose('At the lighthouse','Chegada ao farol'),627,147,
+      choose('Both paths lead to the lighthouse. What Mara knows when she arrives depends on her route.','Os dois caminhos levam ao farol. O que Mara sabe ao chegar depende da rota.')],
+    ['porta','farol','scene',choose('The door ajar','A porta entreaberta'),0,106,
+      choose('The lighthouse is lit and the door is open.','O farol está ligado e a porta está aberta.')],
+    ['fonte','farol','decision',choose('Where is the signal coming from?','De onde vem o sinal?'),219,106,
+      choose('Inspect the equipment or look for the person who sent the broadcast.','Investigar o equipamento ou procurar a pessoa que fez a transmissão.')],
+    ['registro','farol','outcome',choose('The secret log','O registro secreto'),438,106,
+      choose('The log shows when the next broadcast is due.','O registro indica quando a próxima transmissão deve acontecer.')],
+    ['sirene','mare','scene',choose('The evacuation warning','O aviso de evacuação'),0,106,
+      choose('The tide rises, and a siren interrupts the broadcast.','A maré sobe e a sirene interrompe a transmissão.')],
+    ['amanhecer','mare','ending',choose('After the storm','Depois da tempestade'),219,106,
+      choose('Mara leaves with what she discovered at the lighthouse.','Mara leva consigo o que descobriu no farol.')]
+  ].map(([id,chapter,kind,title,x,y,notes]) => ({id,chapter,kind,title,x,y,notes}));
+  const edges = [
+    ['radio','escolha',''], ['escolha','voz',choose('Trust','Confiar')], ['escolha','costa',choose('Go around','Contornar')],
+    ['voz','encontro',''], ['costa','encontro',''], ['encontro','porta',''],
+    ['porta','fonte',''], ['fonte','registro',choose('Investigate','Investigar')], ['registro','sirene',''], ['sirene','amanhecer','']
+  ].map(([from,to,label]) => ({id:uid(),from,to,label}));
+  return {id:'exemplo',title:choose('After the Signal','Depois do sinal'),chapters,nodes,edges};
+}
+
+function readState() {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (raw) {
+      const result = JSON.parse(raw);
+      if (Array.isArray(result?.projects) && result.projects.every(validProject)) return result;
+    }
+  } catch {}
+  return {active:'exemplo',chapter:'sinal',projects:[sample()]};
+}
+
+function validProject(p) {
+  const string = value => typeof value === 'string';
+  if (!p || !string(p.id) || !string(p.title) || !Array.isArray(p.chapters) ||
+      !Array.isArray(p.nodes) || !Array.isArray(p.edges)) return false;
+  if (!p.chapters.every(c => c && string(c.id) && string(c.title))) return false;
+  const chapterIds = new Set(p.chapters.map(c => c.id));
+  if (chapterIds.size !== p.chapters.length) return false;
+  if (!p.nodes.every(n => n && string(n.id) && chapterIds.has(n.chapter) &&
+      kinds.includes(n.kind) && string(n.title) && string(n.notes) &&
+      Number.isFinite(n.x) && Number.isFinite(n.y))) return false;
+  const nodeIds = new Set(p.nodes.map(n => n.id));
+  if (nodeIds.size !== p.nodes.length) return false;
+  return p.edges.every(e => e && string(e.id) && nodeIds.has(e.from) &&
+    nodeIds.has(e.to) && e.from !== e.to && string(e.label)) &&
+    new Set(p.edges.map(e => e.id)).size === p.edges.length;
+}
+
+let state = readState();
+let atHome = true;
+let overview = false;
+let selection = null;
+let connectMode = false, source = null;
+const undoStack = [], redoStack = [];
+let view = {x:0,y:0,zoom:1};
+let scene = {nodes:[],edges:[],headings:[],byId:new Map()};
+let miniBounds = null;
+let gesture = null;
+let toastTimer;
+let toastKey;
+let storageFailed = false;
+const project = () => state.projects.find(p => p.id === state.active) ?? state.projects[0];
+function chapter() {
+  const p = project();
+  return p?.chapters.find(c => c.id === state.chapter) ?? p?.chapters[0];
+}
+const nodeById = id => project()?.nodes.find(n => n.id === id);
+const selectedNode = () => nodeById(selection);
+
+function renderSaveStatus() {
+  const status = $('saveStatus');
+  const message = storageFailed ? 'saveFailed' : 'saved';
+  status.classList.toggle('failed',storageFailed);
+  status.title = t(message);
+  status.innerHTML = (storageFailed ? '' : icon('check')) + '<span class="save-copy">' + tx(message) + '</span>';
+}
+function save() {
+  const previous = storageFailed;
+  try {
+    localStorage.setItem(storageKey,JSON.stringify(state));
+    storageFailed = false;
+  } catch {
+    storageFailed = true;
+  }
+  if (previous !== storageFailed) renderSaveStatus();
+}
+
+function flash(key) {
+  const toast = $('toast');
+  toastKey = key;
+  toast.textContent = t(key);
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.hidden = true; },3000);
+}
+
+function renderLanguage() {
+  document.documentElement.lang = language === 'pt' ? 'pt-BR' : 'en';
+  document.title = t('pageTitle');
+  $('languageSelect').value = language;
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    element.textContent = t(element.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-label]').forEach(element => {
+    element.setAttribute('aria-label',t(element.dataset.i18nLabel));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(element => {
+    const shortcut = element.dataset.shortcut;
+    element.title = t(element.dataset.i18nTitle) + (shortcut ? ' (' + shortcut + ')' : '');
+  });
+  $('legend').innerHTML = kinds.map(kind =>
+    '<span class="legend-item" data-kind="' + kind + '"><i></i>' + tx(kind) + '</span>').join('');
+  renderSaveStatus();
+  if (toastKey && !$('toast').hidden) $('toast').textContent = t(toastKey);
+}
+function changeLanguage(next) {
+  if (next === language || (next !== 'en' && next !== 'pt')) return;
+  language = next;
+  try {
+    localStorage.setItem(languageKey,language);
+  } catch {}
+  renderLanguage();
+  render();
+}
+
+function remember(before) {
+  undoStack.push(before);
+  if (undoStack.length > 80) undoStack.shift();
+  redoStack.length = 0;
+  renderHistory();
+}
+function edit(callback,{fit = false} = {}) {
+  const before = JSON.stringify(state);
+  callback();
+  if (JSON.stringify(state) !== before) remember(before);
+  save();
+  render(fit);
+}
+function resetEditor() {
+  overview = false;
+  selection = null;
+  stopConnect();
+}
+function enterProject(p,chapterId = p.chapters[0]?.id) {
+  atHome = false;
+  state.active = p.id;
+  state.chapter = chapterId ?? null;
+  resetEditor();
+}
+function navigate(pId,chapterId) {
+  const p = state.projects.find(item => item.id === pId);
+  if (!p) return;
+  const lastChapter = p.id === state.active ? chapter()?.id : undefined;
+  enterProject(p,chapterId ?? lastChapter);
+  save();
+  render(true);
+  $('chapterTitle').focus();
+}
+function openHome() {
+  atHome = true;
+  resetEditor();
+  render();
+  $('spaceTitle').focus();
+}
+function historyStep(direction) {
+  const [take,put] = direction === 'undo' ? [undoStack,redoStack] : [redoStack,undoStack];
+  if (!take.length) return;
+  put.push(JSON.stringify(state));
+  state = JSON.parse(take.pop());
+  stopConnect();
+  save();
+  render(true);
+}
+function renderHistory() {
+  for (const id of ['undo','undoHome','undoEmptyChapter']) $(id).disabled = !undoStack.length;
+  for (const id of ['redo','redoHome','redoEmptyChapter']) $(id).disabled = !redoStack.length;
+}
+
+function chapterButton(c,index,active) {
+  return '<button class="chapter-link' + (active ? ' active" aria-current="true' : '') + '" data-chapter="' + esc(c.id) + '"><span class="chapter-no">' +
+    number(index) + '</span><span class="clip" title="' + esc(c.title) + '">' + esc(c.title) + '</span></button>';
+}
+function countText(amount,key) {
+  return amount + ' ' + t(amount === 1 ? key : key + 'Plural');
+}
+function renderHome() {
+  $('projectCount').textContent = countText(state.projects.length,'countProject');
+  $('emptyProjects').hidden = state.projects.length > 0;
+  $('projectGrid').hidden = !state.projects.length;
+  $('projectGrid').innerHTML = state.projects.map(p => {
+    const id = esc(p.id), title = p.title || t('untitled');
+    const summary = countText(p.chapters.length,'countChapter') + ' · ' + countText(p.nodes.length,'countNode');
+    return '<article class="project-card">' +
+      '<button type="button" class="project-open" data-project="' + id + '" aria-label="' + tx('openProject',{name:title}) + '">' +
+      '<span class="project-glyph">' + icon('book') + '</span><span><strong class="project-card-name">' + esc(title) +
+      '</strong><span class="project-card-summary">' + esc(summary) + '</span></span></button>' +
+      '<div class="project-card-actions"><button type="button" class="btn ghost" data-delete-project="' + id +
+      '" aria-label="' + tx('deleteNamedProject',{name:title}) + '">' + icon('trash') + ' ' + tx('delete') + '</button></div></article>';
+  }).join('');
+}
+function renderHeader() {
+  const p = project(), c = chapter();
+  const chapterIndex = p.chapters.indexOf(c);
+  $('projectName').textContent = p.title;
+  $('breadcrumb').textContent = p.title;
+  $('chapters').innerHTML = p.chapters.map((item,index) =>
+    '<div class="chapter-row">' + chapterButton(item,index,!overview && item.id === c?.id) +
+    '<button type="button" class="icon-btn small remove-button" data-delete-chapter="' + esc(item.id) +
+    '" title="' + tx('deleteChapter') + '" aria-label="' + tx('deleteNamedChapter',{name:item.title}) + '">' + icon('trash') + '</button></div>').join('');
+  const projectButtons = state.projects.map(item => '<button class="' + (item.id === p.id ? 'current' : '') +
+    '" data-project="' + esc(item.id) + '">' + icon('book') + '<span class="clip">' + esc(item.title) + '</span></button>').join('');
+  $('projectMenu').innerHTML = projectButtons + '<hr><button id="newProject">' + icon('plus') + ' ' + tx('newProject') + '</button>' +
+    '<button id="renameProject">' + icon('edit') + ' ' + tx('renameProject') + '</button>' +
+    '<button data-delete-project="' + esc(p.id) + '">' + icon('trash') + ' ' + tx('deleteProject') + '</button>';
+  $('chapterLabel').textContent = overview ? t('overview') : c ? t('chapterNumber',{number:number(chapterIndex)}) : t('project');
+  $('chapterTitle').textContent = overview || !c ? p.title : c.title;
+  $('renameChapter').hidden = overview || !c;
+  $('addNode').hidden = !c;
+  $('emptyChapters').hidden = !!c;
+  $('editorWorkspace').hidden = !c;
+  $('editorFooter').hidden = !c;
+  const group = overview ? p.nodes : p.nodes.filter(n => n.chapter === c?.id);
+  const ids = new Set(group.map(n => n.id));
+  const links = p.edges.filter(e => ids.has(e.from) && ids.has(e.to)).length;
+  const chapters = countText(p.chapters.length,'countChapter');
+  const timeline = countText(group.length,'countNode') + ' · ' + countText(links,'countConnection');
+  $('stats').textContent = !c ? chapters : overview ? chapters + ' · ' + timeline : timeline;
+  $('currentTab').classList.toggle('active',!overview);
+  $('overviewTab').classList.toggle('active',overview);
+  $('currentTab').setAttribute('aria-pressed',!overview);
+  $('overviewTab').setAttribute('aria-pressed',overview);
+}
+
+function renderInspector() {
+  const p = project();
+  const n = selectedNode();
+  $('inspectorTitle').innerHTML = icon(n ? 'panel' : 'book') + ' ' + tx(n ? 'nodeDetails' : 'navigation');
+  $('clearSelection').hidden = !n;
+  if (!n) {
+    const items = overview ? '<div class="overview-chapters">' +
+      p.chapters.map((c,i) => chapterButton(c,i,false)).join('') + '</div>' : '';
+    $('inspector').innerHTML = '<p class="hint">' + tx('selectNodeHint') + '</p>' + items;
+    return;
+  }
+  const outgoing = p.edges.filter(e => e.from === n.id);
+  const list = outgoing.map(e => {
+    const target = nodeById(e.to);
+    const crossChapter = target.chapter !== n.chapter ? ' · ' + p.chapters.find(c => c.id === target.chapter).title : '';
+    const label = (e.label || t('noLabel')) + crossChapter;
+    return '<div class="path-item"><button class="path-target" data-target="' + esc(e.to) + '" title="' + esc(target.title + ' · ' + label) + '">' +
+      icon('link') + '<span class="clip"><span class="clip">' + esc(target.title) + '</span><small class="clip">' + esc(label) + '</small></span></button>' +
+      '<button class="icon-btn small" data-edge="' + esc(e.id) + '" title="' + tx('editConnection') + '" aria-label="' +
+      tx('editNamedConnection',{name:target.title}) + '">' + icon('edit') + '</button></div>';
+  }).join('');
+  $('inspector').innerHTML =
+    '<div class="fields"><label class="field"><span>' + tx('title') + '</span><input id="nodeTitle" maxlength="120" value="' + esc(n.title) + '"></label>' +
+    '<label class="field"><span>' + tx('nodeType') + '</span><select id="nodeKind">' + kindOptions(n.kind) + '</select></label>' +
+    '<label class="field"><span>' + tx('notes') + '</span><textarea id="nodeNotes" placeholder="' + tx('notesHint') + '" rows="3">' +
+    esc(n.notes[0] === '\n' ? '\n' + n.notes : n.notes) + '</textarea></label></div>' +
+    '<section class="paths"><div class="paths-title"><span>' + tx('outgoingPaths') + '</span><span class="count">' + outgoing.length +
+    '</span></div><div class="path-list">' + (list || '<p class="hint">' + tx('noPaths') + '</p>') +
+    '</div><button class="btn path-add" id="addPath">' + icon('plus') + ' ' + tx('addPath') + '</button></section>' +
+    '<div class="node-actions"><button class="btn ghost" id="duplicate">' + icon('copy') + ' ' + tx('duplicate') + '</button>' +
+    '<button class="btn ghost remove" id="removeNode">' + icon('trash') + ' ' + tx('delete') + '</button></div>';
+}
+function kindOptions(active) {
+  return kinds.map(value => option(value,t(value),value === active)).join('');
+}
+
+function bounds(nodes) {
+  if (!nodes.length) return {left:0,top:0,right:W,bottom:H};
+  const box = {left:Infinity,top:Infinity,right:-Infinity,bottom:-Infinity};
+  for (const n of nodes) {
+    box.left = Math.min(box.left,n.x);
+    box.top = Math.min(box.top,n.y);
+    box.right = Math.max(box.right,n.x + W);
+    box.bottom = Math.max(box.bottom,n.y + H);
+  }
+  return box;
+}
+function buildScene() {
+  const p = project(), headings = [];
+  let nodes;
+  if (overview) {
+    nodes = [];
+    const byChapter = new Map(p.chapters.map(c => [c.id,[]]));
+    p.nodes.forEach(n => byChapter.get(n.chapter).push(n));
+    let offset = 0;
+    p.chapters.forEach((c,i) => {
+      const group = byChapter.get(c.id), box = bounds(group);
+      headings.push({text:number(i) + '  ' + c.title,x:offset,y:-52});
+      group.forEach(n => nodes.push({...n,x:n.x - box.left + offset,y:n.y - box.top}));
+      offset += Math.max(box.right - box.left,250) + 138;
+    });
+  } else {
+    nodes = p.nodes.filter(n => n.chapter === chapter().id);
+  }
+  const byId = new Map(nodes.map(n => [n.id,n]));
+  return {nodes,headings,byId,edges:p.edges.filter(e => byId.has(e.from) && byId.has(e.to))};
+}
+function renderCards() {
+  $('cards').innerHTML =
+    scene.headings.map(c => '<span class="world-label" style="left:' + c.x + 'px;top:' + c.y + 'px">' + esc(c.text) + '</span>').join('') +
+    scene.nodes.map(n => {
+      const title = esc(n.title || t('untitled'));
+      return '<button class="node' + (n.id === selection ? ' selected' : '') +
+        (n.id === source ? ' connection-source' : '') + '" data-node="' + esc(n.id) + '" aria-pressed="' + (n.id === selection) +
+        '" style="left:' + n.x + 'px;top:' + n.y + 'px" title="' + title + '"><span class="tag" data-kind="' +
+        n.kind + '">' + icon(n.kind) + tx(n.kind) + '</span><span class="node-title">' + title +
+        '</span><span class="port" aria-hidden="true"></span><span class="port out" aria-hidden="true"></span></button>';
+    }).join('');
+}
+
+function renderWires() {
+  const arrows = '<defs><marker id="tip" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1l6 3-6 3" fill="none" stroke="#a198b5" stroke-width="1.1"/></marker>' +
+    '<marker id="tip-active" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1l6 3-6 3" fill="none" stroke="#8d66d7" stroke-width="1.1"/></marker></defs>';
+  const labels = [], groups = new Map();
+  for (const edge of scene.edges) {
+    const key = JSON.stringify([edge.from,edge.to]);
+    if (!groups.has(key)) groups.set(key,[]);
+    groups.get(key).push(edge);
+  }
+  const lines = scene.edges.map(e => {
+    const from = scene.byId.get(e.from), to = scene.byId.get(e.to);
+    const x1 = from.x + W + 4, x2 = to.x - 5, y1 = from.y + H / 2, y2 = to.y + H / 2;
+    const adjacent = x2 - x1 > 16;
+    const reach = Math.max(20,Math.min(130,(x2 - x1) * .55));
+    const sameRow = Math.abs(y2 - y1) < H + 10;
+    const group = groups.get(JSON.stringify([e.from,e.to]));
+    const index = group.indexOf(e);
+    const bend = (index - (group.length - 1)/2) * 31;
+    const bypass = Math.min(from.y,to.y) - 35 - index*24;
+    const startBend = sameRow ? bypass : y1 + bend;
+    const endBend = sameRow ? bypass : y2 + bend;
+    const d = adjacent ? 'M ' + x1 + ' ' + y1 + ' C ' + (x1+reach) + ' ' + (y1+bend) + ' ' + (x2-reach) + ' ' + (y2+bend) + ' ' + x2 + ' ' + y2 :
+      'M ' + x1 + ' ' + y1 + ' C ' + (x1 + 30) + ' ' + y1 + ' ' + (x1 + 30) + ' ' + startBend + ' ' + (x1 + 14) + ' ' + startBend +
+      ' L ' + (x2 - 14) + ' ' + endBend + ' C ' + (x2 - 30) + ' ' + endBend + ' ' + (x2-30) + ' ' + y2 + ' ' + x2 + ' ' + y2;
+    const active = from.id === selection || to.id === selection;
+    const id = ' data-edge="' + esc(e.id) + '"';
+    const tip = active ? 'tip-active' : 'tip';
+    if (e.label && (view.zoom >= .43 || active)) {
+      const chars = [...e.label];
+      const label = chars.length > 24 ? chars.slice(0,23).join('') + '…' : e.label;
+      const width = Math.max(34,[...label].length * 7.3 + 13);
+      const x = (x1 + x2) / 2, y = !adjacent && sameRow ? bypass : (y1 + y2)/2 + bend*(adjacent ? .75 : 1);
+      labels.push('<g class="wire-label"' + id + ' transform="translate(' + x + ' ' + y + ')"><title>' + esc(e.label) +
+        '</title><rect x="' + (-width/2) + '" y="-10" width="' + width + '" height="20" rx="6"/><text text-anchor="middle" y="4">' +
+        esc(label) + '</text></g>');
+    }
+    return '<path class="wire' + (active ? ' active' : '') + '" d="' + d + '" marker-end="url(#' + tip + ')"/>' +
+      '<path class="wire-hit"' + id + ' d="' + d + '"><title>' + tx('editConnection') + '</title></path>';
+  });
+  $('wires').innerHTML = arrows + lines.join('') + labels.join('');
+}
+
+function mapBounds() {
+  const b = bounds(scene.nodes);
+  if (scene.headings.length) {
+    b.left = Math.min(b.left,scene.headings[0].x);
+    const last = scene.headings.at(-1);
+    b.right = Math.max(b.right,last.x + 170);
+    b.top = Math.min(b.top,-52);
+  }
+  if (scene.edges.some(e => {
+    const a = scene.byId.get(e.from), b = scene.byId.get(e.to);
+    return b.x - a.x < W + 25 && Math.abs(a.y - b.y) < H + 10;
+  })) b.top -= 35;
+  return b;
+}
+function renderMinimap() {
+  const map = $('minimap');
+  map.hidden = scene.nodes.length < 2;
+  if (map.hidden) return;
+  const b = mapBounds();
+  const scale = Math.min(110 / (b.right-b.left),60 / (b.bottom-b.top));
+  const dx = (128 - (b.right-b.left)*scale)/2 - b.left * scale;
+  const dy = (76 - (b.bottom-b.top)*scale)/2 - b.top * scale;
+  miniBounds = {scale,dx,dy};
+  const x = (-view.x/view.zoom)*scale+dx, y = (-view.y/view.zoom)*scale+dy;
+  const w = $('graph').clientWidth*scale/view.zoom, h = $('graph').clientHeight*scale/view.zoom;
+  const rect = (x,y,w,h,color,stroke = '') => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h +
+    '" rx="2" fill="' + color + '"' + (stroke ? ' stroke="' + stroke + '"' : '') + '/>';
+  map.innerHTML = rect(x,y,w,h,'#f3edfc','#dfcff6') + scene.nodes.map(n => rect(n.x*scale+dx,n.y*scale+dy,W*scale,H*scale,
+    n.id === selection ? '#9164dd' : '#cfc1e6')).join('');
+}
+function updateView() {
+  $('world').style.transform = 'translate(' + view.x + 'px,' + view.y + 'px) scale(' + view.zoom + ')';
+  $('graph').style.backgroundPosition = (view.x % 20) + 'px ' + (view.y % 20) + 'px';
+  $('zoomLevel').textContent = Math.round(view.zoom*100) + '%';
+  $('zoomIn').disabled = view.zoom >= 2.8;
+  $('zoomOut').disabled = view.zoom <= .10;
+  renderMinimap();
+}
+function fitMap() {
+  const graph = $('graph'), b = mapBounds();
+  const width = b.right - b.left, height = b.bottom - b.top;
+  view.zoom = Math.max(.10,Math.min(1,(graph.clientWidth - 42)/width,(graph.clientHeight - 110)/height));
+  view.x = (graph.clientWidth-width*view.zoom)/2 - b.left*view.zoom;
+  view.y = (graph.clientHeight-height*view.zoom)/2 - b.top*view.zoom - 8;
+  updateView();
+  renderWires();
+}
+function zoomAt(factor,x = $('graph').clientWidth/2,y = $('graph').clientHeight/2) {
+  const previous = view.zoom;
+  view.zoom = Math.max(.10,Math.min(previous*factor,2.8));
+  view.x = x - (x-view.x)*view.zoom/previous;
+  view.y = y - (y-view.y)*view.zoom/previous;
+  updateView();
+  if ((previous < .43) !== (view.zoom < .43)) renderWires();
+}
+
+function renderMode() {
+  $('graph').classList.toggle('overview',overview);
+  $('graph').classList.toggle('connecting',connectMode);
+  $('connect').classList.toggle('on',connectMode);
+  $('connect').setAttribute('aria-pressed',connectMode);
+  $('connectNote').hidden = !connectMode;
+  $('connectNote').textContent = t(source ? 'chooseDestination' : 'chooseSource');
+}
+function stopConnect() {
+  connectMode = false;
+  source = null;
+  renderMode();
+}
+function render(fit = false) {
+  if (!project()) atHome = true;
+  $('goHome').classList.toggle('active',atHome);
+  $('goHome').setAttribute('aria-current',atHome ? 'page' : 'false');
+  $('spaceView').hidden = !atHome;
+  $('editorView').hidden = atHome;
+  $('projectNavigation').hidden = atHome;
+  $('projectCrumb').hidden = atHome;
+  $('exportProject').hidden = atHome;
+  renderHistory();
+  if (atHome) {
+    renderHome();
+    return;
+  }
+  const currentChapter = chapter(), currentNode = selectedNode();
+  if (selection && (!currentNode || (!overview && currentNode.chapter !== currentChapter?.id))) selection = null;
+  renderHeader();
+  if (!currentChapter) return;
+  scene = buildScene();
+  renderCards();
+  renderInspector();
+  renderMode();
+  $('emptyCanvas').hidden = scene.nodes.length > 0;
+  $('connect').disabled = scene.nodes.length < 2;
+  $('layout').disabled = scene.nodes.length < 2;
+  if (fit) fitMap();
+  else {
+    renderWires();
+    updateView();
+  }
+}
+
+function switchView(wholeStory) {
+  if (overview === wholeStory) return;
+  overview = wholeStory;
+  if (!overview && selectedNode()) state.chapter = selectedNode().chapter;
+  stopConnect();
+  save();
+  render(true);
+}
+function inspect(id,recenter = false) {
+  const n = nodeById(id);
+  if (!n) return;
+  const changedChapter = !overview && n.chapter !== chapter().id;
+  if (changedChapter) state.chapter = n.chapter;
+  selection = id;
+  save();
+  render(changedChapter);
+  if (recenter) reveal(id);
+}
+function reveal(id) {
+  const n = scene.byId.get(id), graph = $('graph');
+  if (!n) return;
+  const left = n.x * view.zoom + view.x, top = n.y * view.zoom + view.y;
+  if (left >= 13 && top >= 13 && left + W*view.zoom <= graph.clientWidth-13 &&
+      top + H*view.zoom <= graph.clientHeight-55) return;
+  view.x = graph.clientWidth/2 - (n.x + W/2)*view.zoom;
+  view.y = graph.clientHeight/2 - (n.y + H/2)*view.zoom;
+  updateView();
+}
+function field(label,control) {
+  return '<label class="field"><span>' + esc(label) + '</span>' + control + '</label>';
+}
+function input(name,value = '',placeholder = '',required = false) {
+  return '<input name="' + name + '" value="' + esc(value) + '" placeholder="' + esc(placeholder) +
+    '" maxlength="120"' + (required ? ' required' : '') + '>';
+}
+function option(value,label,selected = false) {
+  return '<option value="' + esc(value) + '"' + (selected ? ' selected' : '') + '>' + esc(label) + '</option>';
+}
+function chapterOptions(selected) {
+  return project().chapters.map((c,i) => option(c.id,number(i) + ' · ' + c.title,c.id === selected)).join('');
+}
+function destinationOptions(from,selected) {
+  const p = project();
+  return p.chapters.map(c => {
+    const matches = p.nodes.filter(n => n.id !== from && n.chapter === c.id);
+    return matches.length ? '<optgroup label="' + esc(c.title) + '">' +
+      matches.map(n => option(n.id,n.title || t('untitled'),n.id === selected)).join('') + '</optgroup>' : '';
+  }).join('');
+}
+function showDialog({title,body,submitKey,onSubmit,remove,extra}) {
+  closeMenus();
+  const form = $('dialogForm');
+  $('dialogTitle').textContent = title;
+  form.innerHTML = body + '<div class="dialog-actions">' +
+    (remove ? '<button type="button" class="btn danger" id="dialogRemove">' + tx('delete') + '</button>' : '') +
+    '<button type="button" class="btn" id="dialogCancel">' + tx(onSubmit ? 'cancel' : 'close') + '</button>' +
+    (onSubmit ? '<button class="btn ' + (submitKey === 'delete' ? 'danger' : 'primary') + '" type="submit">' + tx(submitKey) + '</button>' : '') +
+    '</div>';
+  form.onsubmit = event => {
+    event.preventDefault();
+    onSubmit?.(new FormData(form));
+  };
+  $('dialogCancel').onclick = closeDialog;
+  if (remove) $('dialogRemove').onclick = remove;
+  extra?.(form);
+  if (!$('dialog').open) $('dialog').showModal();
+  const first = form.querySelector('input:not([hidden]), select');
+  if (first) {
+    first.focus();
+    if (first.type === 'text') first.select();
+  }
+}
+function closeDialog() {
+  $('dialog').close();
+}
+function confirmation(title,message,onConfirm) {
+  showDialog({title,body:'<p>' + esc(message) + '</p>',submitKey:'delete',onSubmit:() => {
+    closeDialog();
+    onConfirm();
+  }});
+  $('dialogCancel').focus();
+}
+function showHelp() {
+  const helpItems = ['helpHome','helpChapter','helpPath','helpStory','helpZoom','helpFiles'];
+  const body = '<ul>' + helpItems.map(key => '<li>' + t(key) + '</li>').join('') + '</ul>';
+  showDialog({title:t('helpTitle'),body});
+}
+
+function editProject() {
+  const p = project();
+  showDialog({title:t('renameProject'),body:field(t('name'),input('title',p.title,'',true)),submitKey:'save',
+    onSubmit: data => {
+      const title = data.get('title').trim();
+      if (!title) return;
+      closeDialog();
+      edit(() => { p.title = title; });
+    },remove:() => removeProject(p)});
+}
+function removeProject(p) {
+  if (!p) return;
+  confirmation(t('confirmProject'),t('confirmProjectMessage',{name:p.title}),() => {
+      edit(() => {
+        state.projects = state.projects.filter(item => item.id !== p.id);
+        if (state.active === p.id) {
+          state.active = null;
+          state.chapter = null;
+        }
+        atHome = true;
+        resetEditor();
+      });
+      $('spaceTitle').focus();
+      flash('projectDeleted');
+    });
+}
+function createProject() {
+  showDialog({title:t('newProject'),body:field(t('storyName'),input('title','',t('myStory'),true)),
+    submitKey:'createProject',onSubmit:data => {
+      const title = data.get('title').trim();
+      if (!title) return;
+      closeDialog();
+      edit(() => {
+        const p = {id:uid(),title,chapters:[{id:uid(),title:t('newChapter')}],nodes:[],edges:[]};
+        state.projects.push(p);
+        enterProject(p);
+      },{fit:true});
+      $('chapterTitle').focus();
+    }});
+}
+function chapterDialog(existing = null) {
+  const p = project();
+  const position = existing ? field(t('chapterPosition'),'<select name="position">' +
+    p.chapters.map((c,i) => option(i,number(i),existing.id === c.id)).join('') + '</select>') : '';
+  showDialog({title:t(existing ? 'editChapter' : 'newChapter'),body:'<div class="fields">' +
+    field(t('chapterName'),input('title',existing?.title ?? '',t('chapterName'),true)) + position + '</div>',
+    submitKey:existing ? 'save' : 'createChapter',onSubmit:data => {
+      const title = data.get('title').trim();
+      if (!title) return;
+      closeDialog();
+      edit(() => {
+        if (existing) {
+          existing.title = title;
+          p.chapters.splice(p.chapters.indexOf(existing),1);
+          p.chapters.splice(Number(data.get('position')),0,existing);
+        } else {
+          const c = {id:uid(),title};
+          p.chapters.push(c);
+          enterProject(p,c.id);
+        }
+      },{fit:!existing});
+      if (!existing) $('chapterTitle').focus();
+    },remove:existing ? () => removeChapter(p,existing) : null});
+}
+function removeChapter(p,c) {
+  if (!c) return;
+  confirmation(t('confirmChapter'),t('confirmChapterMessage',{name:c.title}),() => {
+      const wasCurrent = chapter()?.id === c.id;
+      edit(() => {
+        const index = p.chapters.indexOf(c);
+        p.chapters.splice(index,1);
+        const removed = new Set(p.nodes.filter(n => n.chapter === c.id).map(n => n.id));
+        p.nodes = p.nodes.filter(n => !removed.has(n.id));
+        p.edges = p.edges.filter(e => !removed.has(e.from) && !removed.has(e.to));
+        if (removed.has(selection)) selection = null;
+        if (wasCurrent) state.chapter = (p.chapters[index] ?? p.chapters.at(-1))?.id ?? null;
+        if (!p.chapters.length) overview = false;
+        stopConnect();
+      },{fit:wasCurrent || overview});
+      $('chapterTitle').focus();
+      flash('chapterDeleted');
+    });
+}
+function openSpot(chapterId,x,y) {
+  const nodes = project().nodes.filter(n => n.chapter === chapterId);
+  while (nodes.some(n => Math.abs(n.x - x) < W + 15 && Math.abs(n.y - y) < H + 23)) y += H + 28;
+  return {x:Math.round(x),y:Math.round(y)};
+}
+function appendNode({chapterId,title,kind,origin = null,copy = false}) {
+  const graph = $('graph');
+  let x = 0, y = 0;
+  if (origin?.chapter === chapterId) {
+    x = copy ? origin.x + 24 : origin.x + W + 64;
+    y = copy ? origin.y + H + 28 : origin.y;
+  } else if (!overview && chapterId === chapter().id && scene.nodes.length) {
+    x = (graph.clientWidth/2 - view.x)/view.zoom - W/2;
+    y = (graph.clientHeight/2 - view.y)/view.zoom - H/2;
+  }
+  const n = {id:uid(),chapter:chapterId,kind,title,notes:copy ? origin.notes : '',...openSpot(chapterId,x,y)};
+  project().nodes.push(n);
+  return n;
+}
+function addNodeDialog() {
+  const chapterId = selectedNode()?.chapter ?? chapter()?.id;
+  if (chapterId === undefined) return;
+  showDialog({title:t('addNode'),body:'<div class="fields">' +
+    field(t('title'),input('title','',t('nodeExample'),true)) +
+    field(t('nodeType'),'<select name="kind">' + kindOptions('scene') + '</select>') +
+    (overview ? field(t('chapter'),'<select name="chapter">' + chapterOptions(chapterId) + '</select>') : '') +
+    '</div>',submitKey:'add',onSubmit:data => {
+      const title = data.get('title').trim();
+      if (!title) return;
+      closeDialog();
+      const wasEmpty = !scene.nodes.length;
+      edit(() => {
+        selection = appendNode({chapterId:data.get('chapter') ?? chapterId,title,kind:data.get('kind')}).id;
+        stopConnect();
+      },{fit:wasEmpty});
+      reveal(selection);
+    }});
+}
+function removeSelected() {
+  const n = selectedNode(), p = project();
+  if (!n) return;
+  confirmation(t('confirmNode'),t('confirmNodeMessage',{name:n.title || t('untitled')}),() => {
+    edit(() => {
+      p.nodes = p.nodes.filter(item => item.id !== n.id);
+      p.edges = p.edges.filter(e => e.from !== n.id && e.to !== n.id);
+      selection = null;
+      stopConnect();
+    });
+  });
+}
+function duplicateSelected() {
+  const n = selectedNode();
+  if (!n) return;
+  edit(() => {
+    selection = appendNode({chapterId:n.chapter,title:n.title + t('copySuffix'),kind:n.kind,origin:n,copy:true}).id;
+  });
+  reveal(selection);
+}
+
+function editPath(origin,existing = null,destination = null) {
+  const p = project();
+  const destOptions = destinationOptions(origin.id,existing?.to ?? destination?.id);
+  const choices = '<div class="fields" id="newDestination">' +
+    field(t('newNodeTitle'),input('title','',t('newNodeExample'),true)) +
+    field(t('nodeType'),'<select name="kind">' + kindOptions('outcome') + '</select>') +
+    field(t('destinationChapter'),'<select name="chapter">' + chapterOptions(origin.chapter) + '</select>') + '</div>';
+  showDialog({title:t(existing ? 'editConnection' : 'addPath'),
+    body:'<div class="fields">' +
+      field(t('connectionLabel'),input('label',existing?.label ?? '',t('connectionExample'))) +
+      (existing ? '' : field(t('destination'),'<select name="mode">' +
+        option('new',t('createNode'),!destination) + (destOptions ? option('existing',t('useExistingNode'),!!destination) : '') + '</select>')) +
+      '<div id="existingDestination">' + field(t('destinationNode'),'<select name="target">' +
+        option('',t('chooseNode')) + destOptions + '</select>') + '</div>' + (existing ? '' : choices) + '</div>',
+    submitKey:existing ? 'save' : 'addPath',extra:form => {
+      const mode = form.elements.mode;
+      const sync = () => {
+        const isNew = mode?.value === 'new';
+        $('existingDestination').hidden = isNew;
+        form.elements.target.required = !isNew;
+        if (mode) {
+          $('newDestination').hidden = !isNew;
+          form.elements.title.required = isNew;
+        }
+      };
+      if (mode) mode.onchange = sync;
+      sync();
+    },
+    onSubmit:data => {
+      const isNew = data.get('mode') === 'new';
+      const title = data.get('title')?.trim();
+      const target = data.get('target');
+      const label = data.get('label').trim();
+      if (isNew && !title) return;
+      if (!isNew && p.edges.some(e => e.id !== existing?.id && e.from === origin.id && e.to === target && e.label === label)) {
+        flash('duplicateConnection');
+        return;
+      }
+      closeDialog();
+      edit(() => {
+        const to = isNew ? appendNode({chapterId:data.get('chapter'),title,kind:data.get('kind'),origin}).id : target;
+        if (existing) Object.assign(existing,{to,label});
+        else p.edges.push({id:uid(),from:origin.id,to,label});
+        selection = origin.id;
+        stopConnect();
+      },{fit:isNew && (overview || data.get('chapter') === chapter().id)});
+    },
+    remove:existing ? () => confirmation(t('confirmConnection'),t('confirmConnectionMessage'),() => {
+      edit(() => { p.edges = p.edges.filter(e => e.id !== existing.id); });
+    }) : null});
+}
+function edgeDialog(id) {
+  const edge = project().edges.find(e => e.id === id);
+  if (edge) editPath(nodeById(edge.from),edge);
+}
+
+function autoLayout() {
+  const p = project();
+  const targets = overview ? p.chapters : [chapter()];
+  edit(() => {
+    for (const c of targets) layoutChapter(p,c.id);
+  },{fit:true});
+}
+function layoutChapter(p,chapterId) {
+  const nodes = p.nodes.filter(n => n.chapter === chapterId);
+  if (nodes.length < 2) return;
+  const ids = new Set(nodes.map(n => n.id));
+  const edges = p.edges.filter(e => ids.has(e.from) && ids.has(e.to));
+  const outgoing = new Map(nodes.map(n => [n.id,[]]));
+  const incoming = new Map(nodes.map(n => [n.id,0]));
+  for (const e of edges) {
+    outgoing.get(e.from).push(e.to);
+    incoming.set(e.to,incoming.get(e.to)+1);
+  }
+  const rank = new Map(nodes.map(n => [n.id,0]));
+  const remaining = new Set(ids);
+  const queue = nodes.filter(n => incoming.get(n.id) === 0).map(n => n.id);
+  let index = 0;
+  while (remaining.size) {
+    // Start another group when a cycle leaves the queue empty.
+    const id = index < queue.length ? queue[index++] : remaining.values().next().value;
+    if (!remaining.delete(id)) continue;
+    for (const to of outgoing.get(id)) {
+      if (!remaining.has(to)) continue;
+      rank.set(to,Math.max(rank.get(to),rank.get(id)+1));
+      const count = incoming.get(to)-1;
+      incoming.set(to,count);
+      if (count === 0) queue.push(to);
+    }
+  }
+  const columns = new Map();
+  nodes.sort((a,b) => a.y-b.y || a.x-b.x);
+  for (const n of nodes) {
+    const level = rank.get(n.id);
+    if (!columns.has(level)) columns.set(level,[]);
+    columns.get(level).push(n);
+  }
+  let rows = 1;
+  columns.forEach(column => { rows = Math.max(rows,column.length); });
+  for (const [level,column] of columns) {
+    column.forEach((n,i) => {
+      n.x = level * (W + 80);
+      n.y = (i + (rows-column.length)/2) * (H + 58);
+    });
+  }
+}
+
+function exportProject() {
+  const p = project();
+  if (!p) return;
+  const file = new Blob([JSON.stringify({format:'enredo',version:1,project:p},null,2)],{type:'application/json'});
+  const name = p.title.replace(/[<>:"/\\|?*\u0000-\u001f]/g,'-').trim().slice(0,90) || t('backupName');
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(file);
+  link.download = name + '.enredo.json';
+  document.body.append(link);
+  link.click();
+  setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); },1000);
+  flash('exported');
+}
+async function importProject(file) {
+  try {
+    const data = JSON.parse(await file.text());
+    if (data.format !== 'enredo' || data.version !== 1 || !validProject(data.project)) throw new Error('Invalid Enredo project format');
+    edit(() => {
+      const p = {...data.project,id:uid()};
+      if (state.projects.some(item => item.title === p.title)) p.title += t('importSuffix');
+      state.projects.push(p);
+      enterProject(p);
+    },{fit:true});
+    $('chapterTitle').focus();
+    flash('imported');
+  } catch {
+    flash('invalidImport');
+  }
+}
+
+function closeMenus() {
+  document.querySelectorAll('[data-menu]').forEach(button => {
+    $(button.dataset.menu).hidden = true;
+    button.setAttribute('aria-expanded','false');
+  });
+}
+function toggleConnect() {
+  if ($('connect').disabled) return;
+  if (connectMode) stopConnect();
+  else {
+    connectMode = true;
+    source = scene.byId.has(selection) ? selection : null;
+  }
+  renderMode();
+  renderCards();
+}
+function activateCard(id,keyboard) {
+  if (!connectMode) {
+    inspect(id,keyboard);
+    if (keyboard) cardFor(id)?.focus({preventScroll:true});
+    return;
+  }
+  if (!source || source === id) {
+    source = id;
+    renderMode();
+    renderCards();
+    if (keyboard) cardFor(id)?.focus({preventScroll:true});
+    return;
+  }
+  const from = nodeById(source), to = nodeById(id);
+  stopConnect();
+  renderCards();
+  editPath(from,null,to);
+}
+function cardFor(id) {
+  return $('cards').querySelector('[data-node="' + CSS.escape(id) + '"]');
+}
+function setupGraph() {
+  const graph = $('graph');
+  let dragged = false;
+  graph.addEventListener('pointerdown',event => {
+    dragged = false;
+    if (event.button !== 0 && event.button !== 1) return;
+    const target = event.target;
+    if (target.closest('.graph-controls,.minimap,.empty-canvas,[data-edge]')) return;
+    const card = target.closest('[data-node]');
+    if (card && (overview || connectMode) && event.button !== 1) return;
+    const n = card && event.button !== 1 ? nodeById(card.dataset.node) : null;
+    gesture = {pointer:event.pointerId,startX:event.clientX,startY:event.clientY,n,
+      x:n?.x ?? view.x,y:n?.y ?? view.y,button:event.button,started:false};
+    if (event.button === 1) event.preventDefault();
+  });
+  graph.addEventListener('pointermove',event => {
+    if (gesture?.pointer !== event.pointerId) return;
+    const dx = event.clientX - gesture.startX, dy = event.clientY - gesture.startY;
+    if (!gesture.started && Math.hypot(dx,dy) < 4) return;
+    if (!gesture.started) {
+      gesture.started = true;
+      dragged = true;
+      graph.setPointerCapture(event.pointerId);
+      graph.classList.add('panning');
+      if (gesture.n) {
+        gesture.before = JSON.stringify(state);
+        selection = gesture.n.id;
+        renderInspector();
+        renderCards();
+        gesture.card = cardFor(selection);
+      }
+    }
+    if (gesture.n) {
+      const node = gesture.n;
+      node.x = Math.round(gesture.x + dx/view.zoom);
+      node.y = Math.round(gesture.y + dy/view.zoom);
+      gesture.card.style.left = node.x + 'px';
+      gesture.card.style.top = node.y + 'px';
+      renderWires();
+      renderMinimap();
+    } else {
+      view.x = gesture.x + dx;
+      view.y = gesture.y + dy;
+      updateView();
+    }
+  });
+  function finish(event,cancelled = false) {
+    if (gesture?.pointer !== event.pointerId) return;
+    const previous = gesture;
+    gesture = null;
+    graph.classList.remove('panning');
+    if (previous.n && previous.started) {
+      if (cancelled) Object.assign(previous.n,{x:previous.x,y:previous.y});
+      else if (JSON.stringify(state) !== previous.before) remember(previous.before);
+      save();
+      render();
+    }
+  }
+  graph.addEventListener('pointerup',finish);
+  graph.addEventListener('pointercancel',event => finish(event,true));
+  graph.addEventListener('lostpointercapture',event => finish(event,true));
+  graph.addEventListener('click',event => {
+    if (dragged && event.detail > 0) {
+      dragged = false;
+      return;
+    }
+    const card = event.target.closest('[data-node]');
+    const edge = event.target.closest('[data-edge]');
+    if (card) activateCard(card.dataset.node,event.detail === 0);
+    else if (edge && !connectMode) edgeDialog(edge.dataset.edge);
+    else if (event.target === graph && selection && !connectMode) {
+      selection = null;
+      render();
+    }
+  });
+  graph.addEventListener('wheel',event => {
+    if (event.target.closest('.graph-controls')) return;
+    event.preventDefault();
+    if (event.ctrlKey || event.metaKey) {
+      const rect = graph.getBoundingClientRect();
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : 1);
+      zoomAt(Math.exp(-delta*.003),event.clientX-rect.left,event.clientY-rect.top);
+    } else {
+      const scale = event.deltaMode === 1 ? 16 : 1;
+      view.x -= event.deltaX*scale + (event.shiftKey ? event.deltaY*scale : 0);
+      view.y -= event.shiftKey ? 0 : event.deltaY*scale;
+      updateView();
+    }
+  },{passive:false});
+  graph.addEventListener('keydown',event => {
+    if (event.target !== graph || !['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) return;
+    event.preventDefault();
+    if (event.key === 'ArrowLeft') view.x += 45;
+    if (event.key === 'ArrowRight') view.x -= 45;
+    if (event.key === 'ArrowUp') view.y += 45;
+    if (event.key === 'ArrowDown') view.y -= 45;
+    updateView();
+  });
+}
+
+document.addEventListener('click',event => {
+  const menuButton = event.target.closest('[data-menu]');
+  if (menuButton) {
+    const menu = $(menuButton.dataset.menu), opening = menu.hidden;
+    closeMenus();
+    menu.hidden = !opening;
+    menuButton.setAttribute('aria-expanded',opening);
+    return;
+  }
+  const button = event.target.closest('button');
+  if (!button) {
+    closeMenus();
+    return;
+  }
+  const {chapter:chapterId,project:projectId,deleteProject:projectToDelete,deleteChapter:chapterToDelete,target,edge} = button.dataset;
+  if (chapterId !== undefined) navigate(project().id,chapterId);
+  if (projectId !== undefined) navigate(projectId);
+  if (projectToDelete !== undefined) removeProject(state.projects.find(p => p.id === projectToDelete));
+  if (chapterToDelete !== undefined) {
+    const p = project();
+    removeChapter(p,p?.chapters.find(c => c.id === chapterToDelete));
+  }
+  if (target !== undefined) inspect(target,true);
+  if (edge !== undefined) edgeDialog(edge);
+  if (button.id === 'newProject') createProject();
+  if (button.id === 'renameProject') editProject();
+  if (button.id === 'addPath' && selectedNode()) editPath(selectedNode());
+  if (button.id === 'duplicate') duplicateSelected();
+  if (button.id === 'removeNode') removeSelected();
+  closeMenus();
+});
+
+function updateText(event) {
+  const element = event.target;
+  const n = selectedNode();
+  if (!n || (element.id !== 'nodeTitle' && element.id !== 'nodeNotes')) return;
+  const key = element.id === 'nodeTitle' ? 'title' : 'notes';
+  if (n[key] === element.value) return;
+  if (!element.dataset.edited) {
+    remember(JSON.stringify(state));
+    element.dataset.edited = 'true';
+  }
+  n[key] = element.value;
+  save();
+  if (key === 'title') {
+    scene = buildScene();
+    renderCards();
+  }
+}
+$('inspector').addEventListener('input',updateText);
+$('inspector').addEventListener('focusout',event => { delete event.target.dataset.edited; });
+$('inspector').addEventListener('change',event => {
+  if (event.target.id !== 'nodeKind' || !selectedNode()) return;
+  edit(() => { selectedNode().kind = event.target.value; });
+  $('nodeKind').focus();
+});
+$('inspector').addEventListener('keydown',event => {
+  if (event.key === 'Enter' && event.target.id === 'nodeTitle') {
+    event.preventDefault();
+    event.target.blur();
+  }
+});
+const actions = {
+  goHome:openHome,newHomeProject:createProject,emptyImport:() => $('importFile').click(),
+  addChapter:() => chapterDialog(), renameChapter:() => chapterDialog(chapter()),
+  newEmptyChapter:() => chapterDialog(),
+  addNode:addNodeDialog, emptyAdd:addNodeDialog, dialogClose:closeDialog,
+  helpButton:showHelp,fileHelp:showHelp,exportProject,importProject:() => $('importFile').click(),
+  currentTab:() => switchView(false),overviewTab:() => switchView(true),
+  clearSelection:() => { selection = null; stopConnect(); render(); },
+  undo:() => historyStep('undo'),redo:() => historyStep('redo'),connect:toggleConnect,layout:autoLayout,
+  undoHome:() => historyStep('undo'),redoHome:() => historyStep('redo'),
+  undoEmptyChapter:() => historyStep('undo'),redoEmptyChapter:() => historyStep('redo'),
+  zoomIn:() => zoomAt(1.22),zoomOut:() => zoomAt(1/1.22),fit:fitMap
+};
+for (const [id,action] of Object.entries(actions)) $(id).addEventListener('click',action);
+$('importFile').addEventListener('change',event => {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (file) importProject(file);
+});
+$('languageSelect').addEventListener('change',event => changeLanguage(event.target.value));
+$('minimap').addEventListener('click',event => {
+  if (!miniBounds) return;
+  const map = $('minimap').getBoundingClientRect(), graph = $('graph');
+  const x = (event.clientX-map.left)*128/map.width, y = (event.clientY-map.top)*76/map.height;
+  view.x = graph.clientWidth/2 - (x-miniBounds.dx)/miniBounds.scale*view.zoom;
+  view.y = graph.clientHeight/2 - (y-miniBounds.dy)/miniBounds.scale*view.zoom;
+  updateView();
+});
+document.addEventListener('keydown',event => {
+  if ($('dialog').open) return;
+  if (event.key === 'Escape') {
+    closeMenus();
+    if (connectMode) toggleConnect();
+    return;
+  }
+  if (event.target.matches('input, textarea, select, [contenteditable]')) return;
+  const key = event.key.toLowerCase();
+  if ((event.ctrlKey || event.metaKey) && (key === 'z' || key === 'y')) {
+    event.preventDefault();
+    historyStep(key === 'y' || event.shiftKey ? 'redo' : 'undo');
+    return;
+  }
+  if (event.ctrlKey || event.metaKey || event.altKey || atHome || !chapter()) return;
+  if (key === 'n') addNodeDialog();
+  if (key === 'c') toggleConnect();
+  if (key === 'f') fitMap();
+  if (key === 'delete' && selection) removeSelected();
+});
+window.addEventListener('resize',() => {
+  if (!atHome && chapter()) fitMap();
+});
+setupGraph();
+renderLanguage();
+save();
+render(true);
+</script>
+</body>
+</html>
