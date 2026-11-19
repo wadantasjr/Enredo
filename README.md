@@ -1,6 +1,7 @@
 # Enredo
 
 ![Enredo home screen / Tela inicial do Enredo](assets/enredo-screenshot.png)
+![Enredo sample / Projeto aberto do Enredo](assets/enredo-screenshot2.png)
 
 [English](#english) · [Português](#português)
 
