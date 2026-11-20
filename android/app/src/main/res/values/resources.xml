@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Enredo</string>
+    <color name="window_background">#F7F6FB</color>
+    <style name="EnredoTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:colorAccent">#693DC7</item>
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:statusBarColor">@color/window_background</item>
+        <item name="android:navigationBarColor">@color/window_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

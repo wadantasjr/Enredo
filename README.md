@@ -3,7 +3,7 @@
 ![Enredo home screen / Tela inicial do Enredo](assets/enredo-screenshot.png)
 ![Enredo sample / Projeto aberto do Enredo](assets/enredo-screenshot2.png)
 
-[English](#english) · [Português](#português)
+[English](#english) · [Português](#português) · [Android](#android)
 
 ## English
 
@@ -56,3 +56,23 @@ O Enredo abre em inglês por padrão. No seletor de idioma no topo da tela, esco
 O Enredo salva os projetos automaticamente no armazenamento local do navegador. Para guardar uma cópia ou transferir sua história, abra o projeto e escolha **Arquivos → Exportar projeto (.json)**. No navegador ou computador de destino, use **Arquivos → Importar projeto (.json)**.
 
 Se já estiver usando o `Enredo.html`, exporte seus projetos por lá e importe os arquivos JSON neste `index.html`. Abrir uma cópia do editor em outro caminho pode fazer o navegador usar um armazenamento diferente.
+
+## Android
+
+O [APK do Enredo](https://github.com/wadantasjr/Enredo/releases/latest/download/Enredo.apk) funciona offline em aparelhos com Android 8.0 ou superior e o Android System WebView atualizado. O editor usa armazenamento local do aplicativo e, na primeira abertura, usa português se esse for o idioma do aparelho. Para transferir um projeto entre o Android e a versão de navegador, use **Arquivos → Exportar projeto (.json)** em uma versão e **Arquivos → Importar projeto (.json)** na outra.
+
+- Toque em **Aa** no topo para ajustar o tamanho da fonte entre 75% e 130%. O Android começa em 85% e guarda a sua escolha.
+- No diagrama, faça o gesto de pinça com dois dedos para mudar o zoom. Com um dedo, arraste o fundo para mover o mapa ou arraste um cartão na **Timeline** para mudar sua posição.
+- Toque no ícone de **Tela cheia** na barra do diagrama para expandir o espaço de trabalho. O ícone de **Detalhes** recolhe ou reabre o painel. Para voltar ao editor, toque no ícone de **Sair da tela cheia** ou use **Voltar** no Android.
+
+### Compilar no Windows
+
+Use PowerShell 7, JDK 11 ou 17 e o Android SDK com a plataforma 36 e Build Tools 34.0.0. O script também procura o SDK e o JDK incluídos em uma instalação do Unity.
+
+```powershell
+pwsh -File .\android\build.ps1
+```
+
+Se necessário, informe `-AndroidSdk` e `-JavaHome` com os caminhos das ferramentas. A compilação usa os [fontes Android](android/app/src/main) e empacota o [`index.html`](index.html) compartilhado com a versão de navegador. O script verifica a assinatura e grava o resultado em `android/Enredo.apk`.
+
+O APK usa uma chave de desenvolvimento em `android/.signing/enredo-debug.jks`. Guarde essa chave para recompilar atualizações instaláveis sobre o APK original. Use uma chave de publicação para distribuir o app em uma loja.

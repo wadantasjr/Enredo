@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#f7f6fb">
 <title>Enredo — Story planner</title>
 <style>
-:root{color-scheme:light;--ink:#211c31;--muted:#686277;--quiet:#827b91;--line:#e7e3ef;--white:#fff;--accent:#693dc7;--accent-dark:#542aad;--accent-soft:#efe8ff;--canvas:#faf9fd;--sidebar:#f6f4fa;--shadow:0 3px 8px #3123540a;font:16px/1.5 "Aptos","Segoe UI",system-ui,sans-serif}
+:root{color-scheme:light;--ink:#211c31;--muted:#686277;--quiet:#827b91;--line:#e7e3ef;--white:#fff;--accent:#693dc7;--accent-dark:#542aad;--accent-soft:#efe8ff;--canvas:#faf9fd;--sidebar:#f6f4fa;--shadow:0 3px 8px #3123540a;font:100%/1.5 "Aptos","Segoe UI",system-ui,sans-serif}
 *{box-sizing:border-box}
 body{margin:0;color:var(--ink);background:#fff}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -21,7 +21,7 @@ button svg,.icon{width:18px;height:18px;vertical-align:middle}
 .brand{height:74px;display:flex;align-items:center;gap:11px;padding:0 22px;border-bottom:1px solid var(--line)}
 .brand-mark{width:35px;height:35px;display:grid;place-items:center;background:#6c41cf;color:white;border-radius:10px;box-shadow:0 3px 7px #693dc742}
 .brand-mark svg{height:23px;width:23px}
-.brand strong{font-size:22px;letter-spacing:-.8px;line-height:1}
+.brand strong{font-size:1.375rem;letter-spacing:-.8px;line-height:1}
 .side-body{padding:23px 14px}
 .side-home{margin-bottom:21px}
 .side-home .chapter-link svg{width:17px;height:17px;margin-left:3px}
@@ -60,6 +60,7 @@ button svg,.icon{width:18px;height:18px;vertical-align:middle}
 .save.failed,.save.failed svg{color:#ae3b58}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;border-radius:8px;border:1px solid var(--line);background:white;padding:8px 12px;min-height:36px;font-size:.875rem;font-weight:650;line-height:1.25}
 .btn:hover{background:#f7f4fc;border-color:#dcd2eb}
+.font-button{min-width:36px;padding-inline:8px}
 .btn.ghost{background:transparent;border-color:transparent}
 .btn.ghost:hover{background:#f0ebf8}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:white;box-shadow:0 3px 7px #6137bf28}
@@ -111,6 +112,7 @@ button svg,.icon{width:18px;height:18px;vertical-align:middle}
 .tab.active{border-bottom-color:var(--accent)}
 .tab svg{width:16px;height:16px}
 .graph-actions{gap:2px}
+.workspace-actions{display:flex;align-items:center;gap:2px;flex:none}
 .split{width:1px;height:20px;background:var(--line);margin:0 4px}
 .graph{position:relative;isolation:isolate;flex:1;min-height:450px;overflow:hidden;background-color:var(--canvas);background-image:radial-gradient(circle,#d8d0e7 1px,transparent 1.1px);background-size:20px 20px;touch-action:none;cursor:grab}
 .graph.panning,.graph.panning .node{cursor:grabbing}
@@ -124,14 +126,14 @@ button svg,.icon{width:18px;height:18px;vertical-align:middle}
 .wire-label rect{fill:#fff;stroke:#ddd3ee;stroke-width:1}
 .wire-label text{font:650 12px "Aptos","Segoe UI",sans-serif;fill:#5c477e}
 .wire-label:hover rect{fill:#ede3ff}
-.world-label{position:absolute;display:block;color:#5b4d75;font-size:15px;font-weight:750;white-space:nowrap;background:#f0eaf9;border:1px solid #e0d5f0;border-radius:6px;padding:5px 9px}
-.node{width:170px;height:96px;position:absolute;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;padding:12px;border:1px solid #ddd6e9;border-radius:10px;background:#fff;box-shadow:0 4px 9px #34235014;text-align:left;pointer-events:auto;cursor:grab;user-select:none;color:var(--ink)}
+.world-label{position:absolute;display:block;color:#5b4d75;font-size:.9375rem;font-weight:750;white-space:nowrap;background:#f0eaf9;border:1px solid #e0d5f0;border-radius:6px;padding:5px 9px}
+.node{width:170px;height:96px;position:absolute;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;padding:8px 12px;border:1px solid #ddd6e9;border-radius:10px;background:#fff;box-shadow:0 4px 9px #34235014;text-align:left;pointer-events:auto;cursor:grab;user-select:none;color:var(--ink)}
 .node:hover,.node.selected{border-color:#a478ed}
 .graph.overview:not(.connecting) .node{cursor:pointer}
 .node.selected{background:#fcfaff;box-shadow:0 0 0 3px #dcc9f7,0 4px 12px #4b23861f}
 .node.connection-source{border-style:dashed;border-color:var(--accent);box-shadow:0 0 0 4px #dac4ff}
-.node-title{font-size:16px;font-weight:750;letter-spacing:-.02em;line-height:1.15;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.tag{--tag-bg:#e9eefc;--tag-ink:#415389;display:inline-flex;align-items:center;gap:4px;background:var(--tag-bg);color:var(--tag-ink);padding:3px 6px;border-radius:5px;font-size:12px;font-weight:700;line-height:1.15;white-space:nowrap}
+.node-title{font-size:1rem;font-weight:750;letter-spacing:-.02em;line-height:1.15;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.tag{--tag-bg:#e9eefc;--tag-ink:#415389;display:inline-flex;align-items:center;gap:4px;background:var(--tag-bg);color:var(--tag-ink);padding:3px 6px;border-radius:5px;font-size:.75rem;font-weight:700;line-height:1.15;white-space:nowrap}
 .tag svg{width:13px;height:13px}
 [data-kind="decision"]{--tag-bg:#eee3ff;--tag-ink:#6533a8}
 [data-kind="outcome"]{--tag-bg:#f9eddb;--tag-ink:#8f511f}
@@ -204,6 +206,46 @@ dialog::backdrop{background:#29194155}
 @media(max-width:600px){.app{display:block}.sidebar{border:0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto 1fr}.brand{height:auto;align-self:start;padding-top:10px;border:0}.brand strong{font-size:18px}.brand-mark{height:28px;width:28px}.brand-mark svg{height:19px;width:19px}.side-body{padding:7px 9px 8px 0;min-width:0}.side-label{display:none}.project-picker{margin:0 0 3px}.project-button{padding:4px 6px}.project-glyph{height:24px;width:24px}.side-section{margin:0;float:right}.chapter-list{display:flex;overflow:auto;margin-right:31px}.chapter-link{white-space:nowrap;width:auto;min-height:32px;padding:3px 5px;font-size:.8rem}.side-footer{display:none}.topbar{height:46px;padding-inline:10px}.crumb>span,.crumb>svg{display:none}.top-actions{gap:7px}.content{padding:13px 8px}.heading{margin-bottom:12px}.heading p{font-size:.8rem}.heading-actions .btn{font-size:.8rem;padding-inline:6px}.graph-actions .undo-control,.graph-actions .split,.footer-note span:first-child{display:none}.graph-bar{padding:0 5px;min-height:44px}.tab{font-size:.8rem}.minimap{width:100px;height:60px}.graph-footer{gap:8px}.footer-note{justify-content:flex-end}}
 @media(max-width:600px){.side-home{margin-bottom:3px}.chapter-row{flex:none;max-width:180px}.chapter-row .chapter-link{width:auto}.space-heading{align-items:flex-start;gap:8px}.space-heading .heading-actions{gap:2px}.space-heading .primary{margin-left:2px}.space-heading .icon-btn{width:24px}.empty-library-actions .btn{white-space:normal}}
 @media(max-width:600px){.save:not(.failed) .save-copy{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.save.failed .save-copy{max-width:75px;white-space:normal;line-height:1.2}.top-actions{gap:6px}}
+.android .top-actions .btn,.android .dialog-actions .btn{min-height:44px}
+.android .font-button{min-width:44px}
+.android .menu button,.android .project-button{min-height:44px}
+.android .graph-actions .undo-control{display:inline-grid}
+.android .graph-actions .icon-btn,.android .graph-controls .icon-btn,.android .workspace-actions .icon-btn{width:44px;height:44px}
+@media(max-width:940px){
+  .graph-bar{flex-wrap:wrap}
+  .workspace-actions{margin-left:auto}
+  .graph-actions{order:1;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+}
+@media(max-width:600px){
+  .topbar{height:auto;min-height:46px;gap:6px}
+  .android .topbar{min-height:54px}
+  .brand strong{font-size:1.125rem}
+  .top-actions{flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end}
+  .heading>div:first-child,.heading-title h1{min-width:0}
+  .heading p{overflow-wrap:anywhere}
+  .heading-actions{flex-shrink:0}
+  .android .graph-bar{flex-wrap:wrap;gap:0}
+  .android .tabs{min-height:44px}
+  .android .graph{height:48dvh;min-height:245px}
+  .android .graph-controls{left:7px;bottom:7px}
+  .android .minimap{right:7px;bottom:7px}
+}
+.diagram-fullscreen{overflow:hidden}
+.diagram-fullscreen .sidebar,.diagram-fullscreen .topbar,.diagram-fullscreen #editorView>.heading,
+.diagram-fullscreen #editorFooter,.diagram-fullscreen .graph-footer{display:none}
+.diagram-fullscreen .workspace{position:fixed;inset:0;z-index:15;height:auto;min-height:0;border:0;border-radius:0;background:#fff;
+  grid-template-columns:minmax(0,1fr) clamp(215px,34vw,292px);grid-template-rows:minmax(0,1fr)}
+.diagram-fullscreen .graph-shell{min-height:0}
+.diagram-fullscreen .graph-bar{flex-wrap:wrap}
+.diagram-fullscreen .graph{flex:1;height:auto;min-height:0}
+.diagram-fullscreen .inspector{min-height:0;border-left:1px solid var(--line);border-top:0}
+.diagram-fullscreen .inspector-header{height:auto;min-height:44px;flex:none}
+.diagram-fullscreen .inspector-body{flex:1;min-height:0;max-height:none;overscroll-behavior:contain}
+@media(max-width:720px) and (orientation:portrait),(max-width:480px){
+  .diagram-fullscreen .workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) min(40dvh,320px)}
+  .diagram-fullscreen .inspector{border-left:0;border-top:1px solid var(--line)}
+}
+.diagram-fullscreen .workspace.details-collapsed{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
 </style>
 </head>
 <body>
@@ -236,6 +278,7 @@ dialog::backdrop{background:#29194155}
             <option value="pt" lang="pt-BR">Português</option>
           </select>
         </label>
+        <button type="button" class="btn font-button" id="fontButton" aria-haspopup="dialog" aria-label="Text size" title="Text size" data-i18n-label="fontSize" data-i18n-title="fontSize">Aa</button>
         <div class="menu-wrap"><button class="btn" data-menu="fileMenu" aria-expanded="false"><span data-icon="folder"></span> <span data-i18n="files">Files</span> <span data-icon="chevron"></span></button>
           <div class="menu align-right" id="fileMenu" hidden>
             <button id="exportProject"><span data-icon="download"></span> <span data-i18n="exportJson">Export project (.json)</span></button>
@@ -288,6 +331,11 @@ dialog::backdrop{background:#29194155}
               <span class="split"></span>
               <button class="icon-btn" id="connect" title="Connect story beats (C)" aria-label="Connect story beats" data-i18n-label="connectNodes" data-i18n-title="connectNodes" data-shortcut="C" data-icon="link"></button>
               <button class="icon-btn" id="layout" title="Auto-arrange" aria-label="Auto-arrange" data-i18n-label="autoLayout" data-i18n-title="autoLayout" data-icon="layout"></button>
+              <button type="button" class="icon-btn" id="addNodeFullscreen" title="Add story beat" aria-label="Add story beat" data-i18n-label="addNode" data-i18n-title="addNode" data-icon="plus" hidden></button>
+            </div>
+            <div class="workspace-actions">
+              <button type="button" class="icon-btn" id="toggleDetails" title="Hide details" aria-label="Hide details" aria-controls="detailPanel" aria-expanded="true" data-icon="sidePanel" hidden></button>
+              <button type="button" class="icon-btn" id="toggleFullscreen" title="Full screen diagram" aria-label="Full screen diagram" data-icon="expand"></button>
             </div>
           </div>
           <div class="graph" id="graph" tabindex="0" aria-label="Story beat diagram" data-i18n-label="nodeDiagram">
@@ -305,12 +353,12 @@ dialog::backdrop{background:#29194155}
           </div>
           <div class="graph-footer" id="legend"></div>
         </div>
-        <aside class="inspector" aria-label="Details" data-i18n-label="details">
+        <aside class="inspector" id="detailPanel" aria-label="Details" data-i18n-label="details">
           <div class="inspector-header"><strong id="inspectorTitle"></strong><button class="icon-btn small" id="clearSelection" title="Clear selection" aria-label="Clear selection" data-i18n-label="clearSelection" data-i18n-title="clearSelection" data-icon="close"></button></div>
           <div class="inspector-body" id="inspector"></div>
         </aside>
       </section>
-      <footer class="footer-note" id="editorFooter"><span><span data-icon="hand"></span> <span data-i18n="graphHint">Drag the background to pan. Use Ctrl + scroll to zoom.</span></span><span><span data-icon="device"></span> <span data-i18n="storedHere">Stored in this browser</span></span></footer>
+      <footer class="footer-note" id="editorFooter"><span><span data-icon="hand"></span> <span id="graphHint" data-i18n="graphHint">Drag the background to pan. Use Ctrl + scroll to zoom.</span></span><span><span data-icon="device"></span> <span id="storageLocation" data-i18n="storedHere">Stored in this browser</span></span></footer>
     </div>
   </main>
 </div>
@@ -318,8 +366,18 @@ dialog::backdrop{background:#29194155}
 <dialog id="dialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle"></h2><button class="icon-btn" id="dialogClose" aria-label="Close" data-i18n-label="close" data-icon="close"></button></div><form class="dialog-form" id="dialogForm"></form></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
 <script>
+const android = window.EnredoAndroid;
+if (android) {
+  document.documentElement.classList.add('android');
+  document.getElementById('graphHint').dataset.i18n = 'touchGraphHint';
+  document.getElementById('storageLocation').dataset.i18n = 'storedOnDevice';
+}
+
 'use strict';
 const icons = {
+  expand: '<path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/>',
+  contract: '<path d="M4 9h5V4m6 0v5h5M4 15h5v5m6 0v-5h5"/>',
+  sidePanel: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16"/>',
   branch: '<circle cx="6" cy="5" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="19" r="2"/><path d="M6 7v10M6 13h5a7 7 0 0 0 7-5"/>',
   book: '<path d="M12 6a8 8 0 0 0-9-2v15a9 9 0 0 1 9 1 9 9 0 0 1 9-1V4a8 8 0 0 0-9 2zm0 0v14"/>',
   home: '<path d="m3 10 9-7 9 7M5 9v11h14V9m-10 11v-6h6v6"/>',
@@ -359,12 +417,15 @@ const uid = () => globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36) +
 const W = 170, H = 96;
 const storageKey = 'enredo.story-planner.v1';
 const languageKey = 'enredo.language';
+const fontSizeKey = 'enredo.font-size';
+const fontSizes = [75,85,100,115,130];
 const number = index => String(index + 1).padStart(2,'0');
 
 // Each pair contains English first and Brazilian Portuguese second.
 const messages = {
   pageTitle: ['Enredo — Story planner','Enredo — Planejador de histórias'],
   language: ['Language','Idioma'],
+  fontSize: ['Text size','Tamanho da fonte'],
   projectNavigation: ['Project and chapters','Projeto e capítulos'],
   home: ['My space','Meu espaço'],
   project: ['Project','Projeto'],
@@ -411,9 +472,15 @@ const messages = {
   zoomIn: ['Zoom in','Aumentar zoom'],
   fitMap: ['Fit map to view','Enquadrar mapa'],
   details: ['Details','Detalhes'],
+  diagramFullscreen: ['Full screen diagram','Diagrama em tela cheia'],
+  exitFullscreen: ['Exit full screen','Sair da tela cheia'],
+  showDetails: ['Show details panel','Mostrar painel de detalhes'],
+  hideDetails: ['Hide details panel','Recolher painel de detalhes'],
   clearSelection: ['Clear selection','Limpar seleção'],
   graphHint: ['Drag the background to pan. Use Ctrl + scroll to zoom.','Arraste o fundo para navegar. Use Ctrl + rolagem para ampliar.'],
+  touchGraphHint: ['Drag with one finger. Pinch with two fingers to zoom.','Arraste com um dedo. Faça o gesto de pinça com dois dedos para mudar o zoom.'],
   storedHere: ['Stored in this browser','Armazenado neste navegador'],
+  storedOnDevice: ['Stored on this device','Armazenado neste aparelho'],
   saved: ['Saved locally','Salvo localmente'],
   saveFailed: ['Local storage unavailable','Sem salvamento local'],
   undo: ['Undo','Desfazer'],
@@ -446,13 +513,17 @@ const messages = {
   ending: ['Ending','Desfecho'],
   chooseSource: ['Select the starting beat · Esc to cancel','Clique na situação de origem · Esc para cancelar'],
   chooseDestination: ['Select the destination beat · Esc to cancel','Clique na situação de destino · Esc para cancelar'],
+  touchChooseSource: ['Tap the starting beat','Toque na situação de origem'],
+  touchChooseDestination: ['Tap the destination beat','Toque na situação de destino'],
   helpTitle: ['How to use Enredo','Como usar o Enredo'],
   helpHome: ['Open or create a story in <strong>My space</strong>.','Abra ou crie uma história em <strong>Meu espaço</strong>.'],
   helpChapter: ['Create chapters in the sidebar and add story beats to each one.','Crie capítulos na barra lateral e adicione as situações de cada um.'],
   helpPath: ['Select a story beat to add notes and <strong>Add path</strong> to connect it to a new or existing beat, even in another chapter.','Selecione uma situação para escrever notas e use <strong>Adicionar caminho</strong> para ligá-la a uma situação nova ou existente, inclusive em outro capítulo.'],
   helpStory: ['Use <strong>Whole story</strong> to see connections across chapters. Drag the cards in <strong>Timeline</strong> to rearrange them.','Use <strong>História inteira</strong> para ver as conexões entre capítulos. Arraste os cartões na aba <strong>Timeline</strong> para reorganizá-los.'],
   helpZoom: ['Drag the background to pan, use <strong>Ctrl + scroll</strong> to zoom, and press <strong>F</strong> to fit the map to the view.','Arraste o fundo para navegar, use <strong>Ctrl + rolagem</strong> para mudar o zoom e <strong>F</strong> para enquadrar.'],
+  touchHelpZoom: ['Drag the background with one finger to move the map. Pinch with two fingers to zoom, or tap the fit button to see the entire map.','Arraste o fundo com um dedo para mover o mapa. Faça o gesto de pinça com dois dedos para mudar o zoom ou toque no botão de enquadrar para ver o mapa inteiro.'],
   helpFiles: ['Use <strong>Files</strong> to export a JSON backup or move a story to another browser.','Em <strong>Arquivos</strong>, exporte um JSON para guardar uma cópia ou levar a história para outro navegador.'],
+  deviceHelpFiles: ['Use <strong>Files</strong> to import or export a JSON project backup.','Use <strong>Arquivos</strong> para importar ou exportar uma cópia do projeto em JSON.'],
   name: ['Name','Nome'],
   confirmProject: ['Delete project?','Excluir projeto?'],
   confirmProjectMessage: ['“{name}” and all its chapters, story beats, and connections will be deleted. You can undo this while the tab is open.','“{name}” será excluído com todos os seus capítulos, situações e conexões. Você pode desfazer nesta sessão.'],
@@ -486,18 +557,28 @@ const messages = {
   confirmConnectionMessage: ['Both story beats will be kept.','As situações nas duas pontas serão preservadas.'],
   backupName: ['story','historia'],
   exported: ['Project backup exported.','Cópia do projeto exportada.'],
+  exportFailed: ['Could not save the project backup.','Não foi possível salvar a cópia do projeto.'],
+  importFailed: ['Could not open the selected file.','Não foi possível abrir o arquivo escolhido.'],
   importSuffix: [' (imported)',' (importado)'],
   imported: ['Project imported.','Projeto importado.'],
   invalidImport: ['The selected file is not a valid Enredo project.','O arquivo escolhido não é um projeto válido do Enredo.']
 };
 
 let language = readLanguage();
+let fontSize = readFontSize();
+function readFontSize() {
+  try {
+    const saved = Number(localStorage.getItem(fontSizeKey));
+    if (fontSizes.includes(saved)) return saved;
+  } catch {}
+  return android ? 85 : 100;
+}
 function readLanguage() {
   try {
-    return localStorage.getItem(languageKey) === 'pt' ? 'pt' : 'en';
-  } catch {
-    return 'en';
-  }
+    const saved = localStorage.getItem(languageKey);
+    if (saved === 'pt' || saved === 'en') return saved;
+  } catch {}
+  return android && /^pt\b/i.test(navigator.language) ? 'pt' : 'en';
 }
 function t(key, values = {}) {
   return messages[key][language === 'pt' ? 1 : 0].replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ''));
@@ -571,14 +652,17 @@ function validProject(p) {
 
 let state = readState();
 let atHome = true;
+let diagramFullscreen = false;
+let detailsCollapsed = false;
+let diagramScroll = 0;
 let overview = false;
 let selection = null;
 let connectMode = false, source = null;
 const undoStack = [], redoStack = [];
 let view = {x:0,y:0,zoom:1};
+let graphViewport = null;
 let scene = {nodes:[],edges:[],headings:[],byId:new Map()};
 let miniBounds = null;
-let gesture = null;
 let toastTimer;
 let toastKey;
 let storageFailed = false;
@@ -628,11 +712,12 @@ function renderLanguage() {
     element.setAttribute('aria-label',t(element.dataset.i18nLabel));
   });
   document.querySelectorAll('[data-i18n-title]').forEach(element => {
-    const shortcut = element.dataset.shortcut;
+    const shortcut = android ? null : element.dataset.shortcut;
     element.title = t(element.dataset.i18nTitle) + (shortcut ? ' (' + shortcut + ')' : '');
   });
   $('legend').innerHTML = kinds.map(kind =>
     '<span class="legend-item" data-kind="' + kind + '"><i></i>' + tx(kind) + '</span>').join('');
+  renderWorkspaceControls();
   renderSaveStatus();
   if (toastKey && !$('toast').hidden) $('toast').textContent = t(toastKey);
 }
@@ -644,6 +729,11 @@ function changeLanguage(next) {
   } catch {}
   renderLanguage();
   render();
+}
+
+function applyFontSize() {
+  document.documentElement.style.fontSize = fontSize + '%';
+  if (!atHome && chapter()) renderWires();
 }
 
 function remember(before) {
@@ -677,7 +767,7 @@ function navigate(pId,chapterId) {
   enterProject(p,chapterId ?? lastChapter);
   save();
   render(true);
-  $('chapterTitle').focus();
+  $(diagramFullscreen ? 'graph' : 'chapterTitle').focus();
 }
 function openHome() {
   atHome = true;
@@ -866,7 +956,7 @@ function renderWires() {
       const label = chars.length > 24 ? chars.slice(0,23).join('') + '…' : e.label;
       const width = Math.max(34,[...label].length * 7.3 + 13);
       const x = (x1 + x2) / 2, y = !adjacent && sameRow ? bypass : (y1 + y2)/2 + bend*(adjacent ? .75 : 1);
-      labels.push('<g class="wire-label"' + id + ' transform="translate(' + x + ' ' + y + ')"><title>' + esc(e.label) +
+      labels.push('<g class="wire-label"' + id + ' transform="translate(' + x + ' ' + y + ') scale(' + fontSize/100 + ')"><title>' + esc(e.label) +
         '</title><rect x="' + (-width/2) + '" y="-10" width="' + width + '" height="20" rx="6"/><text text-anchor="middle" y="4">' +
         esc(label) + '</text></g>');
     }
@@ -917,17 +1007,27 @@ function updateView() {
 function fitMap() {
   const graph = $('graph'), b = mapBounds();
   const width = b.right - b.left, height = b.bottom - b.top;
+  graphViewport = {width:graph.clientWidth,height:graph.clientHeight};
   view.zoom = Math.max(.10,Math.min(1,(graph.clientWidth - 42)/width,(graph.clientHeight - 110)/height));
   view.x = (graph.clientWidth-width*view.zoom)/2 - b.left*view.zoom;
   view.y = (graph.clientHeight-height*view.zoom)/2 - b.top*view.zoom - 8;
   updateView();
   renderWires();
 }
-function zoomAt(factor,x = $('graph').clientWidth/2,y = $('graph').clientHeight/2) {
+function resizeGraph() {
+  const {clientWidth:width,clientHeight:height} = $('graph');
+  if (atHome || !chapter() || !width || !height || !graphViewport) return;
+  if (width === graphViewport.width && height === graphViewport.height) return;
+  view.x += (width - graphViewport.width)/2;
+  view.y += (height - graphViewport.height)/2;
+  graphViewport = {width,height};
+  updateView();
+}
+function zoomAt(factor,x = $('graph').clientWidth/2,y = $('graph').clientHeight/2,previousX = x,previousY = y) {
   const previous = view.zoom;
   view.zoom = Math.max(.10,Math.min(previous*factor,2.8));
-  view.x = x - (x-view.x)*view.zoom/previous;
-  view.y = y - (y-view.y)*view.zoom/previous;
+  view.x = x - (previousX-view.x)*view.zoom/previous;
+  view.y = y - (previousY-view.y)*view.zoom/previous;
   updateView();
   if ((previous < .43) !== (view.zoom < .43)) renderWires();
 }
@@ -938,15 +1038,51 @@ function renderMode() {
   $('connect').classList.toggle('on',connectMode);
   $('connect').setAttribute('aria-pressed',connectMode);
   $('connectNote').hidden = !connectMode;
-  $('connectNote').textContent = t(source ? 'chooseDestination' : 'chooseSource');
+  const prompts = android ? ['touchChooseSource','touchChooseDestination'] : ['chooseSource','chooseDestination'];
+  $('connectNote').textContent = t(prompts[source ? 1 : 0]);
 }
 function stopConnect() {
   connectMode = false;
   source = null;
   renderMode();
 }
+function renderWorkspaceControls() {
+  const fullscreenButton = $('toggleFullscreen');
+  const fullscreenLabel = t(diagramFullscreen ? 'exitFullscreen' : 'diagramFullscreen');
+  fullscreenButton.title = fullscreenLabel;
+  fullscreenButton.setAttribute('aria-label',fullscreenLabel);
+  fullscreenButton.innerHTML = icon(diagramFullscreen ? 'contract' : 'expand');
+
+  const detailsButton = $('toggleDetails');
+  const detailsLabel = t(detailsCollapsed ? 'showDetails' : 'hideDetails');
+  detailsButton.hidden = !diagramFullscreen;
+  detailsButton.title = detailsLabel;
+  detailsButton.setAttribute('aria-label',detailsLabel);
+  detailsButton.setAttribute('aria-expanded',!detailsCollapsed);
+  detailsButton.classList.toggle('on',!detailsCollapsed);
+  $('detailPanel').hidden = detailsCollapsed;
+  $('editorWorkspace').classList.toggle('details-collapsed',detailsCollapsed);
+  $('addNodeFullscreen').hidden = !diagramFullscreen;
+}
+function setDiagramFullscreen(active) {
+  if (active === diagramFullscreen || (active && (atHome || !chapter()))) return;
+  if (active) diagramScroll = window.scrollY;
+  diagramFullscreen = active;
+  detailsCollapsed = false;
+  closeMenus();
+  document.documentElement.classList.toggle('diagram-fullscreen',active);
+  renderWorkspaceControls();
+  android?.setDiagramFullscreen?.(active);
+  if (!active) window.scrollTo(0,diagramScroll);
+}
+function toggleDiagramDetails() {
+  if (!diagramFullscreen) return;
+  detailsCollapsed = !detailsCollapsed;
+  renderWorkspaceControls();
+}
 function render(fit = false) {
   if (!project()) atHome = true;
+  if (diagramFullscreen && (atHome || !chapter())) setDiagramFullscreen(false);
   $('goHome').classList.toggle('active',atHome);
   $('goHome').setAttribute('aria-current',atHome ? 'page' : 'false');
   $('spaceView').hidden = !atHome;
@@ -1052,6 +1188,18 @@ function showDialog({title,body,submitKey,onSubmit,remove,extra}) {
 function closeDialog() {
   $('dialog').close();
 }
+function editFontSize() {
+  const choices = fontSizes.map(size => option(size,size + '%',size === fontSize)).join('');
+  showDialog({title:t('fontSize'),body:'<select name="fontSize" aria-label="' + tx('fontSize') + '">' + choices + '</select>',
+    submitKey:'save',onSubmit:data => {
+      const size = Number(data.get('fontSize'));
+      if (!fontSizes.includes(size)) return;
+      fontSize = size;
+      try { localStorage.setItem(fontSizeKey,String(size)); } catch {}
+      applyFontSize();
+      closeDialog();
+    }});
+}
 function confirmation(title,message,onConfirm) {
   showDialog({title,body:'<p>' + esc(message) + '</p>',submitKey:'delete',onSubmit:() => {
     closeDialog();
@@ -1060,7 +1208,8 @@ function confirmation(title,message,onConfirm) {
   $('dialogCancel').focus();
 }
 function showHelp() {
-  const helpItems = ['helpHome','helpChapter','helpPath','helpStory','helpZoom','helpFiles'];
+  const helpItems = ['helpHome','helpChapter','helpPath','helpStory',
+    android ? 'touchHelpZoom' : 'helpZoom',android ? 'deviceHelpFiles' : 'helpFiles'];
   const body = '<ul>' + helpItems.map(key => '<li>' + t(key) + '</li>').join('') + '</ul>';
   showDialog({title:t('helpTitle'),body});
 }
@@ -1317,16 +1466,37 @@ function layoutChapter(p,chapterId) {
 function exportProject() {
   const p = project();
   if (!p) return;
-  const file = new Blob([JSON.stringify({format:'enredo',version:1,project:p},null,2)],{type:'application/json'});
+  const json = JSON.stringify({format:'enredo',version:1,project:p},null,2);
   const name = p.title.replace(/[<>:"/\\|?*\u0000-\u001f]/g,'-').trim().slice(0,90) || t('backupName');
+  const filename = name + '.enredo.json';
+  if (android) {
+    android.exportProject(filename,json);
+    return;
+  }
+  const file = new Blob([json],{type:'application/json'});
   const link = document.createElement('a');
   link.href = URL.createObjectURL(file);
-  link.download = name + '.enredo.json';
+  link.download = filename;
   document.body.append(link);
   link.click();
   setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); },1000);
   flash('exported');
 }
+function chooseProjectFile() {
+  if (android) android.chooseImport();
+  else $('importFile').click();
+}
+
+async function importAndroidProject() {
+  try {
+    const response = await fetch('/project-import.json',{cache:'no-store'});
+    if (!response.ok) throw new Error('Could not read the selected file');
+    await importProject(response);
+  } catch {
+    flash('importFailed');
+  }
+}
+
 async function importProject(file) {
   try {
     const data = JSON.parse(await file.text());
@@ -1349,6 +1519,15 @@ function closeMenus() {
     $(button.dataset.menu).hidden = true;
     button.setAttribute('aria-expanded','false');
   });
+}
+function handleAndroidBack() {
+  if ($('dialog').open) closeDialog();
+  else if (document.querySelector('[data-menu][aria-expanded="true"]')) closeMenus();
+  else if (connectMode) toggleConnect();
+  else if (diagramFullscreen) setDiagramFullscreen(false);
+  else if (!atHome) openHome();
+  else return false;
+  return true;
 }
 function toggleConnect() {
   if ($('connect').disabled) return;
@@ -1383,70 +1562,124 @@ function cardFor(id) {
 }
 function setupGraph() {
   const graph = $('graph');
-  let dragged = false;
+  const touches = new Map();
+  let drag = null, pinch = null, suppressClick = false;
+
+  function touchSpan() {
+    const [first,second] = touches.values();
+    const rect = graph.getBoundingClientRect();
+    return {x:(first.x + second.x)/2 - rect.left,y:(first.y + second.y)/2 - rect.top,
+      distance:Math.max(1,Math.hypot(first.x - second.x,first.y - second.y))};
+  }
+
+  function finishDrag(cancelled) {
+    const previous = drag;
+    drag = null;
+    graph.classList.remove('panning');
+    if (!previous?.n || !previous.started) return;
+    if (cancelled) {
+      Object.assign(previous.n,{x:previous.x,y:previous.y});
+      selection = previous.selection;
+    } else {
+      if (previous.n.x !== previous.x || previous.n.y !== previous.y) remember(previous.before);
+      save();
+    }
+    render();
+  }
+
   graph.addEventListener('pointerdown',event => {
-    dragged = false;
+    const touch = event.pointerType === 'touch';
     if (event.button !== 0 && event.button !== 1) return;
+    if ((!touch && touches.size) || (drag?.started && !touches.size)) return;
+    if (!touches.size) suppressClick = false;
     const target = event.target;
-    if (target.closest('.graph-controls,.minimap,.empty-canvas,[data-edge]')) return;
-    const card = target.closest('[data-node]');
-    if (card && (overview || connectMode) && event.button !== 1) return;
-    const n = card && event.button !== 1 ? nodeById(card.dataset.node) : null;
-    gesture = {pointer:event.pointerId,startX:event.clientX,startY:event.clientY,n,
-      x:n?.x ?? view.x,y:n?.y ?? view.y,button:event.button,started:false};
-    if (event.button === 1) event.preventDefault();
-  });
-  graph.addEventListener('pointermove',event => {
-    if (gesture?.pointer !== event.pointerId) return;
-    const dx = event.clientX - gesture.startX, dy = event.clientY - gesture.startY;
-    if (!gesture.started && Math.hypot(dx,dy) < 4) return;
-    if (!gesture.started) {
-      gesture.started = true;
-      dragged = true;
-      graph.setPointerCapture(event.pointerId);
-      graph.classList.add('panning');
-      if (gesture.n) {
-        gesture.before = JSON.stringify(state);
-        selection = gesture.n.id;
-        renderInspector();
-        renderCards();
-        gesture.card = cardFor(selection);
+    const control = target.closest('.graph-controls,.minimap,.empty-canvas');
+    if (touch) {
+      if (control && !touches.size) return;
+      touches.set(event.pointerId,{x:event.clientX,y:event.clientY});
+      if (touches.size >= 2) {
+        // A second finger turns the gesture into a map zoom, discarding any partial card move.
+        if (drag) finishDrag(true);
+        pinch = touchSpan();
+        suppressClick = true;
+        graph.classList.add('panning');
+        for (const pointer of touches.keys()) graph.setPointerCapture(pointer);
+        return;
       }
     }
-    if (gesture.n) {
-      const node = gesture.n;
-      node.x = Math.round(gesture.x + dx/view.zoom);
-      node.y = Math.round(gesture.y + dy/view.zoom);
-      gesture.card.style.left = node.x + 'px';
-      gesture.card.style.top = node.y + 'px';
+    if (control || (!touch && target.closest('[data-edge]'))) return;
+    const card = target.closest('[data-node]');
+    if (!touch && card && (overview || connectMode) && event.button !== 1) return;
+    const n = card && !overview && !connectMode && event.button !== 1 ? nodeById(card.dataset.node) : null;
+    drag = {pointer:event.pointerId,startX:event.clientX,startY:event.clientY,n,
+      x:n?.x ?? view.x,y:n?.y ?? view.y,started:false};
+    if (event.button === 1) event.preventDefault();
+  });
+
+  graph.addEventListener('pointermove',event => {
+    if (touches.has(event.pointerId)) {
+      touches.set(event.pointerId,{x:event.clientX,y:event.clientY});
+      if (pinch) {
+        const next = touchSpan();
+        zoomAt(next.distance/pinch.distance,next.x,next.y,pinch.x,pinch.y);
+        pinch = next;
+        return;
+      }
+    }
+    if (drag?.pointer !== event.pointerId) return;
+    if (event.pointerType !== 'touch' && event.buttons === 0) {
+      finishDrag(true);
+      return;
+    }
+    const dx = event.clientX - drag.startX, dy = event.clientY - drag.startY;
+    if (!drag.started && Math.hypot(dx,dy) < 4) return;
+    if (!drag.started) {
+      drag.started = true;
+      suppressClick = true;
+      graph.setPointerCapture(event.pointerId);
+      graph.classList.add('panning');
+      if (drag.n) {
+        drag.before = JSON.stringify(state);
+        drag.selection = selection;
+        selection = drag.n.id;
+        renderInspector();
+        renderCards();
+        drag.card = cardFor(selection);
+      }
+    }
+    if (drag.n) {
+      const node = drag.n;
+      node.x = Math.round(drag.x + dx/view.zoom);
+      node.y = Math.round(drag.y + dy/view.zoom);
+      drag.card.style.left = node.x + 'px';
+      drag.card.style.top = node.y + 'px';
       renderWires();
       renderMinimap();
     } else {
-      view.x = gesture.x + dx;
-      view.y = gesture.y + dy;
+      view.x = drag.x + dx;
+      view.y = drag.y + dy;
       updateView();
     }
   });
+
   function finish(event,cancelled = false) {
-    if (gesture?.pointer !== event.pointerId) return;
-    const previous = gesture;
-    gesture = null;
-    graph.classList.remove('panning');
-    if (previous.n && previous.started) {
-      if (cancelled) Object.assign(previous.n,{x:previous.x,y:previous.y});
-      else if (JSON.stringify(state) !== previous.before) remember(previous.before);
-      save();
-      render();
+    if (touches.delete(event.pointerId) && pinch) {
+      pinch = touches.size >= 2 ? touchSpan() : null;
+      if (touches.size === 1) {
+        const [[pointer,point]] = touches;
+        drag = {pointer,startX:point.x,startY:point.y,x:view.x,y:view.y,started:true};
+      }
+    } else if (drag?.pointer === event.pointerId) {
+      finishDrag(cancelled);
     }
   }
   graph.addEventListener('pointerup',finish);
   graph.addEventListener('pointercancel',event => finish(event,true));
-  graph.addEventListener('lostpointercapture',event => finish(event,true));
+  graph.addEventListener('lostpointercapture',event => {
+    if (event.target === graph) finish(event,true);
+  });
   graph.addEventListener('click',event => {
-    if (dragged && event.detail > 0) {
-      dragged = false;
-      return;
-    }
+    if (suppressClick && event.detail > 0) return;
     const card = event.target.closest('[data-node]');
     const edge = event.target.closest('[data-edge]');
     if (card) activateCard(card.dataset.node,event.detail === 0);
@@ -1544,11 +1777,13 @@ $('inspector').addEventListener('keydown',event => {
   }
 });
 const actions = {
-  goHome:openHome,newHomeProject:createProject,emptyImport:() => $('importFile').click(),
+  goHome:openHome,newHomeProject:createProject,emptyImport:chooseProjectFile,
+  fontButton:editFontSize,
   addChapter:() => chapterDialog(), renameChapter:() => chapterDialog(chapter()),
   newEmptyChapter:() => chapterDialog(),
   addNode:addNodeDialog, emptyAdd:addNodeDialog, dialogClose:closeDialog,
-  helpButton:showHelp,fileHelp:showHelp,exportProject,importProject:() => $('importFile').click(),
+  addNodeFullscreen:addNodeDialog,toggleFullscreen:() => setDiagramFullscreen(!diagramFullscreen),toggleDetails:toggleDiagramDetails,
+  helpButton:showHelp,fileHelp:showHelp,exportProject,importProject:chooseProjectFile,
   currentTab:() => switchView(false),overviewTab:() => switchView(true),
   clearSelection:() => { selection = null; stopConnect(); render(); },
   undo:() => historyStep('undo'),redo:() => historyStep('redo'),connect:toggleConnect,layout:autoLayout,
@@ -1576,6 +1811,7 @@ document.addEventListener('keydown',event => {
   if (event.key === 'Escape') {
     closeMenus();
     if (connectMode) toggleConnect();
+    else if (diagramFullscreen) setDiagramFullscreen(false);
     return;
   }
   if (event.target.matches('input, textarea, select, [contenteditable]')) return;
@@ -1591,10 +1827,9 @@ document.addEventListener('keydown',event => {
   if (key === 'f') fitMap();
   if (key === 'delete' && selection) removeSelected();
 });
-window.addEventListener('resize',() => {
-  if (!atHome && chapter()) fitMap();
-});
+new ResizeObserver(resizeGraph).observe($('graph'));
 setupGraph();
+applyFontSize();
 renderLanguage();
 save();
 render(true);
