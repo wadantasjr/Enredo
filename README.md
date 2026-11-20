@@ -1,13 +1,15 @@
 # Enredo
 
-![Enredo home screen / Tela inicial do Enredo](assets/enredo-screenshot.png)
-![Enredo sample / Projeto aberto do Enredo](assets/enredo-screenshot2.png)
+[English](#english) · [Português](#português)
 
-[English](#english) · [Português](#português) · [Android](#android)
+![Enredo home screen](assets/enredo-screenshot.png)
+![Enredo sample project](assets/enredo-screenshot2.png)
 
 ## English
 
 An offline visual editor for planning branching stories. Organize scenes into chapters, connect decisions and consequences, and see where different paths come back together.
+
+Use Enredo [in your browser](#getting-started) or install the [Android app](#android-app).
 
 ### Getting started
 
@@ -31,9 +33,31 @@ Projects are saved automatically in your browser's local storage. To back up or 
 
 If you already use `Enredo.html`, export your projects there and import the JSON files into this `index.html`. Opening a copy of the editor from a different path can use a different browser storage area.
 
+### Android app
+
+The [Enredo APK](https://github.com/wadantasjr/Enredo/releases/latest/download/Enredo.apk) runs offline on Android 8.0 or later with an up-to-date Android System WebView. The app saves projects on your device and starts in Portuguese if your device is set to Portuguese. To transfer a project between Android and the browser, use **Files → Export project (.json)** in one version and **Files → Import project (.json)** in the other.
+
+- Tap **Aa** at the top to set the text size between 75% and 130%. The Android app starts at 85% and remembers your choice.
+- Pinch with two fingers to zoom the diagram. Drag the background with one finger to move the map, or drag a card in **Timeline** to reposition it.
+- Tap **Full screen diagram** in the diagram toolbar to expand the workspace. Use the details icon to collapse or reopen the panel. To return to the editor, tap **Exit full screen** or use Android's **Back** action.
+
+#### Build on Windows
+
+Use PowerShell 7, JDK 11 or 17, and the Android SDK with platform 36 and Build Tools 34.0.0. The script also looks for the SDK and JDK bundled with Unity.
+
+```powershell
+pwsh -File .\android\build.ps1
+```
+
+If needed, specify the tool locations with `-AndroidSdk` and `-JavaHome`. The build uses the [Android source files](android/app/src/main) and packages the [`index.html`](index.html) shared with the browser version. The script verifies the signature and writes the result to `android/Enredo.apk`.
+
+The APK uses a development signing key at `android/.signing/enredo-debug.jks`. Keep this key to build updates that can be installed over the original APK. Use a release key to distribute the app through an app store.
+
 ## Português
 
 Editor visual offline para planejar histórias ramificadas. Organize cenas por capítulo, conecte decisões e consequências e veja onde os caminhos da história voltam a se encontrar.
+
+Use o Enredo [no navegador](#como-começar) ou instale o [aplicativo Android](#aplicativo-android).
 
 ### Como começar
 
@@ -57,15 +81,15 @@ O Enredo salva os projetos automaticamente no armazenamento local do navegador. 
 
 Se já estiver usando o `Enredo.html`, exporte seus projetos por lá e importe os arquivos JSON neste `index.html`. Abrir uma cópia do editor em outro caminho pode fazer o navegador usar um armazenamento diferente.
 
-## Android
+### Aplicativo Android
 
 O [APK do Enredo](https://github.com/wadantasjr/Enredo/releases/latest/download/Enredo.apk) funciona offline em aparelhos com Android 8.0 ou superior e o Android System WebView atualizado. O editor usa armazenamento local do aplicativo e, na primeira abertura, usa português se esse for o idioma do aparelho. Para transferir um projeto entre o Android e a versão de navegador, use **Arquivos → Exportar projeto (.json)** em uma versão e **Arquivos → Importar projeto (.json)** na outra.
 
 - Toque em **Aa** no topo para ajustar o tamanho da fonte entre 75% e 130%. O Android começa em 85% e guarda a sua escolha.
 - No diagrama, faça o gesto de pinça com dois dedos para mudar o zoom. Com um dedo, arraste o fundo para mover o mapa ou arraste um cartão na **Timeline** para mudar sua posição.
-- Toque no ícone de **Tela cheia** na barra do diagrama para expandir o espaço de trabalho. O ícone de **Detalhes** recolhe ou reabre o painel. Para voltar ao editor, toque no ícone de **Sair da tela cheia** ou use **Voltar** no Android.
+- Toque em **Diagrama em tela cheia** na barra do diagrama para expandir o espaço de trabalho. Use o ícone de detalhes para recolher ou reabrir o painel. Para voltar ao editor, toque em **Sair da tela cheia** ou use **Voltar** no Android.
 
-### Compilar no Windows
+#### Compilar no Windows
 
 Use PowerShell 7, JDK 11 ou 17 e o Android SDK com a plataforma 36 e Build Tools 34.0.0. O script também procura o SDK e o JDK incluídos em uma instalação do Unity.
 
