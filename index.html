@@ -123,8 +123,8 @@ button svg,.icon{width:18px;height:18px;vertical-align:middle}
 .chapter-empty{margin:0 0 16px}
 .workspace{flex:1;min-height:570px;display:grid;grid-template-columns:minmax(0,1fr) 292px;border:1px solid var(--line);border-radius:13px;box-shadow:var(--workspace-shadow);overflow:hidden}
 .graph-shell{display:flex;flex-direction:column;min-width:0}
-.graph-bar{display:flex;justify-content:space-between;align-items:center;gap:4px;padding:0 9px 0 12px;min-height:53px;border-bottom:1px solid var(--line)}
-.tabs{align-self:stretch;display:flex;gap:12px;min-width:0}
+.graph-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px;padding:0 9px 0 12px;min-height:53px;border-bottom:1px solid var(--line)}
+.tabs{align-self:stretch;display:flex;flex-wrap:wrap;gap:12px;min-width:0}
 .tab{background:none;border:0;border-bottom:2px solid transparent;padding:0 3px;font-size:.875rem;font-weight:650;color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap}
 .tab:hover,.tab.active{color:var(--accent-dark)}
 .tab.active{border-bottom-color:var(--accent)}
@@ -229,10 +229,10 @@ dialog::backdrop{background:var(--backdrop)}
 .android .top-actions .btn,.android .dialog-actions .btn{min-height:44px}
 .android .font-button{min-width:44px}
 .android .menu button,.android .project-button{min-height:44px}
+.android .tabs{min-height:44px}
 .android .graph-actions .undo-control{display:inline-grid}
 .android .graph-actions .icon-btn,.android .graph-controls .icon-btn,.android .workspace-actions .icon-btn{width:44px;height:44px}
 @media(max-width:940px){
-  .graph-bar{flex-wrap:wrap}
   .workspace-actions{margin-left:auto}
   .graph-actions{order:1;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
 }
@@ -244,8 +244,7 @@ dialog::backdrop{background:var(--backdrop)}
   .heading>div:first-child,.heading-title h1{min-width:0}
   .heading p{overflow-wrap:anywhere}
   .heading-actions{flex-shrink:0}
-  .android .graph-bar{flex-wrap:wrap;gap:0}
-  .android .tabs{min-height:44px}
+  .android .graph-bar{gap:0}
   .android .graph{height:48dvh;min-height:245px}
   .android .graph-controls{left:7px;bottom:7px}
   .android .minimap{right:7px;bottom:7px}
@@ -256,7 +255,6 @@ dialog::backdrop{background:var(--backdrop)}
 .diagram-fullscreen .workspace{position:fixed;inset:0;z-index:15;height:auto;min-height:0;border:0;border-radius:0;background:var(--fullscreen-bg);
   grid-template-columns:minmax(0,1fr) clamp(215px,34vw,292px);grid-template-rows:minmax(0,1fr)}
 .diagram-fullscreen .graph-shell{min-height:0}
-.diagram-fullscreen .graph-bar{flex-wrap:wrap}
 .diagram-fullscreen .graph{flex:1;height:auto;min-height:0}
 .diagram-fullscreen .inspector{min-height:0;border-left:1px solid var(--line);border-top:0}
 .diagram-fullscreen .inspector-header{height:auto;min-height:44px;flex:none}
@@ -266,6 +264,131 @@ dialog::backdrop{background:var(--backdrop)}
   .diagram-fullscreen .inspector{border-left:0;border-top:1px solid var(--line)}
 }
 .diagram-fullscreen .workspace.details-collapsed{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+.workspace.structure-mode,.workspace.no-map{grid-template-columns:minmax(0,1fr)}
+.workspace.no-map:not(.structure-mode){flex:none;height:auto;min-height:0}
+.workspace.no-map .chapter-empty{margin:14px}
+.workspace.no-map:not(.structure-mode) .graph-actions,.workspace.no-map .workspace-actions,
+.structure-mode .workspace-actions,.structure-mode .map-tool{display:none}
+.structure-mode .graph-actions .undo-control{display:inline-grid}
+.structure-mode .graph-shell{min-height:0}
+.structure-view{flex:1;min-height:0;overflow:auto;padding:clamp(12px,3vw,24px);background:var(--surface-subtle)}
+.structure-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.structure-header h2{margin:0;font-size:1.25rem;line-height:1.25;overflow-wrap:anywhere}
+.structure-header p{margin:5px 0 0;color:var(--muted);font-size:.875rem}
+.structure-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr));gap:8px;margin:16px 0 12px}
+.structure-summary>div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);min-width:0}
+.structure-summary dt{color:var(--muted);font-size:.78rem;overflow-wrap:anywhere}
+.structure-summary dd{margin:0;color:var(--accent-dark);font-size:1.125rem;font-weight:750;font-variant-numeric:tabular-nums}
+.structure-stages,.structure-situations{list-style:none;margin:0;padding:0;display:grid;gap:6px;min-width:0}
+.structure-stages{margin-top:12px}
+.structure-substages{margin:6px 0 8px 10px;padding-left:10px;border-left:2px solid var(--line)}
+.structure-stage{border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.structure-stage:has(.structure-stage-toggle[aria-expanded="true"]){border-color:var(--sidebar-active-line)}
+.structure-stage-toggle{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;text-align:left;border:0;border-radius:8px;padding:9px 10px;background:transparent}
+.structure-stage-toggle:hover,.structure-stage-toggle[aria-expanded="true"]{background:var(--accent-soft)}
+.structure-stage-toggle:focus-visible,.structure-locate:focus-visible{outline-offset:-2px}
+.structure-stage-name{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 7px;line-height:1.28;overflow-wrap:anywhere}
+.structure-stage-name strong{font-size:.925rem}
+.structure-stage-order,.structure-stage-kind,.structure-stage-purpose,.structure-stage-status{font-size:.78rem;color:var(--muted)}
+.structure-stage-order{color:var(--accent-dark);font-variant-numeric:tabular-nums}
+.structure-stage-purpose{display:block;margin-top:4px;overflow-wrap:anywhere}
+.structure-stage-status{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:4px;max-width:8rem;text-align:right}
+.structure-stage-status svg{width:14px;height:14px}
+.structure-stage-toggle[aria-expanded="true"] .structure-stage-status svg{transform:rotate(180deg)}
+.structure-stage-details{padding:10px 12px 12px;border-top:1px solid var(--line);font-size:.875rem;overflow-wrap:anywhere}
+.structure-stage-details h3{margin:10px 0 5px;font-size:.875rem}
+.structure-stage-details p{margin:0 0 6px}
+.structure-questions{margin:0;padding-left:18px;color:var(--muted)}
+.structure-preserved{margin:10px 0;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+.structure-preserved summary{cursor:pointer;font-size:.875rem;font-weight:700}
+.structure-preserved[open] summary{margin-bottom:6px}
+.structure-locate{display:flex;align-items:center;justify-content:space-between;gap:5px 10px;flex-wrap:wrap;text-align:left;width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 9px;background:var(--path-bg);font-size:.875rem;overflow-wrap:anywhere}
+.structure-locate:hover{border-color:var(--card-hover-line);background:var(--card-hover)}
+.structure-locate small{display:block;color:var(--muted);font-size:.78rem}
+.structure-locate span+span{color:var(--accent-dark);font-size:.78rem;font-weight:650}
+.model-options{display:grid;gap:6px;margin:0;padding:8px 10px;background:var(--surface-subtle);border:1px solid var(--line);border-radius:8px;font-size:.8rem}
+.model-options dt{font-weight:700}
+.model-options dd{margin:0;color:var(--muted)}
+.narrative-association-actions{display:flex;flex-wrap:wrap;gap:6px}
+.narrative-association-actions .btn{white-space:normal}
+.node.has-narrative-stage{gap:3px;padding-block:6px}
+.node.has-narrative-stage .tag{padding-block:2px}
+.node.has-narrative-stage .node-title{font-size:min(1rem,17px);line-height:1.1;min-height:0}
+.node-stage{flex:none;display:block;max-width:100%;color:var(--accent-dark);font-size:.72rem;line-height:1.1;font-weight:650}
+.node-stage.preserved{color:var(--muted)}
+.android .structure-stage-toggle,.android .structure-locate,.android .structure-header .btn,
+.android .structure-preserved summary,.android .narrative-association-actions .btn,
+.android #nodeNarrativeStage,.android select[name="narrativeModel"]{min-height:44px}
+.android .structure-preserved summary{align-content:center}
+@media(max-width:940px){.workspace.structure-mode{min-height:0}.structure-view{overflow:visible}}
+@media(max-width:600px){
+  .tab{min-height:44px}
+  .graph-actions .undo-control{display:inline-grid}
+  .structure-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .structure-stage-status{max-width:6rem}
+}
+.workspace.characters-mode{grid-template-columns:minmax(0,1fr);min-height:0}
+.characters-mode .workspace-actions,.characters-mode .map-tool{display:none}
+.workspace.characters-mode .graph-actions{display:flex}
+.characters-mode .graph-actions .undo-control{display:inline-grid}
+.characters-mode .graph-shell{min-height:0}
+.character-view{flex:1;min-height:0;overflow:auto;padding:clamp(12px,2.5vw,22px);background:var(--surface-subtle)}
+.character-browser{display:grid;grid-template-columns:minmax(13rem,1fr) minmax(0,2fr);gap:14px;align-items:start}
+.character-catalog,.character-profile{min-width:0;display:grid;gap:12px}
+.character-catalog{position:sticky;top:0}
+.character-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.character-search{grid-column:1/-1}
+.character-list,.character-items,.character-events{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.character-list{max-height:50dvh;overflow:auto}
+.character-item,.character-section,.character-event{min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow-wrap:anywhere}
+.character-item{display:flex;align-items:center;gap:8px;padding:6px 8px;width:100%;text-align:left}
+.character-item:hover,.character-item[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--sidebar-active-line)}
+.character-item small,.character-heading small,.character-event small{display:block;color:var(--muted);font-size:.8rem}
+.character-portrait{position:relative;display:inline-grid;place-items:center;flex:none;width:36px;height:36px;border-radius:8px;overflow:hidden;background:var(--accent-soft);color:var(--accent-dark);font-weight:750}
+.character-portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.character-heading .character-portrait{width:72px;height:72px;font-size:1.4rem}
+.character-heading,.character-section-header{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0}
+.character-heading h2,.character-section h3,.character-section h4{margin:0}
+.character-heading h2{font-size:1.2rem}
+.character-section h3,.character-section h4{font-size:.95rem}
+.character-section{padding:12px;display:grid;gap:9px}
+.character-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.character-section-header{justify-content:space-between}
+.character-small{font-size:.84rem}
+.character-data{margin:0;display:grid;gap:6px}
+.character-data dt{color:var(--muted);font-size:.8rem}
+.character-data dd{margin:0;white-space:pre-wrap}
+.character-more summary{cursor:pointer;font-weight:650}
+.character-more[open] summary{margin-bottom:8px}
+.character-event{padding:8px 9px}
+.character-event p{margin:4px 0;white-space:pre-wrap}
+.character-arc-filter{display:flex;gap:7px;flex-wrap:wrap;align-items:end}
+.character-arc-filter .field{flex:1;min-width:min(100%,10rem)}
+.character-roles{border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin:0}
+.character-roles label,.character-check{display:flex;align-items:center;gap:7px;min-height:28px}
+.character-roles input,.character-check input{width:auto;margin:0;accent-color:var(--accent)}
+.participant-list{display:grid;gap:6px}
+.participant-list .character-item{border:0;background:transparent;padding:5px}
+.participant-list .character-portrait{width:29px;height:29px;font-size:.75rem}
+.participant-row{display:flex;gap:4px;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--path-bg)}
+.participant-row>.icon-btn{flex:none;margin-right:3px}
+.android .character-view :is(.btn,.field select,.field input,.character-item,.structure-locate,summary),
+.android .character-check,.android .character-roles label,.android .participant-row button{min-height:44px}
+@media(max-width:940px){
+  .character-view{overflow:visible}
+  .character-browser{grid-template-columns:minmax(0,1fr)}
+  .character-catalog{position:static}
+  .character-list{max-height:none}
+  .character-view.has-profile .character-catalog{display:none}
+}
+@media(min-width:601px) and (max-width:940px){
+  .topbar{height:auto;min-height:74px;padding-block:6px}
+  .top-actions{flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end}
+}
+@media(max-width:600px){
+  .graph-bar .tabs{flex-wrap:wrap}
+  .graph-bar .tab{white-space:nowrap}
+}
 </style>
 </head>
 <body>
@@ -337,35 +460,37 @@ dialog::backdrop{background:var(--backdrop)}
         <div><div class="eyebrow" id="chapterLabel"></div><div class="heading-title"><h1 id="chapterTitle" tabindex="-1"></h1><button class="icon-btn small" id="renameChapter" title="Edit chapter" aria-label="Edit chapter" data-i18n-label="editChapter" data-i18n-title="editChapter" data-icon="edit"></button></div><p id="stats"></p></div>
         <div class="heading-actions"><button class="btn primary" id="addNode"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
       </section>
-      <section class="empty-library chapter-empty" id="emptyChapters" hidden>
-        <strong data-i18n="noChapters">This project has no chapters yet</strong>
-        <p data-i18n="noChaptersHint">Create a chapter to start building your timeline.</p>
-        <div class="empty-library-actions">
-          <button type="button" class="btn primary" id="newEmptyChapter"><span data-icon="plus"></span> <span data-i18n="newChapter">New chapter</span></button>
-          <button type="button" class="btn" id="undoEmptyChapter"><span data-icon="undo"></span> <span data-i18n="undo">Undo</span></button>
-          <button type="button" class="btn" id="redoEmptyChapter"><span data-icon="redo"></span> <span data-i18n="redo">Redo</span></button>
-        </div>
-      </section>
       <section class="workspace" id="editorWorkspace" aria-label="Story map" data-i18n-label="storyMap">
         <div class="graph-shell">
           <div class="graph-bar">
-            <div class="tabs" aria-label="View" data-i18n-label="view">
-              <button class="tab" id="currentTab"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
-              <button class="tab" id="overviewTab"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
+            <div class="tabs" role="group" aria-label="View" data-i18n-label="view">
+              <button type="button" class="tab" id="currentTab" aria-controls="graph"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
+              <button type="button" class="tab" id="overviewTab" aria-controls="graph"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
+              <button type="button" class="tab" id="structureTab" aria-controls="structureView"><span data-icon="panel"></span> <span data-i18n="structure">Structure</span></button>
+              <button type="button" class="tab" id="charactersTab" aria-controls="charactersView"><span data-icon="people"></span> <span data-i18n="characters">Characters</span></button>
             </div>
-            <div class="graph-actions" aria-label="Map tools" data-i18n-label="mapTools">
+            <div class="graph-actions" role="group" id="graphActions" aria-label="Map tools" data-i18n-label="mapTools">
               <button class="icon-btn undo-control" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo" data-i18n-label="undo" data-i18n-title="undo" data-shortcut="Ctrl+Z" data-icon="undo"></button>
               <button class="icon-btn undo-control" id="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" data-i18n-label="redo" data-i18n-title="redo" data-shortcut="Ctrl+Shift+Z" data-icon="redo"></button>
-              <span class="split"></span>
-              <button class="icon-btn" id="connect" title="Connect story beats (C)" aria-label="Connect story beats" data-i18n-label="connectNodes" data-i18n-title="connectNodes" data-shortcut="C" data-icon="link"></button>
-              <button class="icon-btn" id="layout" title="Auto-arrange" aria-label="Auto-arrange" data-i18n-label="autoLayout" data-i18n-title="autoLayout" data-icon="layout"></button>
-              <button type="button" class="icon-btn" id="addNodeFullscreen" title="Add story beat" aria-label="Add story beat" data-i18n-label="addNode" data-i18n-title="addNode" data-icon="plus" hidden></button>
+              <span class="split map-tool"></span>
+              <button class="icon-btn map-tool" id="connect" title="Connect story beats (C)" aria-label="Connect story beats" data-i18n-label="connectNodes" data-i18n-title="connectNodes" data-shortcut="C" data-icon="link"></button>
+              <button class="icon-btn map-tool" id="layout" title="Auto-arrange" aria-label="Auto-arrange" data-i18n-label="autoLayout" data-i18n-title="autoLayout" data-icon="layout"></button>
+              <button type="button" class="icon-btn map-tool" id="addNodeFullscreen" title="Add story beat" aria-label="Add story beat" data-i18n-label="addNode" data-i18n-title="addNode" data-icon="plus" hidden></button>
             </div>
             <div class="workspace-actions">
               <button type="button" class="icon-btn" id="toggleDetails" title="Hide details" aria-label="Hide details" aria-controls="detailPanel" aria-expanded="true" data-icon="sidePanel" hidden></button>
               <button type="button" class="icon-btn" id="toggleFullscreen" title="Full screen diagram" aria-label="Full screen diagram" data-icon="expand"></button>
             </div>
           </div>
+          <section class="empty-library chapter-empty" id="emptyChapters" hidden>
+            <strong data-i18n="noChapters">This project has no chapters yet</strong>
+            <p data-i18n="noChaptersHint">Create a chapter to start building your timeline.</p>
+            <div class="empty-library-actions">
+              <button type="button" class="btn primary" id="newEmptyChapter"><span data-icon="plus"></span> <span data-i18n="newChapter">New chapter</span></button>
+              <button type="button" class="btn" id="undoEmptyChapter"><span data-icon="undo"></span> <span data-i18n="undo">Undo</span></button>
+              <button type="button" class="btn" id="redoEmptyChapter"><span data-icon="redo"></span> <span data-i18n="redo">Redo</span></button>
+            </div>
+          </section>
           <div class="graph" id="graph" tabindex="0" aria-label="Story beat diagram" data-i18n-label="nodeDiagram">
             <div class="world" id="world"><svg class="wires" id="wires" aria-hidden="true"></svg><div id="cards"></div></div>
             <div class="empty-canvas" id="emptyCanvas" hidden><strong data-i18n="firstNode">Start with a story beat</strong><p data-i18n="firstNodeHint">Add a scene or choice, then connect the paths that follow.</p><button class="btn primary" id="emptyAdd"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
@@ -380,6 +505,40 @@ dialog::backdrop{background:var(--backdrop)}
             <svg class="minimap" id="minimap" viewBox="0 0 128 76" preserveAspectRatio="none" aria-hidden="true"></svg>
           </div>
           <div class="graph-footer" id="legend"></div>
+          <section class="structure-view" id="structureView" aria-labelledby="structureModelName" hidden>
+            <header class="structure-header">
+              <div><h2 id="structureModelName"></h2><p id="structureDescription"></p></div>
+              <button type="button" class="btn" id="changeNarrativeModel"><span data-icon="edit"></span> <span data-i18n="changeNarrativeModel">Change model</span></button>
+            </header>
+            <p class="hint" id="structureModelUnavailable" data-i18n="modelUnavailable" hidden></p>
+            <dl class="structure-summary" id="structureSummary"></dl>
+            <p class="hint" id="structureGuide"></p>
+            <details class="structure-preserved" id="structurePreserved" hidden>
+              <summary id="structurePreservedTitle"></summary>
+              <p class="hint" data-i18n="preservedCountHint"></p>
+              <ul class="structure-situations" id="structurePreservedList"></ul>
+            </details>
+            <ul class="structure-stages" id="structureStages"></ul>
+          </section>
+          <section class="character-view" id="charactersView" aria-label="Characters" data-i18n-label="characters" hidden>
+            <p class="hint" id="characterDataIssue" role="status" hidden></p>
+            <div class="character-browser" id="characterBrowser">
+              <div class="character-catalog">
+                <div class="character-actions">
+                  <button type="button" class="btn primary" id="newCharacter"><span data-icon="plus"></span> <span data-i18n="newCharacter">New character</span></button>
+                  <button type="button" class="btn" id="manageCharacterRoles"><span data-i18n="roles">Roles</span></button>
+                </div>
+                <div class="character-filters">
+                  <label class="field character-search"><span data-i18n="characterSearch">Search characters</span><input type="search" id="characterSearch"></label>
+                  <label class="field"><span data-i18n="roles">Roles</span><select id="characterRoleFilter"></select></label>
+                  <label class="field"><span data-i18n="group">Group</span><select id="characterGroupFilter"></select></label>
+                </div>
+                <ul class="character-list" id="characterList"></ul>
+                <p class="hint" id="characterListHint" role="status" hidden></p>
+              </div>
+              <article class="character-profile" id="characterProfile"></article>
+            </div>
+          </section>
         </div>
         <aside class="inspector" id="detailPanel" aria-label="Details" data-i18n-label="details">
           <div class="inspector-header"><strong id="inspectorTitle"></strong><button class="icon-btn small" id="clearSelection" title="Clear selection" aria-label="Clear selection" data-i18n-label="clearSelection" data-i18n-title="clearSelection" data-icon="close"></button></div>
@@ -391,6 +550,7 @@ dialog::backdrop{background:var(--backdrop)}
   </main>
 </div>
 <input type="file" id="importFile" accept=".json,application/json" hidden>
+<input type="file" id="portraitFile" accept="image/jpeg,image/png,image/webp" hidden>
 <dialog id="dialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle"></h2><button class="icon-btn" id="dialogClose" aria-label="Close" data-i18n-label="close" data-icon="close"></button></div><form class="dialog-form" id="dialogForm"></form></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
 <script>
@@ -436,6 +596,7 @@ const icons = {
   merge: '<circle cx="5" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 5c5 0 3 7 10 7M7 19c5 0 3-7 10-7"/>',
   ending: '<path d="M5 21V4m0 1c5-4 9 4 14 0v10c-5 4-9-4-14 0"/>',
   panel: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M10 4v16m3-11h4m-4 4h3"/>',
+  people: '<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2m1-15a3 3 0 0 1 0 6m2 3a4 4 0 0 1 3 4v2"/>',
   copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
   trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13m-8 4v5m4-5v5"/>'
 };
@@ -443,7 +604,9 @@ const icon = name => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
 document.querySelectorAll('[data-icon]').forEach(element => { element.innerHTML = icon(element.dataset.icon); });
 const kinds = ['scene','decision','outcome','merge','ending'];
 const $ = id => document.getElementById(id);
-const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc = value => String(value).replace(/[&<>"'\r]/g, c => ({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','\r':'&#13;'
+}[c]));
 const uid = () => globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
 const W = 170, H = 96;
 const storageKey = 'enredo.story-planner.v1';
@@ -536,7 +699,9 @@ const messages = {
   view: ['View','Visualização'],
   timeline: ['Timeline','Timeline'],
   wholeStory: ['Whole story','História inteira'],
+  structure: ['Structure','Estrutura'],
   mapTools: ['Map tools','Ferramentas do mapa'],
+  historyTools: ['Edit history','Histórico de edição'],
   connectNodes: ['Connect story beats','Conectar situações'],
   autoLayout: ['Auto-arrange','Organizar automaticamente'],
   nodeDiagram: ['Story beat diagram','Diagrama de situações'],
@@ -574,6 +739,41 @@ const messages = {
   editNamedConnection: ['Edit connection to {name}','Editar conexão com {name}'],
   title: ['Title','Título'],
   nodeType: ['Story beat type','Tipo de situação'],
+  narrativeModel: ['Narrative Model','Modelo Narrativo'],
+  narrativeStage: ['Narrative Stage','Etapa Narrativa'],
+  changeNarrativeModel: ['Change model','Alterar modelo'],
+  chooseNarrativeModel: ['Choose a model','Selecione um modelo'],
+  noNarrativeStage: ['No stage','Sem etapa'],
+  chooseNarrativeStage: ['Choose a stage','Selecione uma etapa'],
+  noPredefinedStages: ['Free Structure uses chapters and story beats without predefined stages.','Na Estrutura Livre, use capítulos e situações para organizar a história.'],
+  structureGuide: ['Use the order as a reference. Each path can repeat or skip stages.','Use a ordem como referência. Cada caminho pode repetir ou omitir etapas.'],
+  modelUnavailable: ['The saved model is unavailable in this version. The editor shows Free Structure and keeps your associations.','O modelo salvo está indisponível nesta versão. O editor exibe a Estrutura Livre e mantém suas associações.'],
+  noStagesForAssociation: ['Choose a model with stages in Structure to add an association.','Na aba Estrutura, escolha um modelo com etapas para fazer uma associação.'],
+  totalStages: ['Total stages','Total de etapas'],
+  usedStages: ['Stages used','Etapas utilizadas'],
+  unusedStages: ['Stages unused','Etapas não utilizadas'],
+  associatedSituations: ['Beats with a stage','Situações associadas'],
+  unassociatedSituations: ['Beats without a stage in this model','Situações sem etapa neste modelo'],
+  stageUnused: ['Unused','Não utilizada'],
+  stageAct: ['Act','Ato'],
+  stageSequence: ['Sequence','Sequência'],
+  stageMilestone: ['Milestone','Marco'],
+  guidingQuestions: ['Guiding questions','Perguntas orientadoras'],
+  noStageSituations: ['There are no beats associated with this stage yet.','Esta etapa ainda está sem situações associadas.'],
+  locateOnMap: ['Locate on map','Localizar no mapa'],
+  locateNamedBeat: ['Locate {title} in {chapter} on the map','Localizar {title} em {chapter} no mapa'],
+  keepAssociations: ['Existing associations stay saved when you switch models.','O Enredo guarda as associações existentes ao trocar de modelo.'],
+  preservedAssociations: ['Preserved associations ({count})','Associações preservadas ({count})'],
+  preservedCountHint: ['These beats have no usable stage in the active model. Their associations stay saved.','Estas situações estão sem etapa disponível no modelo ativo. As associações continuam salvas.'],
+  preservedStage: ['Preserved · {stage}','Preservada · {stage}'],
+  preservedStageDetails: ['Preserved association · {model} · {stage}','Associação preservada · {model} · {stage}'],
+  unknownStage: ['Unavailable stage','Etapa indisponível'],
+  unknownModel: ['Unavailable model','Modelo indisponível'],
+  convertAssociation: ['Convert association','Converter associação'],
+  convertAssociationHint: ['Choose the stage that will replace the saved association.','Escolha a etapa que vai substituir a associação salva.'],
+  removeAssociation: ['Remove association','Remover associação'],
+  removeAssociationTitle: ['Remove the narrative stage?','Remover a etapa narrativa?'],
+  removeAssociationHint: ['The story beat, its notes and its connections will be kept.','A situação, as notas e as conexões serão mantidas.'],
   notes: ['Notes','Notas'],
   notesHint: ['What happens at this point in the story?','O que acontece nesta situação?'],
   outgoingPaths: ['Outgoing paths','Caminhos de saída'],
@@ -594,6 +794,7 @@ const messages = {
   helpChapter: ['Create chapters in the sidebar and add story beats to each one.','Crie capítulos na barra lateral e adicione as situações de cada um.'],
   helpPath: ['Select a story beat to add notes and <strong>Add path</strong> to connect it to a new or existing beat, even in another chapter.','Selecione uma situação para escrever notas e use <strong>Adicionar caminho</strong> para ligá-la a uma situação nova ou existente, inclusive em outro capítulo.'],
   helpStory: ['Use <strong>Whole story</strong> to see connections across chapters. Drag the cards in <strong>Timeline</strong> to rearrange them.','Use <strong>História inteira</strong> para ver as conexões entre capítulos. Arraste os cartões na aba <strong>Timeline</strong> para reorganizá-los.'],
+  helpStructure: ['In <strong>Structure</strong>, choose a narrative model and find the beats for each stage. Associate a beat in its details panel.','Em <strong>Estrutura</strong>, escolha um modelo narrativo e localize as situações de cada etapa. Use o painel de detalhes para associar uma situação.'],
   helpZoom: ['Drag the background to pan, use <strong>Ctrl + scroll</strong> to zoom, and press <strong>F</strong> to fit the map to the view.','Arraste o fundo para navegar, use <strong>Ctrl + rolagem</strong> para mudar o zoom e <strong>F</strong> para enquadrar.'],
   touchHelpZoom: ['Drag the background with one finger to move the map. Pinch with two fingers to zoom, or tap the fit button to see the entire map.','Arraste o fundo com um dedo para mover o mapa. Faça o gesto de pinça com dois dedos para mudar o zoom ou toque no botão de enquadrar para ver o mapa inteiro.'],
   helpFiles: ['Use <strong>Files</strong> to export a JSON backup or move a story to another browser.','Em <strong>Arquivos</strong>, exporte um JSON para guardar uma cópia ou levar a história para outro navegador.'],
@@ -635,7 +836,150 @@ const messages = {
   importFailed: ['Could not open the selected file.','Não foi possível abrir o arquivo escolhido.'],
   importSuffix: [' (imported)',' (importado)'],
   imported: ['Project imported.','Projeto importado.'],
-  invalidImport: ['The selected file is not a valid Enredo project.','O arquivo escolhido não é um projeto válido do Enredo.']
+  invalidImport: ['The selected file is not a valid Enredo project.','O arquivo escolhido não é um projeto válido do Enredo.'],
+  characters: ['Characters','Personagens'],
+  newCharacter: ['New character','Novo personagem'],
+  editCharacter: ['Edit character','Editar personagem'],
+  characterSearch: ['Search by name or alias','Buscar por nome ou codinome'],
+  characterEmpty: ['Create the first character in this project.','Crie o primeiro personagem deste projeto.'],
+  characterNoMatches: ['No characters match these filters.','Nenhum personagem corresponde aos filtros.'],
+  characterSelect: ['Select a character to open their profile.','Selecione um personagem para abrir a ficha.'],
+  characterBackList: ['Back to characters','Voltar para personagens'],
+  characterBackMap: ['Back to the beat','Voltar à situação'],
+  characterDataIssue: ['Check character data at {field}. You can export a backup.','Revise os dados de personagens no campo {field}. Você pode exportar uma cópia.'],
+  invalidCharacterImport: ['Could not import character data at {field}.','Não foi possível importar os dados de personagens no campo {field}.'],
+  importedUnsaved: ['Project opened. Export a backup to keep it.','Projeto aberto. Exporte uma cópia para guardá-lo.'],
+  nickname: ['Alias','Apelido ou codinome'],
+  description: ['Description','Descrição'],
+  group: ['Group or faction','Grupo ou facção'],
+  personality: ['Personality','Personalidade'],
+  dominantTraits: ['Dominant traits','Traços dominantes'],
+  strengths: ['Strengths','Qualidades'],
+  flaws: ['Flaws','Defeitos'],
+  beliefs: ['Values and beliefs','Valores e crenças'],
+  belief: ['Conviction','Convicção'],
+  fears: ['Fears','Medos'],
+  contradictions: ['Contradictions','Contradições'],
+  vulnerabilities: ['Vulnerabilities','Vulnerabilidades'],
+  motivation: ['Motivation','Motivação'],
+  goal: ['External goal','Objetivo externo'],
+  need: ['Inner need','Necessidade interna'],
+  reason: ['Main motivation','Motivação principal'],
+  obstacles: ['Obstacles','Obstáculos'],
+  internalConflict: ['Internal conflicts','Conflitos internos'],
+  externalConflict: ['External conflicts','Conflitos externos'],
+  conflict: ['Conflict','Conflito'],
+  cost: ['What they are willing to lose','O que o personagem aceita perder'],
+  successConsequence: ['Expected effect of success','Consequência prevista do sucesso'],
+  failureConsequence: ['Expected effect of failure','Consequência prevista do fracasso'],
+  roles: ['Roles','Papéis'],
+  primaryRole: ['Primary role','Papel principal'],
+  noPrimaryRole: ['No primary role','Sem papel principal'],
+  allRoles: ['All roles','Todos os papéis'],
+  allGroups: ['All groups','Todos os grupos'],
+  customRoles: ['Custom roles','Papéis personalizados'],
+  noCustomRoles: ['Create a role to use it in character profiles.','Crie um papel para usá-lo nas fichas.'],
+  addRole: ['Add role','Adicionar papel'],
+  editRole: ['Edit role','Editar papel'],
+  deleteRole: ['Delete this role?','Excluir este papel?'],
+  deleteRoleHint: ['The role will be removed from {count} profiles.','O papel será retirado de {count} fichas.'],
+  roleNameExists: ['A role already uses this name.','Já existe um papel com esse nome.'],
+  'role-protagonist': ['Protagonist','Protagonista'],
+  'role-antagonist': ['Antagonist','Antagonista'],
+  'role-supporting': ['Supporting character','Coadjuvante'],
+  'role-mentor': ['Mentor','Mentor'],
+  'role-ally': ['Ally','Aliado'],
+  'role-rival': ['Rival','Rival'],
+  'role-minor': ['Minor character','Secundário'],
+  addPortrait: ['Add portrait','Adicionar retrato'],
+  changePortrait: ['Change portrait','Trocar retrato'],
+  removePortrait: ['Remove portrait','Remover retrato'],
+  invalidPortrait: ['Choose a readable JPEG, PNG or WebP image up to 12 MB.','Escolha uma imagem JPEG, PNG ou WebP legível de até 12 MB.'],
+  deleteCharacterTitle: ['Delete {name}?','Excluir {name}?'],
+  deleteCharacterHint: ['Removes this character from {beats} beats, {arcs} arcs and {relations} relationships.','Remove o personagem de {beats} situações, {arcs} arcos e {relations} relacionamentos.'],
+  participants: ['Participants','Participantes'],
+  addParticipant: ['Add participant','Adicionar participante'],
+  editParticipant: ['Edit participant','Editar participante'],
+  noParticipants: ['This beat has no participants.','Esta situação está sem participantes.'],
+  focalCharacter: ['Focal character','Personagem focal'],
+  dramaticFunction: ['Dramatic function','Função dramática'],
+  chooseCharacter: ['Choose a character','Selecione um personagem'],
+  character: ['Character','Personagem'],
+  characterBeats: ['Associated beats','Situações associadas'],
+  noCharacterBeats: ['This character has no associated beats.','Este personagem está sem situações associadas.'],
+  characterArcs: ['Arcs','Arcos'],
+  newArc: ['New arc','Novo arco'],
+  editArc: ['Edit arc','Editar arco'],
+  noArcs: ['Create an arc to record choices and consequences.','Crie um arco para registrar escolhas e consequências.'],
+  initialState: ['Initial state','Estado inicial'],
+  initialSummary: ['Where the character starts','Como o personagem começa'],
+  eventSummary: ['What happened?','O que aconteceu?'],
+  newArcEvent: ['Add event','Adicionar acontecimento'],
+  editArcEvent: ['Edit event','Editar acontecimento'],
+  noArcEvents: ['This arc has no events in this view.','Este arco está sem acontecimentos nesta visualização.'],
+  eventPhase: ['Phase','Fase'],
+  development: ['Development','Desenvolvimento'],
+  arcEnding: ['Outcome','Desfecho'],
+  arcOutcomeType: ['Arc outcome','Resultado do arco'],
+  arcPositive: ['Positive change','Transformação positiva'],
+  arcNegative: ['Negative change','Transformação negativa'],
+  arcSteady: ['Conviction held','Manutenção da convicção'],
+  arcChanges: ['Changes and consequences','Mudanças e consequências'],
+  arcFate: ['Fate','Destino do personagem'],
+  arcAlive: ['Alive','Vivo'],
+  arcDead: ['Dead','Morto'],
+  objectiveStatus: ['Goal status','Estado do objetivo'],
+  goalAchieved: ['Achieved','Alcançado'],
+  goalFailed: ['Failed','Fracassou'],
+  goalAbandoned: ['Abandoned','Abandonado'],
+  leaveGroup: ['Leaves the group','Deixa o grupo'],
+  advancedDetails: ['More details','Mais detalhes'],
+  noRecord: ['Unspecified','Sem registro'],
+  noLinkedBeat: ['No linked beat','Sem situação vinculada'],
+  linkedBeat: ['Linked beat','Situação vinculada'],
+  incomingConnection: ['Incoming connection','Conexão de entrada'],
+  noConnection: ['No connection','Sem conexão'],
+  arcPath: ['Story path','Caminho'],
+  allArcPaths: ['All paths','Todos os caminhos'],
+  commonArcPath: ['Common to all paths','Comum a todos os caminhos'],
+  newArcPath: ['New path','Novo caminho'],
+  editArcPath: ['Edit path','Editar caminho'],
+  pathNameExists: ['A path already uses this name.','Já existe um caminho com esse nome.'],
+  deleteArcPath: ['Delete this path?','Excluir este caminho?'],
+  arcPathUsed: ['Move its events to another path before deleting this one.','Mova os acontecimentos para outro caminho antes de excluir este.'],
+  arcMoveUp: ['Move event up','Subir acontecimento'],
+  arcMoveDown: ['Move event down','Descer acontecimento'],
+  deleteArc: ['Delete this arc?','Excluir este arco?'],
+  deleteArcHint: ['The arc and its {count} events will be removed.','O arco e seus {count} acontecimentos serão removidos.'],
+  relationships: ['Relationships','Relacionamentos'],
+  newRelationship: ['Add relationship','Adicionar relacionamento'],
+  editRelationship: ['Edit relationship','Editar relacionamento'],
+  relationshipType: ['Relationship type','Tipo de relacionamento'],
+  relationshipLabel: ['Custom relationship name','Nome do relacionamento personalizado'],
+  relationshipDirection: ['Direction','Direção'],
+  relationshipFromCharacter: ['From this character','Deste personagem'],
+  relationshipToCharacter: ['To this character','Para este personagem'],
+  relationshipFirst: ['Add another character to create a relationship.','Cadastre outro personagem para criar um relacionamento.'],
+  relationshipEmpty: ['This character has no relationships yet.','Este personagem ainda está sem relacionamentos.'],
+  relationshipChanges: ['Relationship changes','Mudanças nos relacionamentos'],
+  relationshipNone: ['Does not exist yet','Ainda não existe'],
+  relationshipActive: ['Active','Ativo'],
+  relationshipStrained: ['Strained','Em tensão'],
+  relationshipBroken: ['Broken','Rompido'],
+  relationshipDelete: ['Delete this relationship?','Excluir este relacionamento?'],
+  relationshipDeleteHint: ['Its changes in the arcs will also be removed.','As mudanças deste relacionamento nos arcos também serão removidas.'],
+  'relation-family': ['Family','Família'],
+  'relation-friendship': ['Friendship','Amizade'],
+  'relation-alliance': ['Alliance','Aliança'],
+  'relation-rivalry': ['Rivalry','Rivalidade'],
+  'relation-enmity': ['Enmity','Inimizade'],
+  'relation-hierarchy': ['Hierarchy','Hierarquia'],
+  'relation-romance': ['Romance','Romance'],
+  'relation-loyalty': ['Loyalty','Lealdade'],
+  'relation-betrayal': ['Betrayal','Traição'],
+  'relation-trust': ['Trust','Confiança'],
+  'relation-custom': ['Custom','Personalizado'],
+  helpCharacters: ['Open Characters to create profiles and arcs. Select a beat and add its participants in Details.','Abra Personagens para criar fichas e arcos. Selecione uma situação e adicione participantes em Detalhes.']
 };
 
 let language = readLanguage();
@@ -658,6 +1002,373 @@ function t(key, values = {}) {
   return messages[key][language === 'pt' ? 1 : 0].replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ''));
 }
 const tx = (key, values) => esc(t(key, values));
+
+// BEGIN narrative-models
+const EnredoNarrative = (() => {
+  const defaultModelId = 'free';
+  const bilingual = ([en, pt]) => ({ en, pt });
+
+  function stage(id, kind, name, summary, purpose, questions) {
+    return {
+      id, kind, parentId: null, name: bilingual(name), summary: bilingual(summary),
+      purpose: bilingual(purpose), questions: questions.map(bilingual)
+    };
+  }
+
+  function act(parent, stages) {
+    return [parent, ...stages.map(child => ({ ...child, parentId: parent.id }))];
+  }
+
+  function model(id, name, summary, stages = []) {
+    return {
+      id, name: bilingual(name), summary: bilingual(summary),
+      stages: stages.map((entry, index) => {
+        const order = index + 1;
+        return id === 'beats-15' ? { ...entry, order, suggestedPosition: order } : { ...entry, order };
+      })
+    };
+  }
+
+  const models = [
+    model('free', ['Free Structure', 'Estrutura Livre'],
+      ['Plan with chapters and story beats at your own pace.', 'Planeje com capítulos e situações no seu ritmo.']),
+    model('three-acts', ['Three-Act Structure', 'Estrutura em Três Atos'],
+      ['Group setup, confrontation and resolution into acts, sequences and milestones.',
+       'Organize apresentação, confrontação e resolução em atos, sequências e marcos.'], [
+      ...act(stage('act-1', 'act', ['Act I — Presentation', 'Ato I — Apresentação'],
+        ['The world, characters and initial conflict take shape.', 'O mundo, os personagens e o conflito inicial ganham forma.'],
+        ['Give the player enough context to understand the first major choice.', 'Dê ao jogador o contexto da primeira grande escolha.'], [
+          ['What does the player need to understand before the conflict grows?', 'O que o jogador precisa entender antes de o conflito crescer?']
+        ]), [
+        stage('act-1-universe', 'sequence', ['Introducing the World', 'Apresentação do universo'],
+          ['Show places, rules and habits through early situations.', 'Mostre lugares, regras e hábitos nas primeiras situações.'],
+          ['Establish what the player can expect from this world.', 'Mostre o que o jogador pode esperar deste mundo.'], [
+            ['What can the player learn by exploring?', 'O que o jogador pode descobrir ao explorar?']
+          ]),
+        stage('act-1-characters', 'sequence', ['Introducing the Characters', 'Introdução dos personagens'],
+          ['Introduce the people who shape the first choices.', 'Apresente quem influencia as primeiras escolhas.'],
+          ['Make goals and relationships clear through action.', 'Mostre objetivos e relações por meio de ações.'], [
+            ['Which action reveals what each person wants?', 'Qual ação revela o que cada pessoa quer?']
+          ]),
+        stage('act-1-dramatic-situation', 'sequence', ['Establishing the Dramatic Situation', 'Estabelecimento da situação dramática'],
+          ['Frame a goal, an opposing force and what could be lost.', 'Mostre um objetivo, uma força contrária e o que se pode perder.'],
+          ['Give the decisions that follow a clear reason to matter.', 'Dê um motivo para as próximas decisões importarem.'], [
+            ['Who wants what, and what stands in the way?', 'Quem quer o quê e o que está no caminho?']
+          ]),
+        stage('act-1-initial-conflict', 'sequence', ['Developing the Initial Conflict', 'Desenvolvimento do conflito inicial'],
+          ['Show the first attempts to deal with the problem.', 'Mostre as primeiras tentativas de lidar com o problema.'],
+          ['Reveal the cost of acting or letting the tension grow.', 'Revele o custo de agir ou de deixar a tensão crescer.'], [
+            ['What changes after the first attempt?', 'O que muda depois da primeira tentativa?']
+          ]),
+        stage('act-1-turning-point', 'milestone', ['First Turning Point', 'Primeiro ponto de virada'],
+          ['An event or choice sends a path in a new direction.', 'Um evento ou uma escolha dá um novo rumo ao caminho.'],
+          ['Carry the initial conflict into a more demanding situation.', 'Leve o conflito inicial a uma situação mais exigente.'], [
+            ['What opens or closes because of this turn?', 'O que se abre ou se fecha com essa virada?']
+          ])
+      ]),
+      ...act(stage('act-2', 'act', ['Act II — Confrontation', 'Ato II — Confrontação'],
+        ['Opposition grows as the characters pursue their goals.', 'A oposição cresce enquanto os personagens buscam seus objetivos.'],
+        ['Let the results of earlier actions shape later choices.', 'Faça os resultados das ações anteriores pesarem nas próximas escolhas.'], [
+          ['Which earlier decision creates new pressure on this path?', 'Qual decisão anterior cria pressão neste caminho?']
+        ]), [
+        stage('act-2-obstacles', 'sequence', ['Progression of Obstacles', 'Progressão dos obstáculos'],
+          ['Put barriers between a character and a goal.', 'Coloque barreiras entre um personagem e seu objetivo.'],
+          ['Give each route a distinct way to respond to resistance.', 'Dê a cada rota uma forma própria de reagir à resistência.'], [
+            ['How can the player get past this obstacle?', 'Como o jogador pode superar este obstáculo?']
+          ]),
+        stage('act-2-complications', 'sequence', ['Escalating Complications', 'Complicações crescentes'],
+          ['Let the outcome of an attempt create another problem.', 'Faça o resultado de uma tentativa criar outro problema.'],
+          ['Increase pressure through effects of earlier actions.', 'Aumente a pressão com os efeitos de ações anteriores.'], [
+            ['Which success or mistake makes the next choice harder?', 'Qual acerto ou erro torna a próxima escolha mais difícil?']
+          ]),
+        stage('act-2-conflicts', 'sequence', ['Conflict Development', 'Desenvolvimento dos conflitos'],
+          ['Bring competing goals and commitments together.', 'Coloque objetivos e compromissos incompatíveis frente a frente.'],
+          ['Make the player weigh who benefits from each path.', 'Mostre quem ganha ou perde com cada caminho.'], [
+            ['Which goals can no longer be met together?', 'Quais objetivos deixaram de poder coexistir?']
+          ]),
+        stage('act-2-turning-point', 'milestone', ['Second Turning Point', 'Segundo ponto de virada'],
+          ['A choice, setback or discovery defines the final approach.', 'Uma escolha, perda ou descoberta define a direção final.'],
+          ['Turn the accumulated pressure into a clear direction for the ending.', 'Transforme a pressão acumulada em uma direção clara para o desfecho.'], [
+            ['What gives this path a chance to resolve the central conflict?', 'O que permite a este caminho resolver o conflito central?']
+          ])
+      ]),
+      ...act(stage('act-3', 'act', ['Act III — Resolution', 'Ato III — Resolução'],
+        ['The central conflict reaches its result on this path.', 'O conflito central chega ao seu resultado neste caminho.'],
+        ['Connect the ending to the choices and costs that preceded it.', 'Ligue o desfecho às escolhas e aos custos anteriores.'], [
+          ['What should the player understand about their choices by the end?', 'O que o jogador deve entender sobre suas escolhas no final?']
+        ]), [
+        stage('act-3-decisive-confrontation', 'sequence', ['Decisive Confrontation', 'Confrontação decisiva'],
+          ['Bring the forces in conflict together for the final attempt.', 'Reúna as forças em conflito para a tentativa final.'],
+          ['Put the route’s choices and commitments to use.', 'Ponha em prática as escolhas e os compromissos da rota.'], [
+            ['How do earlier choices affect this attempt?', 'Como as escolhas anteriores afetam esta tentativa?']
+          ]),
+        stage('act-3-climax', 'milestone', ['Climax', 'Clímax'],
+          ['An action or result settles what is most at stake.', 'Uma ação ou um resultado decide o que mais importa no conflito.'],
+          ['Answer the central dramatic question for this path.', 'Responda à questão central deste caminho.'], [
+            ['Which moment makes the outcome clear?', 'Qual momento torna o resultado claro?']
+          ]),
+        stage('act-3-consequences', 'sequence', ['Consequences', 'Consequências'],
+          ['Show the immediate effects of the decisive result.', 'Mostre os efeitos imediatos do resultado decisivo.'],
+          ['Give the choices visible effects on people or places.', 'Mostre como as escolhas afetam pessoas ou lugares.'], [
+            ['Who feels the result first, and how?', 'Quem sente o resultado primeiro e de que forma?']
+          ]),
+        stage('act-3-resolution', 'sequence', ['Resolution', 'Resolução'],
+          ['Show how life settles after this path ends.', 'Mostre como fica a vida após o fim deste caminho.'],
+          ['Clarify what changed and what remains open.', 'Deixe claro o que mudou e o que ficou em aberto.'], [
+            ['What is the new normal after this ending?', 'Qual é a nova rotina depois deste desfecho?']
+          ])
+        ])
+    ]),
+    model('journey-12', ['12-Stage Journey', 'Jornada em 12 Etapas'],
+      ['Trace how a character faces change, learns and carries its effects into the ending.',
+       'Acompanhe como um personagem enfrenta mudanças, aprende e leva os efeitos ao desfecho.'], [
+      stage('ordinary-world', 'stage', ['Ordinary World', 'Mundo Comum'],
+        ['Show the routine and relationships in place before the change.', 'Mostre a rotina e as relações antes da mudança.'],
+        ['Give the player a baseline for noticing what changes later.', 'Dê ao jogador uma referência para perceber o que muda depois.'], [
+          ['What does the character take for granted?', 'O que o personagem tem como certo?'],
+          ['Which tension already exists in this routine?', 'Qual tensão já existe nessa rotina?'],
+          ['What can the player do to learn how this world works?', 'O que o jogador pode fazer para entender como este mundo funciona?']
+        ]),
+      stage('call-to-adventure', 'stage', ['Call to Adventure', 'Chamado à Aventura'],
+        ['A problem or opportunity makes a response necessary.', 'Um problema ou uma oportunidade exige uma resposta.'],
+        ['Make the stakes and possible directions of the journey clear.', 'Mostre o que está em jogo e as direções possíveis da jornada.'], [
+          ['What interrupts the routine?', 'O que interrompe a rotina?'],
+          ['Who or what brings the news?', 'Quem ou o que traz a novidade?'],
+          ['What can happen if the player ignores it?', 'O que pode acontecer se o jogador ignorar o chamado?']
+        ]),
+      stage('refusal-of-call', 'stage', ['Refusal of the Call', 'Recusa do Chamado'],
+        ['Show hesitation, doubt or a reason to turn down the challenge.', 'Mostre a hesitação, a dúvida ou um motivo para recusar o desafio.'],
+        ['Reveal what the character risks by accepting.', 'Revele o que o personagem arrisca se aceitar.'], [
+          ['What makes staying seem safer?', 'O que faz ficar parecer mais seguro?'],
+          ['Does refusal open a different route?', 'A recusa abre outro caminho?'],
+          ['Which event could change the answer?', 'Qual evento poderia mudar a resposta?']
+        ]),
+      stage('meeting-with-mentor', 'stage', ['Meeting with the Mentor', 'Encontro com o Mentor'],
+        ['A person, clue or experience offers guidance.', 'Uma pessoa, pista ou experiência oferece orientação.'],
+        ['Prepare the character to face a choice with new knowledge or support.', 'Prepare o personagem para uma escolha com novo conhecimento ou apoio.'], [
+          ['What does the character learn here?', 'O que o personagem aprende aqui?'],
+          ['Can different routes offer different guidance?', 'Caminhos diferentes podem oferecer orientações diferentes?'],
+          ['What remains for the player to decide?', 'O que ainda cabe ao jogador decidir?']
+        ]),
+      stage('crossing-first-threshold', 'stage', ['Crossing the First Threshold', 'Travessia do Primeiro Limiar'],
+        ['A commitment takes the character into an unfamiliar situation.', 'Um compromisso leva o personagem a uma situação desconhecida.'],
+        ['Show the first effect of committing to the journey.', 'Mostre o primeiro efeito de assumir o compromisso.'], [
+          ['Which choice marks the crossing?', 'Qual escolha marca a travessia?'],
+          ['Which familiar option becomes harder to return to?', 'A qual opção conhecida fica mais difícil voltar?'],
+          ['How can the player recognize the new rules?', 'Como o jogador percebe as novas regras?']
+        ]),
+      stage('tests-allies-enemies', 'stage', ['Tests, Allies and Enemies', 'Testes, Aliados e Inimigos'],
+        ['Trials introduce the rules of the new situation and who may help or oppose the character.',
+         'As provas mostram as novas regras e quem pode ajudar ou fazer oposição.'],
+        ['Let the player learn which tools, people and choices matter on this route.', 'Mostre quais recursos, pessoas e escolhas pesam nesta rota.'], [
+          ['What does each test teach?', 'O que cada prova ensina?'],
+          ['Who becomes an ally because of a choice?', 'Quem vira aliado por causa de uma escolha?'],
+          ['Can the same person oppose the player on another route?', 'A mesma pessoa pode se opor ao jogador em outra rota?']
+        ]),
+      stage('approach-hidden-cave', 'stage', ['Approach to the Hidden Cave', 'Aproximação da Caverna Oculta'],
+        ['The character prepares to face a place, person or fear at the center of the conflict.',
+         'O personagem se prepara para enfrentar um lugar, uma pessoa ou um medo no centro do conflito.'],
+        ['Build anticipation and give earlier preparations a purpose.', 'Crie expectativa e dê uma função aos preparativos anteriores.'], [
+          ['What needs to be ready before the confrontation?', 'O que precisa estar pronto antes do confronto?'],
+          ['Which risk becomes clear during the approach?', 'Qual risco fica claro na aproximação?'],
+          ['Which preparations differ across routes?', 'Quais preparativos mudam entre as rotas?']
+        ]),
+      stage('ordeal', 'stage', ['Ordeal', 'Provação'],
+        ['The character faces a central fear, loss or threat to the goal.', 'O personagem enfrenta um medo, uma perda ou uma ameaça central ao objetivo.'],
+        ['Force a choice under pressure and make its cost visible.', 'Exija uma escolha sob pressão e mostre seu custo.'], [
+          ['What is at risk in this confrontation?', 'O que está em risco neste confronto?'],
+          ['Which earlier decision changes the result?', 'Qual decisão anterior muda o resultado?'],
+          ['What changes even if the character succeeds?', 'O que muda mesmo se o personagem tiver sucesso?']
+        ]),
+      stage('reward', 'stage', ['Reward', 'Recompensa'],
+        ['The ordeal yields a discovery, gain or partial victory.', 'A provação gera uma descoberta, um ganho ou uma vitória parcial.'],
+        ['Show what the character can do or understand after the ordeal.', 'Mostre o que o personagem pode fazer ou entender após a provação.'], [
+          ['What did the character earn or learn?', 'O que o personagem ganhou ou aprendeu?'],
+          ['Does each path lead to the same reward?', 'Cada caminho leva à mesma recompensa?'],
+          ['What cost remains after the gain?', 'Qual custo permanece depois do ganho?']
+        ]),
+      stage('road-back', 'stage', ['Road Back', 'Caminho de Volta'],
+        ['The character heads toward a new goal or a return as the ordeal’s effects follow.',
+         'O personagem segue para um novo objetivo ou para o retorno, sob os efeitos da provação.'],
+        ['Show how the gain changes the way to the ending.', 'Mostre como o ganho muda o caminho até o desfecho.'], [
+          ['What makes returning difficult now?', 'O que dificulta o retorno agora?'],
+          ['Which consequence follows the character?', 'Qual consequência acompanha o personagem?'],
+          ['Which route is open because of the reward?', 'Qual rota se abriu por causa da recompensa?']
+        ]),
+      stage('resurrection', 'stage', ['Resurrection', 'Ressurreição'],
+        ['A final test puts the character’s change into action.', 'Uma prova final coloca em prática a mudança do personagem.'],
+        ['Make the change, its limits and its cost visible in a decisive choice.', 'Mostre a mudança, seus limites e seu custo em uma escolha decisiva.'], [
+          ['How does the character act differently now?', 'Como o personagem age de outro modo agora?'],
+          ['What can the player lose at this point?', 'O que o jogador pode perder neste ponto?'],
+          ['How can one route show a change that another route avoids?', 'Como uma rota pode mostrar uma mudança ausente em outra?']
+        ]),
+      stage('return-with-elixir', 'stage', ['Return with the Elixir', 'Retorno com o Elixir'],
+        ['The character brings back a lesson, resource or change.', 'O personagem traz de volta uma lição, um recurso ou uma mudança.'],
+        ['Show who benefits from the journey and what it leaves behind.', 'Mostre a quem a jornada beneficia e o que ela deixa.'], [
+          ['Who receives the benefit of the return?', 'Quem recebe o benefício do retorno?'],
+          ['What changed in the world the player first saw?', 'O que mudou no mundo que o jogador viu no início?'],
+          ['How does the result differ across endings?', 'Como o resultado muda entre os desfechos?']
+        ])
+    ]),
+    model('beats-15', ['15-Beat Structure', 'Estrutura em 15 Marcos'],
+      ['Use turning points, changes in pressure and echoes between the opening and ending.',
+       'Organize viradas, mudanças de pressão e relações entre a abertura e o desfecho.'], [
+      stage('opening-image', 'milestone', ['Opening Image', 'Imagem de Abertura'],
+        ['The first situation gives a sense of tone and of the starting conditions.', 'A primeira situação mostra o tom e as condições de partida.'],
+        ['Give the ending a starting point to echo or contrast with.', 'Crie uma referência que o desfecho possa retomar ou contrastar.'], [
+          ['What does the player see or do first?', 'O que o jogador vê ou faz primeiro?'],
+          ['What does this reveal about the world?', 'O que isso revela sobre o mundo?'],
+          ['Which detail could gain a new meaning at the end?', 'Qual detalhe pode ganhar outro sentido no final?']
+        ]),
+      stage('stated-theme', 'milestone', ['Stated Theme', 'Tema Declarado'],
+        ['A question, action or remark puts a central idea in play.', 'Uma pergunta, ação ou fala coloca em jogo uma ideia central.'],
+        ['Give later choices a common question to explore.', 'Dê às próximas escolhas uma questão em comum.'], [
+          ['What idea should the player reflect on?', 'Sobre qual ideia o jogador pode refletir?'],
+          ['Who puts that idea into words or action?', 'Quem expressa essa ideia por meio de fala ou ação?'],
+          ['Can different routes offer different answers?', 'Rotas diferentes podem dar respostas diferentes?']
+        ]),
+      stage('setup', 'milestone', ['Setup', 'Apresentação'],
+        ['Introduce the people, goals and conditions that matter later.', 'Apresente as pessoas, os objetivos e as condições que importam depois.'],
+        ['Give later events enough context to feel like consequences of the story.', 'Dê contexto para o jogador entender as consequências posteriores.'], [
+          ['What should the player know before choosing?', 'O que o jogador precisa saber antes de escolher?'],
+          ['Which detail can pay off later?', 'Qual detalhe pode produzir um efeito mais tarde?'],
+          ['What shows the current state of the conflict?', 'O que mostra o estado atual do conflito?']
+        ]),
+      stage('catalyst', 'milestone', ['Catalyst', 'Catalisador'],
+        ['An event changes the conditions and demands a response.', 'Um evento muda as condições e exige uma resposta.'],
+        ['Turn the opening context into a problem the player can act on.', 'Transforme o contexto inicial em um problema sobre o qual o jogador pode agir.'], [
+          ['What breaks the initial balance?', 'O que rompe o equilíbrio inicial?'],
+          ['Who has to respond?', 'Quem precisa responder?'],
+          ['Which options become available or disappear?', 'Quais opções surgem ou desaparecem?']
+        ]),
+      stage('debate', 'milestone', ['Debate', 'Debate'],
+        ['The character weighs possible responses and their costs.', 'O personagem avalia possíveis respostas e seus custos.'],
+        ['Make uncertainty meaningful before a commitment.', 'Mostre por que a decisão é difícil antes do compromisso.'], [
+          ['Which options look reasonable from here?', 'Quais opções parecem viáveis neste ponto?'],
+          ['What can the character learn before deciding?', 'O que o personagem pode descobrir antes de decidir?'],
+          ['What makes delay costly?', 'O que torna caro adiar a decisão?']
+        ]),
+      stage('break-into-two', 'milestone', ['Break into Two', 'Entrada no Segundo Ato'],
+        ['A commitment starts a new phase of the conflict.', 'Um compromisso inicia uma nova fase do conflito.'],
+        ['Link a clear choice to a change in what the player must do.', 'Ligue uma escolha clara a uma mudança no que o jogador precisa fazer.'], [
+          ['Which action commits this route?', 'Qual ação define esta rota?'],
+          ['What changes as soon as it takes effect?', 'O que muda assim que a ação produz efeito?'],
+          ['How might another route enter this phase differently?', 'Como outra rota pode entrar nesta fase de outro modo?']
+        ]),
+      stage('secondary-story', 'milestone', ['Secondary Story', 'História Secundária'],
+        ['A relationship or parallel goal develops alongside the main conflict.', 'Uma relação ou um objetivo paralelo se desenvolve junto ao conflito principal.'],
+        ['Explore the theme from another angle and create consequences of its own.', 'Explore o tema por outro ponto de vista e gere consequências próprias.'], [
+          ['Whose perspective does this story add?', 'Que ponto de vista essa história acrescenta?'],
+          ['What choice matters specifically to this thread?', 'Qual escolha importa para esta linha da história?'],
+          ['Where can its effects reach the main conflict?', 'Onde seus efeitos podem alcançar o conflito principal?']
+        ]),
+      stage('premise-exploration', 'milestone', ['Premise Exploration', 'Exploração da Premissa'],
+        ['Situations let the player experience the central idea in action.', 'As situações permitem ao jogador viver a ideia central na prática.'],
+        ['Show what changes when the player tries different approaches.', 'Mostre o que muda quando o jogador tenta abordagens diferentes.'], [
+          ['Which situations best express the premise?', 'Quais situações melhor expressam a premissa?'],
+          ['What can the player try here?', 'O que o jogador pode tentar aqui?'],
+          ['What do different approaches reveal about the world?', 'O que abordagens diferentes revelam sobre o mundo?']
+        ]),
+      stage('midpoint', 'milestone', ['Midpoint', 'Ponto Médio'],
+        ['A success, setback or revelation changes how the conflict looks.', 'Um sucesso, uma perda ou uma revelação muda a leitura do conflito.'],
+        ['Raise the stakes or change what the path is trying to achieve.', 'Aumente o que está em jogo ou mude o objetivo do caminho.'], [
+          ['What seemed true before this event?', 'O que parecia verdadeiro antes deste evento?'],
+          ['Which outcome might be more fragile than it looks?', 'Qual resultado pode ser mais frágil do que parece?'],
+          ['What must the player rethink now?', 'O que o jogador precisa repensar agora?']
+        ]),
+      stage('pressure-rises', 'milestone', ['Rising Pressure', 'Aumento da Pressão'],
+        ['Opposition strengthens, resources shrink or relationships strain.', 'A oposição cresce, os recursos diminuem ou as relações se desgastam.'],
+        ['Make earlier actions matter as options become harder to sustain.', 'Mostre o peso das ações anteriores à medida que as opções se reduzem.'], [
+          ['Which pressure comes from earlier choices?', 'Qual pressão vem de escolhas anteriores?'],
+          ['What becomes more difficult to protect?', 'O que fica mais difícil proteger?'],
+          ['Where do paths face different risks?', 'Onde os caminhos enfrentam riscos diferentes?']
+        ]),
+      stage('all-is-lost', 'milestone', ['All Is Lost', 'Tudo Está Perdido'],
+        ['A loss makes the current plan appear unworkable.', 'Uma perda faz o plano atual parecer inviável.'],
+        ['Show how far the existing approach can take the character.', 'Mostre o limite da estratégia que o personagem vinha usando.'], [
+          ['What does this route lose?', 'O que esta rota perde?'],
+          ['Which plan can no longer continue?', 'Qual plano não pode mais seguir?'],
+          ['What, if anything, remains available?', 'O que ainda está ao alcance do personagem?']
+        ]),
+      stage('inner-crisis', 'milestone', ['Inner Crisis', 'Crise Interior'],
+        ['The character faces the meaning and cost of the setback.', 'O personagem encara o sentido e o custo da perda.'],
+        ['Give a later change of direction an emotional cause.', 'Dê uma causa emocional à próxima mudança de direção.'], [
+          ['What belief does the loss put in doubt?', 'Qual crença a perda põe em dúvida?'],
+          ['How does the character respond when the old plan fails?', 'Como o personagem reage quando o plano falha?'],
+          ['What might another route have taught by now?', 'O que outra rota pode ter ensinado até aqui?']
+        ]),
+      stage('break-into-three', 'milestone', ['Break into Three', 'Entrada no Terceiro Ato'],
+        ['An insight or alliance makes a final approach possible.', 'Uma descoberta ou aliança permite uma tentativa final.'],
+        ['Use what the path has taught the character to set up the resolution.', 'Use o que o caminho ensinou ao personagem para preparar a resolução.'], [
+          ['What makes the final approach possible?', 'O que torna possível a tentativa final?'],
+          ['Can a secondary story contribute to that plan?', 'Uma história secundária pode ajudar nesse plano?'],
+          ['Which choice turns the insight into action?', 'Qual escolha leva a descoberta à prática?']
+        ]),
+      stage('final-resolution', 'milestone', ['Final Resolution', 'Resolução Final'],
+        ['The route puts its final approach into practice and reaches an outcome.', 'A rota coloca a tentativa final em prática e chega a um resultado.'],
+        ['Show how the central conflict and its immediate effects are settled on this route.', 'Mostre como o conflito central se resolve e quais efeitos surgem nesta rota.'], [
+          ['Which action decides the result?', 'Qual ação decide o resultado?'],
+          ['How do earlier choices change what is possible?', 'Como escolhas anteriores mudam o que é possível?'],
+          ['What cost remains after the resolution?', 'Qual custo permanece após a resolução?']
+        ]),
+      stage('final-image', 'milestone', ['Final Image', 'Imagem Final'],
+        ['The last situation reveals the state of the world or the character after the outcome.',
+         'A última situação revela o estado do mundo ou do personagem após o desfecho.'],
+        ['Make the route’s lasting change visible.', 'Mostre a mudança que permanece após o fim da rota.'], [
+          ['What does the player see or do last?', 'O que o jogador vê ou faz por último?'],
+          ['What detail recalls or contrasts with the opening?', 'Qual detalhe retoma ou contrasta com a abertura?'],
+          ['How can each ending leave a different final impression?', 'Como cada desfecho pode deixar uma impressão final diferente?']
+        ])
+    ])
+  ];
+
+  const byModelId = new Map(models.map(entry => [entry.id, entry]));
+  const getNarrativeModel = id => byModelId.get(id);
+  const getNarrativeStage = (modelId, stepId) => getNarrativeModel(modelId)?.stages.find(entry => entry.id === stepId);
+  const activeNarrativeModel = project => getNarrativeModel(project.narrativeModel) ?? getNarrativeModel(defaultModelId);
+  const hasId = value => typeof value === 'string' && value.trim().length > 0;
+
+  function normalizeProject(project) {
+    return {
+      ...project,
+      narrativeModel: hasId(project.narrativeModel) ? project.narrativeModel : defaultModelId,
+      nodes: project.nodes.map(node => {
+        const stage = node.narrativeStage;
+        return { ...node, narrativeStage: hasId(stage?.modelId) && hasId(stage?.stepId) ? { ...stage } : null };
+      })
+    };
+  }
+
+  function normalizeState(state) {
+    return { ...state, projects: state.projects.map(normalizeProject) };
+  }
+
+  function narrativeUsage(project) {
+    const model = activeNarrativeModel(project);
+    const byStage = new Map(model.stages.map(entry => [entry.id, []]));
+    const preserved = [];
+    let associated = 0;
+    for (const node of project.nodes) {
+      const stage = node.narrativeStage;
+      if (!stage) continue;
+      const group = stage.modelId === model.id ? byStage.get(stage.stepId) : undefined;
+      if (group) {
+        group.push(node);
+        associated += 1;
+      } else {
+        preserved.push(node);
+      }
+    }
+    const used = [...byStage.values()].filter(nodes => nodes.length > 0).length;
+    const total = model.stages.length;
+    return { model, byStage, preserved, total, used, unused: total - used,
+      associated, unassociated: project.nodes.length - associated };
+  }
+
+  return { models, defaultModelId, getNarrativeModel, getNarrativeStage, activeNarrativeModel,
+    normalizeProject, normalizeState, narrativeUsage };
+})();
+// END narrative-models
 
 function sample() {
   const choose = (english,portuguese) => language === 'pt' ? portuguese : english;
@@ -687,24 +1398,259 @@ function sample() {
       choose('The tide rises, and a siren interrupts the broadcast.','A maré sobe e a sirene interrompe a transmissão.')],
     ['amanhecer','mare','ending',choose('After the storm','Depois da tempestade'),219,106,
       choose('Mara leaves with what she discovered at the lighthouse.','Mara leva consigo o que descobriu no farol.')]
-  ].map(([id,chapter,kind,title,x,y,notes]) => ({id,chapter,kind,title,x,y,notes}));
+  ].map(([id,chapter,kind,title,x,y,notes]) => ({id,chapter,kind,title,x,y,notes,narrativeStage:null}));
   const edges = [
     ['radio','escolha',''], ['escolha','voz',choose('Trust','Confiar')], ['escolha','costa',choose('Go around','Contornar')],
     ['voz','encontro',''], ['costa','encontro',''], ['encontro','porta',''],
     ['porta','fonte',''], ['fonte','registro',choose('Investigate','Investigar')], ['registro','sirene',''], ['sirene','amanhecer','']
   ].map(([from,to,label]) => ({id:uid(),from,to,label}));
-  return {id:'exemplo',title:choose('After the Signal','Depois do sinal'),chapters,nodes,edges};
+  return {id:'exemplo',title:choose('After the Signal','Depois do sinal'),
+    chapters,nodes,edges,narrativeModel:EnredoNarrative.defaultModelId};
 }
+
+// BEGIN character-data
+const EnredoCharacters = (() => {
+  const collections = ['characters','characterRoles','characterArcs','arcPaths','relationships','portraits'];
+  const roles = ['protagonist','antagonist','supporting','mentor','ally','rival','minor'];
+  const relationshipTypes = ['family','friendship','alliance','rivalry','enmity','hierarchy','romance','loyalty','betrayal','trust','custom'];
+  const relationshipStates = ['absent','active','strained','broken'];
+  const phases = ['development','ending'];
+  const arcTypes = ['positive','negative','steady'];
+  const fates = ['alive','dead'];
+  const objectiveStates = ['achieved','failed','abandoned'];
+  const personalityFields = ['dominantTraits','strengths','flaws','beliefs','fears','contradictions','vulnerabilities'];
+  const motivationFields = ['goal','need','reason','obstacles','internalConflict','externalConflict','cost','successConsequence','failureConsequence'];
+  const initialFields = ['summary','belief','goal','need','conflict'];
+  const profileFields = ['nickname','description','group','notes'];
+  const maxPortraitBytes = 24 * 1024;
+  const maxImageBytes = 12 * 1024 * 1024;
+  const issues = new WeakMap();
+  const isRecord = value => value && typeof value === 'object' && !Array.isArray(value);
+  const hasText = value => typeof value === 'string' && value.trim().length > 0;
+  const optionalText = value => value == null || typeof value === 'string';
+  const optionalFields = (value,fields) => value == null || (isRecord(value) && fields.every(key => optionalText(value[key])));
+  const member = (values,value) => value == null || values.includes(value);
+  const participantsOf = node => node.participants ?? [];
+
+  function initials(name) {
+    const words = name.normalize('NFC').trim().split(/\s+/u).filter(Boolean);
+    const firstLetter = word => (word?.match(/[\p{L}\p{N}]\p{M}*/u)?.[0] ?? Array.from(word ?? '')[0] ?? '').toUpperCase();
+    const first = firstLetter(words[0]);
+    return words.length > 1 ? first + firstLetter(words.at(-1)) : first;
+  }
+
+  function validPortrait(data) {
+    const prefix = 'data:image/jpeg;base64,';
+    return typeof data === 'string' && data.length <= prefix.length + Math.ceil(maxPortraitBytes/3)*4 &&
+      /^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(data) && (data.length-prefix.length)%4 === 0;
+  }
+
+  function validationError(project) {
+    const lists = {};
+    for (const name of collections) {
+      const list = project[name] === undefined ? [] : project[name];
+      if (!Array.isArray(list)) return name;
+      const ids = new Set();
+      for (const [index,item] of list.entries()) {
+        if (!isRecord(item) || !hasText(item.id) || ids.has(item.id)) return name + '[' + index + '].id';
+        ids.add(item.id);
+      }
+      lists[name] = list;
+    }
+    const roleIds = new Set(roles);
+    for (const [index,role] of lists.characterRoles.entries()) {
+      if (roleIds.has(role.id) || !hasText(role.name)) return 'characterRoles[' + index + ']';
+      roleIds.add(role.id);
+    }
+    const portraits = new Set();
+    for (const [index,portrait] of lists.portraits.entries()) {
+      if (!validPortrait(portrait.data)) return 'portraits[' + index + '].data';
+      portraits.add(portrait.id);
+    }
+    const characters = new Set();
+    for (const [index,character] of lists.characters.entries()) {
+      const path = 'characters[' + index + ']';
+      if (!hasText(character.name)) return path + '.name';
+      for (const key of profileFields) {
+        if (!optionalText(character[key])) return path + '.' + key;
+      }
+      for (const [key,fields] of [['personality',personalityFields],['motivation',motivationFields]]) {
+        if (!optionalFields(character[key],fields)) return path + '.' + key;
+      }
+      const assigned = character.roleIds === undefined ? [] : character.roleIds;
+      if (!Array.isArray(assigned) || new Set(assigned).size !== assigned.length || assigned.some(id => !roleIds.has(id))) {
+        return path + '.roleIds';
+      }
+      if (!member(assigned,character.primaryRoleId)) return path + '.primaryRoleId';
+      if (character.portraitId != null && !portraits.has(character.portraitId)) return path + '.portraitId';
+      characters.add(character.id);
+    }
+    const nodes = new Set();
+    for (const [index,node] of project.nodes.entries()) {
+      const path = 'nodes[' + index + ']';
+      const people = node.participants === undefined ? [] : node.participants;
+      if (!Array.isArray(people)) return path + '.participants';
+      const assigned = new Set();
+      for (const [i,person] of people.entries()) {
+        if (!isRecord(person) || !characters.has(person.characterId) || assigned.has(person.characterId) ||
+            !optionalText(person.dramaticFunction)) return path + '.participants[' + i + '].characterId';
+        assigned.add(person.characterId);
+      }
+      if (node.focalCharacterId != null && !assigned.has(node.focalCharacterId)) return path + '.focalCharacterId';
+      nodes.add(node.id);
+    }
+    const paths = new Set();
+    for (const [i,route] of lists.arcPaths.entries()) {
+      if (!hasText(route.name)) return 'arcPaths[' + i + '].name';
+      paths.add(route.id);
+    }
+    const relations = new Map();
+    for (const [i,relation] of lists.relationships.entries()) {
+      if (!characters.has(relation.fromCharacterId) || !characters.has(relation.toCharacterId) ||
+          relation.fromCharacterId === relation.toCharacterId || !relationshipTypes.includes(relation.type) ||
+          !relationshipStates.includes(relation.initialState) ||
+          (relation.type === 'custom' && !hasText(relation.customLabel)) || !optionalText(relation.notes)) {
+        return 'relationships[' + i + ']';
+      }
+      relations.set(relation.id,relation);
+    }
+    const incoming = new Map(project.edges.map(edge => [edge.id,edge.to]));
+    const eventIds = new Set();
+    for (const [index,arc] of lists.characterArcs.entries()) {
+      const path = 'characterArcs[' + index + ']';
+      if (!characters.has(arc.characterId) || !hasText(arc.title) ||
+          !optionalFields(arc.initial,initialFields) || !Array.isArray(arc.events)) return path;
+      for (const [i,event] of arc.events.entries()) {
+        const eventPath = path + '.events[' + i + ']';
+        if (!isRecord(event) || !hasText(event.id) || eventIds.has(event.id) ||
+            !hasText(event.summary) || !phases.includes(event.phase)) return eventPath;
+        eventIds.add(event.id);
+        if (event.nodeId != null && !nodes.has(event.nodeId)) return eventPath + '.nodeId';
+        if (event.edgeId != null && (event.nodeId == null || incoming.get(event.edgeId) !== event.nodeId)) return eventPath + '.edgeId';
+        if (event.pathId != null && !paths.has(event.pathId)) return eventPath + '.pathId';
+        if (event.arcType != null && (event.phase !== 'ending' || !arcTypes.includes(event.arcType))) return eventPath + '.arcType';
+        const changes = event.changes;
+        if (changes != null && (!optionalFields(changes,['group','belief']) ||
+            !member(fates,changes.fate) || !member(objectiveStates,changes.objectiveStatus))) return eventPath + '.changes';
+        const updates = event.relationshipChanges === undefined ? [] : event.relationshipChanges;
+        if (!Array.isArray(updates)) return eventPath + '.relationshipChanges';
+        const mentioned = new Set();
+        for (const update of updates) {
+          if (!isRecord(update) || relations.get(update.relationshipId)?.fromCharacterId !== arc.characterId ||
+              !relationshipStates.includes(update.state) || mentioned.has(update.relationshipId)) return eventPath + '.relationshipChanges';
+          mentioned.add(update.relationshipId);
+        }
+      }
+    }
+    return null;
+  }
+
+  function normalizeProject(project) {
+    const error = validationError(project);
+    if (error) {
+      issues.set(project,error);
+      return project;
+    }
+    const normalized = {...project};
+    for (const key of collections) normalized[key] = project[key] ?? [];
+    return normalized;
+  }
+
+  const issue = project => issues.get(project) ?? null;
+  const eventsForPath = (arc,pathId) => pathId == null ? arc.events : arc.events.filter(event => event.pathId == null || event.pathId === pathId);
+
+  function detachSituations(project,ids) {
+    if (issue(project)) return;
+    for (const arc of project.characterArcs) {
+      for (const event of arc.events) {
+        if (!ids.has(event.nodeId)) continue;
+        event.nodeId = null;
+        event.edgeId = null;
+      }
+    }
+  }
+
+  function detachConnection(project,id) {
+    if (issue(project)) return;
+    for (const arc of project.characterArcs) {
+      for (const event of arc.events) if (event.edgeId === id) event.edgeId = null;
+    }
+  }
+
+  function forgetRelationships(project,ids) {
+    project.relationships = project.relationships.filter(relation => !ids.has(relation.id));
+    for (const arc of project.characterArcs) {
+      for (const event of arc.events) {
+        if (event.relationshipChanges) event.relationshipChanges = event.relationshipChanges.filter(change => !ids.has(change.relationshipId));
+      }
+    }
+  }
+
+  function prunePortrait(project,id) {
+    if (id && !project.characters.some(character => character.portraitId === id)) {
+      project.portraits = project.portraits.filter(portrait => portrait.id !== id);
+    }
+  }
+
+  function setPortrait(project,characterId,asset) {
+    const character = project.characters.find(person => person.id === characterId);
+    const previousId = character.portraitId;
+    const existing = asset && project.portraits.find(portrait => portrait.data === asset.data);
+    if (asset && !existing) project.portraits = [...project.portraits,asset];
+    character.portraitId = existing?.id ?? asset?.id ?? null;
+    prunePortrait(project,previousId);
+  }
+
+  function removeCharacter(project,id) {
+    const removed = project.characters.find(character => character.id === id);
+    project.characters = project.characters.filter(character => character.id !== id);
+    project.characterArcs = project.characterArcs.filter(arc => arc.characterId !== id);
+    for (const node of project.nodes) {
+      if (node.participants) node.participants = node.participants.filter(person => person.characterId !== id);
+      if (node.focalCharacterId === id) node.focalCharacterId = null;
+    }
+    const relationships = project.relationships.filter(relation => relation.fromCharacterId === id || relation.toCharacterId === id);
+    forgetRelationships(project,new Set(relationships.map(relation => relation.id)));
+    prunePortrait(project,removed?.portraitId);
+  }
+
+  function captureHistory(state) {
+    const portraits = [];
+    const projects = state.projects.map(({portraits:table,...project}) => {
+      portraits.push(table);
+      return project;
+    });
+    return {json:JSON.stringify({...state,projects}),portraits};
+  }
+
+  function restoreHistory(snapshot) {
+    const restored = JSON.parse(snapshot.json);
+    restored.projects = restored.projects.map((project,index) => {
+      if (snapshot.portraits[index] !== undefined) project.portraits = snapshot.portraits[index];
+      return normalizeProject(project);
+    });
+    return restored;
+  }
+
+  return {roles,relationshipTypes,relationshipStates,phases,arcTypes,fates,objectiveStates,
+    profileFields,personalityFields,motivationFields,initialFields,maxImageBytes,maxPortraitBytes,
+    initials,participantsOf,validPortrait,validationError,normalizeProject,issue,eventsForPath,detachSituations,detachConnection,
+    forgetRelationships,removeCharacter,setPortrait,captureHistory,restoreHistory};
+})();
+// END character-data
 
 function readState() {
   try {
     const raw = localStorage.getItem(storageKey);
     if (raw) {
       const result = JSON.parse(raw);
-      if (Array.isArray(result?.projects) && result.projects.every(validProject)) return result;
+      if (Array.isArray(result?.projects) && result.projects.every(validProject)) {
+        const normalized = EnredoNarrative.normalizeState(result);
+        return {...normalized,projects:normalized.projects.map(EnredoCharacters.normalizeProject)};
+      }
     }
   } catch {}
-  return {active:'exemplo',chapter:'sinal',projects:[sample()]};
+  return {active:'exemplo',chapter:'sinal',projects:[EnredoCharacters.normalizeProject(sample())]};
 }
 
 function validProject(p) {
@@ -729,7 +1675,10 @@ let atHome = true;
 let diagramFullscreen = false;
 let detailsCollapsed = false;
 let diagramScroll = 0;
-let overview = false;
+let viewMode = 'timeline';
+let lastMapMode = 'timeline';
+let structureStageSelection = null;
+let mapNeedsFit = true;
 let selection = null;
 let connectMode = false, source = null;
 const undoStack = [], redoStack = [];
@@ -739,7 +1688,13 @@ let scene = {nodes:[],edges:[],headings:[],byId:new Map()};
 let miniBounds = null;
 let toastTimer;
 let toastKey;
+let toastValues;
 let storageFailed = false;
+const isWholeStory = () => viewMode === 'whole-story';
+const isStructureView = () => viewMode === 'structure';
+const isCharactersView = () => viewMode === 'characters';
+const isMapView = () => viewMode === 'timeline' || isWholeStory();
+const narrativeText = copy => copy[language];
 const project = () => state.projects.find(p => p.id === state.active) ?? state.projects[0];
 function chapter() {
   const p = project();
@@ -784,10 +1739,11 @@ function changeTheme(next) {
   renderThemeControls();
 }
 
-function flash(key) {
+function flash(key,values) {
   const toast = $('toast');
   toastKey = key;
-  toast.textContent = t(key);
+  toastValues = values;
+  toast.textContent = t(key,values);
   toast.hidden = false;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { toast.hidden = true; },3000);
@@ -812,7 +1768,7 @@ function renderLanguage() {
     '<span class="legend-item" data-kind="' + kind + '"><i></i>' + tx(kind) + '</span>').join('');
   renderWorkspaceControls();
   renderSaveStatus();
-  if (toastKey && !$('toast').hidden) $('toast').textContent = t(toastKey);
+  if (toastKey && !$('toast').hidden) $('toast').textContent = t(toastKey,toastValues);
 }
 function changeLanguage(next) {
   if (next === language || (next !== 'en' && next !== 'pt')) return;
@@ -826,7 +1782,7 @@ function changeLanguage(next) {
 
 function applyFontSize() {
   document.documentElement.style.fontSize = fontSize + '%';
-  if (!atHome && chapter()) renderWires();
+  if (!atHome && isMapView() && chapter()) renderWires();
 }
 
 function remember(before) {
@@ -836,15 +1792,21 @@ function remember(before) {
   renderHistory();
 }
 function edit(callback,{fit = false} = {}) {
-  const before = JSON.stringify(state);
+  const before = EnredoCharacters.captureHistory(state);
   callback();
-  if (JSON.stringify(state) !== before) remember(before);
+  const after = EnredoCharacters.captureHistory(state);
+  if (after.json !== before.json || after.portraits.some((table,index) => table !== before.portraits[index])) remember(before);
   save();
   render(fit);
 }
 function resetEditor() {
-  overview = false;
+  viewMode = 'timeline';
+  lastMapMode = viewMode;
+  structureStageSelection = null;
+  $('structureView').scrollTop = 0;
+  $('structurePreserved').open = false;
   selection = null;
+  resetCharacterView();
   stopConnect();
 }
 function enterProject(p,chapterId = p.chapters[0]?.id) {
@@ -868,14 +1830,29 @@ function openHome() {
   render();
   $('spaceTitle').focus();
 }
+function mapLayoutChanged(before,after) {
+  if (before.chapters.length !== after.chapters.length ||
+      before.chapters.some((c,i) => c.id !== after.chapters[i].id)) return true;
+  if (before.nodes.length !== after.nodes.length || before.nodes.some((n,i) => {
+    const next = after.nodes[i];
+    return n.id !== next.id || n.chapter !== next.chapter || n.x !== next.x || n.y !== next.y;
+  })) return true;
+  return before.edges.length !== after.edges.length ||
+    before.edges.some((e,i) => e.from !== after.edges[i].from || e.to !== after.edges[i].to);
+}
 function historyStep(direction) {
   const [take,put] = direction === 'undo' ? [undoStack,redoStack] : [redoStack,undoStack];
   if (!take.length) return;
-  put.push(JSON.stringify(state));
-  state = JSON.parse(take.pop());
-  stopConnect();
+  const previousProject = project(), previousChapter = chapter()?.id;
+  put.push(EnredoCharacters.captureHistory(state));
+  state = EnredoCharacters.restoreHistory(take.pop());
+  const restoredProject = project();
+  if (previousProject?.id !== restoredProject?.id) resetEditor();
+  else stopConnect();
   save();
-  render(true);
+  const keepFraming = !isMapView() && previousProject && restoredProject &&
+    (lastMapMode !== 'timeline' || previousChapter === chapter()?.id) && !mapLayoutChanged(previousProject,restoredProject);
+  render(!keepFraming);
 }
 function renderHistory() {
   for (const id of ['undo','undoHome','undoEmptyChapter']) $(id).disabled = !undoStack.length;
@@ -907,10 +1884,14 @@ function renderHome() {
 function renderHeader() {
   const p = project(), c = chapter();
   const chapterIndex = p.chapters.indexOf(c);
+  const structure = isStructureView();
+  const characters = isCharactersView();
+  const timeline = viewMode === 'timeline';
+  const showMap = !!c && isMapView();
   $('projectName').textContent = p.title;
   $('breadcrumb').textContent = p.title;
   $('chapters').innerHTML = p.chapters.map((item,index) =>
-    '<div class="chapter-row">' + chapterButton(item,index,!overview && item.id === c?.id) +
+    '<div class="chapter-row">' + chapterButton(item,index,timeline && item.id === c?.id) +
     '<button type="button" class="icon-btn small remove-button" data-delete-chapter="' + esc(item.id) +
     '" title="' + tx('deleteChapter') + '" aria-label="' + tx('deleteNamedChapter',{name:item.title}) + '">' + icon('trash') + '</button></div>').join('');
   const projectButtons = state.projects.map(item => '<button class="' + (item.id === p.id ? 'current' : '') +
@@ -918,23 +1899,943 @@ function renderHeader() {
   $('projectMenu').innerHTML = projectButtons + '<hr><button id="newProject">' + icon('plus') + ' ' + tx('newProject') + '</button>' +
     '<button id="renameProject">' + icon('edit') + ' ' + tx('renameProject') + '</button>' +
     '<button data-delete-project="' + esc(p.id) + '">' + icon('trash') + ' ' + tx('deleteProject') + '</button>';
-  $('chapterLabel').textContent = overview ? t('overview') : c ? t('chapterNumber',{number:number(chapterIndex)}) : t('project');
-  $('chapterTitle').textContent = overview || !c ? p.title : c.title;
-  $('renameChapter').hidden = overview || !c;
-  $('addNode').hidden = !c;
-  $('emptyChapters').hidden = !!c;
-  $('editorWorkspace').hidden = !c;
-  $('editorFooter').hidden = !c;
-  const group = overview ? p.nodes : p.nodes.filter(n => n.chapter === c?.id);
-  const ids = new Set(group.map(n => n.id));
-  const links = p.edges.filter(e => ids.has(e.from) && ids.has(e.to)).length;
+  $('chapterLabel').textContent = structure ? t('structure') : characters ? t('characters') : isWholeStory() ? t('overview') :
+    c ? t('chapterNumber',{number:number(chapterIndex)}) : t('project');
+  $('chapterTitle').textContent = timeline && c ? c.title : p.title;
+  $('renameChapter').hidden = !timeline || !c;
+  $('addNode').hidden = !showMap;
+  $('emptyChapters').hidden = !!c || !isMapView();
+  $('graph').hidden = !showMap;
+  $('legend').hidden = !showMap;
+  $('structureView').hidden = !structure;
+  $('charactersView').hidden = !characters;
+  $('editorFooter').hidden = !showMap;
+  $('editorWorkspace').classList.toggle('structure-mode',structure);
+  $('editorWorkspace').classList.toggle('characters-mode',characters);
+  $('editorWorkspace').classList.toggle('no-map',!c);
+  $('editorWorkspace').setAttribute('aria-label',t(structure ? 'structure' : characters ? 'characters' : 'storyMap'));
+  $('graphActions').setAttribute('aria-label',t(showMap ? 'mapTools' : 'historyTools'));
+  $('overviewTab').disabled = !c;
+  for (const [id,mode] of [['currentTab','timeline'],['overviewTab','whole-story'],['structureTab','structure'],['charactersTab','characters']]) {
+    $(id).classList.toggle('active',viewMode === mode);
+    $(id).setAttribute('aria-pressed',viewMode === mode);
+  }
   const chapters = countText(p.chapters.length,'countChapter');
-  const timeline = countText(group.length,'countNode') + ' · ' + countText(links,'countConnection');
-  $('stats').textContent = !c ? chapters : overview ? chapters + ' · ' + timeline : timeline;
-  $('currentTab').classList.toggle('active',!overview);
-  $('overviewTab').classList.toggle('active',overview);
-  $('currentTab').setAttribute('aria-pressed',!overview);
-  $('overviewTab').setAttribute('aria-pressed',overview);
+  let stats = chapters;
+  if (showMap) {
+    const group = timeline ? p.nodes.filter(n => n.chapter === c.id) : p.nodes;
+    const ids = new Set(group.map(n => n.id));
+    const links = timeline ? p.edges.filter(e => ids.has(e.from) && ids.has(e.to)).length : p.edges.length;
+    const mapStats = countText(group.length,'countNode') + ' · ' + countText(links,'countConnection');
+    stats = timeline ? mapStats : chapters + ' · ' + mapStats;
+  }
+  $('stats').textContent = stats;
+  renderWorkspaceControls();
+}
+
+function narrativeStageName(assignment) {
+  const stage = EnredoNarrative.getNarrativeStage(assignment.modelId,assignment.stepId);
+  return stage ? narrativeText(stage.name) : t('unknownStage');
+}
+function preservedStageDescription(assignment) {
+  const model = EnredoNarrative.getNarrativeModel(assignment.modelId);
+  return t('preservedStageDetails',{
+    model:model ? narrativeText(model.name) : t('unknownModel'),
+    stage:narrativeStageName(assignment)
+  });
+}
+function activeNarrativeStage(node,model) {
+  const assignment = node.narrativeStage;
+  if (assignment?.modelId === model.id) return EnredoNarrative.getNarrativeStage(model.id,assignment.stepId);
+}
+function narrativeStageOptions(model,selected = '',prompt = 'noNarrativeStage') {
+  return option('',t(prompt),!selected) + model.stages.map(stage =>
+    option(stage.id,(stage.parentId ? '↳ ' : '') + narrativeText(stage.name),stage.id === selected)).join('');
+}
+function narrativeStageField(node,p) {
+  const model = EnredoNarrative.activeNarrativeModel(p);
+  const active = activeNarrativeStage(node,model);
+  const preserved = node.narrativeStage && !active;
+  let options = narrativeStageOptions(model,active?.id);
+  if (preserved) options = option('',t('preservedStage',{stage:narrativeStageName(node.narrativeStage)}),true);
+  const control = '<select id="nodeNarrativeStage"' +
+    (preserved || !model.stages.length ? ' disabled aria-describedby="nodeNarrativeHint"' : '') + '>' + options + '</select>';
+  let details = '';
+  if (preserved) {
+    const convert = model.stages.length ? '<button type="button" class="btn" id="convertNarrativeStage">' + tx('convertAssociation') + '</button>' : '';
+    details = '<p class="hint" id="nodeNarrativeHint">' + esc(preservedStageDescription(node.narrativeStage)) + '</p>' +
+      '<div class="narrative-association-actions">' + convert +
+      '<button type="button" class="btn" id="removeNarrativeStage">' + tx('removeAssociation') + '</button></div>';
+  } else if (!model.stages.length) {
+    details = '<p class="hint" id="nodeNarrativeHint">' + tx('noStagesForAssociation') + '</p>';
+  }
+  return '<div>' + field(t('narrativeStage'),control) + details + '</div>';
+}
+
+function renderStructureSituations(nodes,chapters,{preserved = false} = {}) {
+  return nodes.map(node => {
+    const title = node.title || t('untitled');
+    const chapter = chapters.get(node.chapter);
+    const description = preserved ? ' · ' + preservedStageDescription(node.narrativeStage) : '';
+    return '<li><button type="button" class="structure-locate" data-locate-node="' + esc(node.id) +
+      '" aria-label="' + tx('locateNamedBeat',{title,chapter}) + '"><span><strong>' + esc(title) + '</strong><small>' +
+      esc(chapter + description) + '</small></span><span>' + tx('locateOnMap') + '</span></button></li>';
+  }).join('');
+}
+function renderStructureStage(stage,nodes,chapters) {
+  const expanded = stage.id === structureStageSelection;
+  const detailsId = 'narrative-stage-' + stage.id;
+  const index = stage.suggestedPosition ?? (stage.kind === 'stage' ? stage.order : null);
+  const kind = {act:'stageAct',sequence:'stageSequence',milestone:'stageMilestone'}[stage.kind];
+  const numberLabel = index ? '<span class="structure-stage-order">' + number(index - 1) + '</span>' : '';
+  const kindLabel = kind ? '<small class="structure-stage-kind">' + tx(kind) + '</small>' : '';
+  const questions = expanded ? stage.questions.map(question => '<li>' + esc(narrativeText(question)) + '</li>').join('') : '';
+  const situations = !expanded ? '' : nodes.length ? '<ul class="structure-situations">' +
+    renderStructureSituations(nodes,chapters) + '</ul>' : '<p class="hint">' + tx('noStageSituations') + '</p>';
+  const details = expanded ? '<p>' + esc(narrativeText(stage.summary)) + '</p><h3>' + tx('guidingQuestions') +
+    '</h3><ul class="structure-questions">' + questions + '</ul><h3>' + tx('associatedSituations') + '</h3>' + situations : '';
+  return '<div class="structure-stage"><button type="button" class="structure-stage-toggle" data-narrative-stage="' + esc(stage.id) +
+    '" aria-expanded="' + expanded + '" aria-controls="' + esc(detailsId) + '"><span><span class="structure-stage-name">' +
+    numberLabel + '<strong>' + esc(narrativeText(stage.name)) + '</strong>' + kindLabel +
+    '</span><span class="structure-stage-purpose">' + esc(narrativeText(stage.purpose)) + '</span></span>' +
+    '<span class="structure-stage-status">' + (nodes.length ? esc(countText(nodes.length,'countNode')) : tx('stageUnused')) +
+    icon('chevron') + '</span></button><div class="structure-stage-details" id="' + esc(detailsId) + '"' +
+    (expanded ? '' : ' hidden') + '>' + details + '</div></div>';
+}
+function renderStructure() {
+  const p = project(), usage = EnredoNarrative.narrativeUsage(p), {model} = usage;
+  const chapters = new Map(p.chapters.map((c,index) => [c.id,number(index) + ' · ' + c.title]));
+  $('structureModelName').textContent = narrativeText(model.name);
+  $('structureDescription').textContent = narrativeText(model.summary);
+  $('structureModelUnavailable').hidden = p.narrativeModel === model.id;
+  $('structureGuide').textContent = t(model.stages.length ? 'structureGuide' : 'noPredefinedStages');
+  $('structureSummary').innerHTML = [
+    ['total','totalStages'], ['used','usedStages'], ['unused','unusedStages'],
+    ['associated','associatedSituations'], ['unassociated','unassociatedSituations']
+  ].map(([count,key]) => '<div><dt>' + tx(key) + '</dt><dd data-narrative-count="' + count + '">' + usage[count] + '</dd></div>').join('');
+
+  const preserved = $('structurePreserved');
+  preserved.hidden = !usage.preserved.length;
+  if (preserved.hidden) preserved.open = false;
+  $('structurePreservedTitle').textContent = t('preservedAssociations',{count:usage.preserved.length});
+  $('structurePreservedList').innerHTML = renderStructureSituations(usage.preserved,chapters,{preserved:true});
+  if (structureStageSelection && !usage.byStage.has(structureStageSelection)) structureStageSelection = null;
+
+  const stageItem = entry => renderStructureStage(entry,usage.byStage.get(entry.id),chapters);
+  const children = new Map();
+  for (const entry of model.stages) {
+    if (!entry.parentId) continue;
+    if (!children.has(entry.parentId)) children.set(entry.parentId,[]);
+    children.get(entry.parentId).push(entry);
+  }
+  $('structureStages').innerHTML = model.stages.filter(entry => !entry.parentId).map(entry => {
+    const group = children.get(entry.id);
+    const nested = group ? '<ul class="structure-stages structure-substages">' +
+      group.map(child => '<li>' + stageItem(child) + '</li>').join('') + '</ul>' : '';
+    return '<li>' + stageItem(entry) + nested + '</li>';
+  }).join('');
+}
+function locateProjectNode(id) {
+  const node = nodeById(id);
+  if (!node) return;
+  selection = id;
+  state.chapter = node.chapter;
+  if (isWholeStory()) {
+    save();
+    render();
+  } else {
+    switchView('whole-story');
+  }
+  reveal(id);
+  $('graph').scrollIntoView({block:'nearest'});
+  cardFor(id)?.focus({preventScroll:true});
+}
+
+const characterView = {characterId:null,arcId:null,pathId:null,origin:null,previousView:'timeline'};
+let portraitRequest = null;
+
+function resetCharacterView() {
+  Object.assign(characterView,{characterId:null,arcId:null,pathId:null,origin:null,previousView:'timeline'});
+  $('characterSearch').value = '';
+  $('characterRoleFilter').value = '';
+  $('characterGroupFilter').value = '';
+}
+
+function openCharacters() {
+  if (isCharactersView()) return;
+  characterView.origin = null;
+  characterView.previousView = viewMode;
+  switchView('characters');
+}
+
+function characterById(id,p = project()) {
+  return p?.characters?.find(character => character.id === id);
+}
+
+function selectedCharacter() {
+  const p = project();
+  return p && !EnredoCharacters.issue(p) ? characterById(characterView.characterId,p) : undefined;
+}
+
+function openCharacter(id,fromMap = false) {
+  const p = project();
+  if (!p || EnredoCharacters.issue(p) || !characterById(id,p)) return;
+  if (fromMap) characterView.origin = {mode:viewMode,nodeId:selection};
+  if (characterView.characterId !== id) Object.assign(characterView,{characterId:id,arcId:null,pathId:null});
+  if (isCharactersView()) renderCharacters();
+  else switchView('characters');
+  $('characterProfileTitle')?.focus({preventScroll:true});
+}
+
+function leaveCharacterView() {
+  const origin = characterView.origin;
+  if (origin) {
+    characterView.origin = null;
+    const node = nodeById(origin.nodeId);
+    if (node) {
+      selection = node.id;
+      state.chapter = node.chapter;
+    }
+    switchView(chapter() ? origin.mode : 'timeline');
+    if (node) cardFor(node.id)?.focus({preventScroll:true});
+    return;
+  }
+  const id = characterView.characterId;
+  if (id) {
+    Object.assign(characterView,{characterId:null,arcId:null,pathId:null});
+    renderCharacters();
+    $('characterList').querySelector('[data-character-id="' + CSS.escape(id) + '"]')?.focus();
+    return;
+  }
+  const previous = characterView.previousView;
+  switchView(previous === 'whole-story' && !chapter() ? 'timeline' : previous);
+  $(isWholeStory() ? 'overviewTab' : isStructureView() ? 'structureTab' : 'currentTab').focus();
+}
+
+const characterSearchKey = value => value.normalize('NFD').replace(/\p{M}/gu,'').toLocaleLowerCase(language);
+const byName = (a,b) => a.name.localeCompare(b.name,language);
+const roleList = p => [
+  ...EnredoCharacters.roles.map(id => ({id,name:t('role-' + id)})),...p.characterRoles
+];
+const profileRole = (character,roles) => roles.get(character.primaryRoleId ?? character.roleIds?.[0]);
+
+function characterButton(key,attributes = '',style = '') {
+  return '<button type="button" class="btn ' + style + '" ' + attributes + '>' + tx(key) + '</button>';
+}
+
+function characterAvatar(character) {
+  const data = character.portraitId ? '<img alt="" decoding="async" data-portrait="' + esc(character.portraitId) + '">' : '';
+  return '<span class="character-portrait" aria-hidden="true"><span class="portrait-initials">' +
+    esc(EnredoCharacters.initials(character.name)) + '</span>' + data + '</span>';
+}
+
+function displayPortraits(container,p) {
+  const images = new Map(p.portraits.map(image => [image.id,image.data]));
+  for (const img of container.querySelectorAll('img[data-portrait]')) {
+    const source = images.get(img.dataset.portrait);
+    if (!source) continue;
+    img.onerror = () => { img.hidden = true; };
+    img.src = source;
+  }
+}
+
+function characterRow(character,attributes,detail,active = null) {
+  return '<button type="button" class="character-item" ' + attributes + (active === null ? '' : ' aria-pressed="' + active + '"') +
+    '>' + characterAvatar(character) + '<span><strong>' + esc(character.name) + '</strong>' +
+    (detail ? '<small>' + esc(detail) + '</small>' : '') + '</span></button>';
+}
+
+function renderCharacterList() {
+  const p = project();
+  if (!p || EnredoCharacters.issue(p)) return;
+  const query = characterSearchKey($('characterSearch').value.trim());
+  const role = $('characterRoleFilter').value, group = $('characterGroupFilter').value;
+  const roles = new Map(roleList(p).map(item => [item.id,item.name]));
+  const matches = p.characters.filter(person =>
+    (!role || person.roleIds?.includes(role)) && (!group || person.group === group) &&
+    (!query || characterSearchKey(person.name + ' ' + (person.nickname ?? '')).includes(query))).sort(byName);
+  const list = $('characterList');
+  list.innerHTML = matches.map(character => {
+    const detail = [character.nickname,profileRole(character,roles)].filter(Boolean).join(' · ');
+    return '<li>' + characterRow(character,'data-character-id="' + esc(character.id) + '"',detail,character.id === characterView.characterId) + '</li>';
+  }).join('');
+  displayPortraits(list,p);
+  $('characterListHint').hidden = !!matches.length;
+  $('characterListHint').textContent = t(p.characters.length ? 'characterNoMatches' : 'characterEmpty');
+}
+
+function characterDataList(record,keys,prefix = '') {
+  const rows = keys.filter(key => record?.[key]).map(key => '<div><dt>' + tx(prefix + key) +
+    '</dt><dd>' + esc(record[key]) + '</dd></div>');
+  return rows.length ? '<dl class="character-data">' + rows.join('') + '</dl>' : '';
+}
+
+function characterSection(title,body,action = '') {
+  return '<section class="character-section"><header class="character-section-header"><h3>' +
+    tx(title) + '</h3>' + action + '</header>' + body + '</section>';
+}
+
+function renderCharacterBeats(p,id) {
+  const model = EnredoNarrative.activeNarrativeModel(p);
+  const chapters = new Map(p.chapters.map(chapter => [chapter.id,chapter.title]));
+  const items = p.nodes.filter(node => EnredoCharacters.participantsOf(node).some(person => person.characterId === id)).map(node => {
+    const stage = activeNarrativeStage(node,model);
+    const detail = [chapters.get(node.chapter),stage && narrativeText(stage.name)].filter(Boolean).join(' · ');
+    return '<li><button type="button" class="structure-locate" data-character-locate="' + esc(node.id) +
+      '"><span><strong>' + esc(node.title || t('untitled')) + '</strong><small>' + esc(detail) +
+      '</small></span><span>' + tx('locateOnMap') + '</span></button></li>';
+  });
+  return characterSection('characterBeats',items.length ? '<ul class="character-items">' + items.join('') +
+    '</ul>' : '<p class="hint">' + tx('noCharacterBeats') + '</p>');
+}
+
+function renderCharacterProfile(p,character) {
+  const roles = new Map(roleList(p).map(item => [item.id,item.name]));
+  const assigned = (character.roleIds ?? []).map(id => roles.get(id)).filter(Boolean).join(' · ');
+  const personality = characterDataList(character.personality,EnredoCharacters.personalityFields);
+  const motivation = characterDataList(character.motivation,EnredoCharacters.motivationFields.filter(key => key !== 'goal'));
+  const profileData = characterDataList(character,['description','group','notes']) +
+    characterDataList(character.motivation,['goal']) +
+    (personality ? '<details class="character-more"><summary>' + tx('personality') + '</summary>' + personality + '</details>' : '') +
+    (motivation ? '<details class="character-more"><summary>' + tx('motivation') + '</summary>' + motivation + '</details>' : '');
+  const back = characterButton(characterView.origin ? 'characterBackMap' : 'characterBackList','id="backFromCharacter"');
+  const choose = characterButton(character.portraitId ? 'changePortrait' : 'addPortrait','id="choosePortrait"');
+  const remove = character.portraitId ? characterButton('removePortrait','id="removePortrait"','ghost') : '';
+  return '<div class="character-actions">' + back + '</div><section class="character-section">' +
+    '<div class="character-heading">' + characterAvatar(character) + '<div><h2 id="characterProfileTitle" tabindex="-1">' +
+    esc(character.name) + '</h2>' + (character.nickname ? '<small>' + esc(character.nickname) + '</small>' : '') +
+    (assigned ? '<small>' + esc(assigned) + '</small>' : '') + '</div></div><div class="character-actions">' +
+    characterButton('editCharacter','id="editCharacter"','primary') + choose + remove + '</div>' + profileData + '</section>' +
+    renderCharacterBeats(p,character.id) + renderCharacterArcs(p,character.id) + renderCharacterRelationships(p,character.id);
+}
+
+function renderCharacters() {
+  const p = project(), profile = $('characterProfile');
+  const issue = EnredoCharacters.issue(p);
+  $('characterBrowser').hidden = !!issue;
+  $('characterDataIssue').hidden = !issue;
+  if (issue) {
+    $('characterDataIssue').textContent = t('characterDataIssue',{field:issue});
+    return;
+  }
+  const character = selectedCharacter();
+  if (!character) Object.assign(characterView,{characterId:null,arcId:null,pathId:null});
+  $('charactersView').classList.toggle('has-profile',!!character);
+  const role = $('characterRoleFilter');
+  const group = $('characterGroupFilter');
+  const groups = [...new Set(p.characters.map(person => person.group).filter(Boolean))].sort((a,b) => a.localeCompare(b,language));
+  role.innerHTML = option('',t('allRoles'),true) + roleList(p).map(item => option(item.id,item.name,item.id === role.value)).join('');
+  group.innerHTML = option('',t('allGroups'),true) + groups.map(name => option(name,name,name === group.value)).join('');
+  renderCharacterList();
+  profile.innerHTML = character ? renderCharacterProfile(p,character) : '<p class="hint">' + tx('characterSelect') + '</p>';
+  displayPortraits(profile,p);
+}
+
+function characterTextField(label,name,value = '',required = false) {
+  return field(t(label),'<textarea name="' + name + '" rows="2" maxlength="4000"' + (required ? ' required' : '') +
+    '>' + esc('\n' + (value ?? '')) + '</textarea>');
+}
+
+function characterFields(record,fields,prefix = '',labelPrefix = '') {
+  return fields.map(key => characterTextField(labelPrefix + key,prefix + key,record?.[key])).join('');
+}
+
+function readCharacterFields(data,fields,record,prefix = '') {
+  const result = {...record};
+  for (const key of fields) {
+    const value = String(data.get(prefix + key) ?? '').trim();
+    if (value) result[key] = value;
+    else delete result[key];
+  }
+  return result;
+}
+
+function characterDialog(existing = null) {
+  const p = project();
+  if (!isCharactersView() || EnredoCharacters.issue(p)) return;
+  const name = field(t('name'),input('name',existing?.name ?? '','',true));
+  const roles = roleList(p);
+  const roleFields = '<fieldset class="character-roles"><legend>' + tx('roles') + '</legend>' + roles.map(role =>
+    '<label><input type="checkbox" name="roleIds" value="' + esc(role.id) + '"' +
+    (existing?.roleIds?.includes(role.id) ? ' checked' : '') + '><span>' + esc(role.name) + '</span></label>').join('') + '</fieldset>' +
+    field(t('primaryRole'),'<select name="primaryRoleId">' + option('',t('noPrimaryRole'),!existing?.primaryRoleId) +
+      roles.map(role => option(role.id,role.name,role.id === existing?.primaryRoleId)).join('') + '</select>');
+  const details = existing ? field(t('nickname'),input('nickname',existing.nickname ?? '')) +
+    field(t('group'),input('group',existing.group ?? '')) + characterFields(existing,['description','notes']) + roleFields +
+    characterTextField('goal','motivation-goal',existing.motivation?.goal) +
+    '<details class="character-more"><summary>' + tx('personality') + '</summary><div class="fields">' +
+    characterFields(existing.personality,EnredoCharacters.personalityFields,'personality-') +
+    '</div></details><details class="character-more"><summary>' + tx('motivation') + '</summary><div class="fields">' +
+    characterFields(existing.motivation,EnredoCharacters.motivationFields.filter(key => key !== 'goal'),'motivation-') + '</div></details>' : '';
+  showDialog({title:t(existing ? 'editCharacter' : 'newCharacter'),body:'<div class="fields">' + name + details + '</div>',
+    submitKey:existing ? 'save' : 'add',onSubmit:data => {
+      const label = data.get('name').trim();
+      if (!label) return;
+      closeDialog();
+      const id = existing?.id ?? uid();
+      edit(() => {
+        if (existing) {
+          existing.name = label;
+          for (const key of EnredoCharacters.profileFields) existing[key] = data.get(key).trim();
+          const primary = data.get('primaryRoleId') || null;
+          existing.roleIds = [...new Set([...data.getAll('roleIds'),...(primary ? [primary] : [])])];
+          existing.primaryRoleId = primary;
+          existing.personality = readCharacterFields(data,EnredoCharacters.personalityFields,existing.personality,'personality-');
+          existing.motivation = readCharacterFields(data,EnredoCharacters.motivationFields,existing.motivation,'motivation-');
+        } else {
+          p.characters.push({id,name:label,roleIds:[],primaryRoleId:null,portraitId:null});
+          $('characterSearch').value = '';
+          $('characterRoleFilter').value = '';
+          $('characterGroupFilter').value = '';
+        }
+        characterView.characterId = id;
+      });
+      $('characterProfileTitle')?.focus({preventScroll:true});
+    },remove:existing ? () => confirmRemoveCharacter(p,existing) : null});
+}
+
+function confirmRemoveCharacter(p,character) {
+  const id = character.id;
+  const beats = p.nodes.filter(node => EnredoCharacters.participantsOf(node).some(person => person.characterId === id)).length;
+  const arcs = p.characterArcs.filter(arc => arc.characterId === id).length;
+  const relations = p.relationships.filter(relation => relation.fromCharacterId === id || relation.toCharacterId === id).length;
+  confirmation(t('deleteCharacterTitle',{name:character.name}),t('deleteCharacterHint',{beats,arcs,relations}),() => {
+    edit(() => EnredoCharacters.removeCharacter(p,id));
+    $('newCharacter').focus();
+  });
+}
+
+function showCharacterRoles() {
+  const p = project();
+  if (!isCharactersView() || EnredoCharacters.issue(p)) return;
+  const choices = p.characterRoles.slice().sort(byName).map(role =>
+    '<li><button type="button" class="structure-locate" data-edit-role="' + esc(role.id) + '">' +
+    '<span>' + esc(role.name) + '</span><span>' + tx('editRole') + '</span></button></li>').join('');
+  showDialog({title:t('customRoles'),body:'<div class="fields">' + (choices ? '<ul class="character-items">' + choices +
+    '</ul>' : '<p class="hint">' + tx('noCustomRoles') + '</p>') + characterButton('addRole','id="addCharacterRole"','primary') + '</div>',
+    extra:form => {
+      for (const button of form.querySelectorAll('[data-edit-role]')) {
+        button.onclick = () => characterRoleDialog(p.characterRoles.find(role => role.id === button.dataset.editRole));
+      }
+      $('addCharacterRole').onclick = () => characterRoleDialog();
+    }});
+}
+
+function characterRoleDialog(existing = null) {
+  const p = project();
+  showDialog({title:t(existing ? 'editRole' : 'addRole'),body:field(t('name'),input('name',existing?.name ?? '','',true)),
+    submitKey:existing ? 'save' : 'add',onSubmit:data => {
+      const name = data.get('name').trim();
+      if (!name) return;
+      if (roleList(p).some(role => role.id !== existing?.id && characterSearchKey(role.name) === characterSearchKey(name))) {
+        flash('roleNameExists');
+        return;
+      }
+      closeDialog();
+      edit(() => {
+        if (existing) existing.name = name;
+        else p.characterRoles.push({id:uid(),name});
+      });
+      $('manageCharacterRoles').focus();
+    },remove:existing ? () => {
+      const count = p.characters.filter(character => character.roleIds?.includes(existing.id)).length;
+      confirmation(t('deleteRole'),t('deleteRoleHint',{count}),() => {
+        edit(() => {
+          p.characterRoles = p.characterRoles.filter(role => role.id !== existing.id);
+          for (const character of p.characters) {
+            if (character.primaryRoleId === existing.id) character.primaryRoleId = null;
+            if (character.roleIds?.includes(existing.id)) character.roleIds = character.roleIds.filter(id => id !== existing.id);
+          }
+        });
+        $('manageCharacterRoles').focus();
+      });
+    } : null});
+}
+
+function renderNodeParticipants(node,p) {
+  if (EnredoCharacters.issue(p)) return '';
+  const characters = new Map(p.characters.map(person => [person.id,person]));
+  const participants = EnredoCharacters.participantsOf(node);
+  const rows = participants.map(person => {
+    const character = characters.get(person.characterId);
+    const detail = [node.focalCharacterId === character.id && t('focalCharacter'),person.dramaticFunction].filter(Boolean).join(' · ');
+    return '<div class="participant-row">' + characterRow(character,'data-open-participant="' + esc(character.id) + '"',detail) +
+      '<button type="button" class="icon-btn small" data-edit-participant="' + esc(character.id) + '" title="' + tx('editParticipant') +
+      '" aria-label="' + tx('editParticipant') + '">' + icon('edit') + '</button></div>';
+  }).join('');
+  const action = p.characters.length > participants.length ?
+    characterButton('addParticipant','id="addParticipant"','path-add') : '';
+  return '<section class="paths"><div class="paths-title"><span>' + tx('participants') + '</span><span class="count">' +
+    participants.length + '</span></div>' + (rows ? '<div class="participant-list">' + rows + '</div>' :
+      '<p class="hint">' + tx('noParticipants') + '</p>') + action + '</section>';
+}
+
+function participantDialog(existingId = null) {
+  const p = project(), node = selectedNode();
+  if (!node || EnredoCharacters.issue(p)) return;
+  const participants = EnredoCharacters.participantsOf(node);
+  const existing = participants.find(person => person.characterId === existingId);
+  const assigned = new Set(participants.map(person => person.characterId));
+  const remaining = p.characters.filter(person => !assigned.has(person.id)).sort(byName);
+  if (!existing && !remaining.length) return;
+  const chooser = existing ? '<p>' + esc(characterById(existingId,p).name) + '</p>' :
+    field(t('character'),'<select name="characterId" required>' + option('',t('chooseCharacter'),true) +
+      remaining.map(person => option(person.id,person.name)).join('') + '</select>');
+  showDialog({title:t(existing ? 'editParticipant' : 'addParticipant'),body:'<div class="fields">' + chooser +
+    field(t('dramaticFunction'),input('dramaticFunction',existing?.dramaticFunction ?? '')) +
+    '<label class="character-check"><input type="checkbox" name="focal"' + (existingId && node.focalCharacterId === existingId ? ' checked' : '') +
+    '>' + tx('focalCharacter') + '</label></div>',submitKey:existing ? 'save' : 'add',onSubmit:data => {
+      const id = existing?.characterId ?? data.get('characterId');
+      if (!id || !characterById(id,p) || (!existing && !remaining.some(person => person.id === id))) return;
+      closeDialog();
+      edit(() => {
+        const part = {characterId:id,dramaticFunction:data.get('dramaticFunction').trim()};
+        if (existing) Object.assign(existing,part);
+        else node.participants = [...participants,part];
+        if (data.has('focal')) node.focalCharacterId = id;
+        else if (node.focalCharacterId === id) node.focalCharacterId = null;
+      });
+      $('inspector').querySelector('[data-open-participant="' + CSS.escape(id) + '"]')?.focus({preventScroll:true});
+    },remove:existing ? () => {
+      closeDialog();
+      edit(() => {
+        node.participants = node.participants.filter(part => part.characterId !== existingId);
+        if (node.focalCharacterId === existingId) node.focalCharacterId = null;
+      });
+      $('addParticipant')?.focus({preventScroll:true});
+    } : null});
+}
+
+function chooseCharacterPortrait() {
+  const character = selectedCharacter();
+  if (!character || portraitRequest) return;
+  portraitRequest = {project:project(),id:character.id};
+  if (android?.choosePortrait) android.choosePortrait();
+  else $('portraitFile').click();
+}
+
+function cancelAndroidPortrait(failed = false) {
+  if (portraitRequest && failed) flash('invalidPortrait');
+  portraitRequest = null;
+}
+
+async function receiveAndroidPortrait() {
+  const request = portraitRequest;
+  try {
+    const response = await fetch('/character-portrait',{cache:'no-store'});
+    if (!response.ok) throw new Error('Image unavailable');
+    if (!request) {
+      await response.body.cancel();
+      return;
+    }
+    const reader = response.body.getReader();
+    const chunks = [];
+    let bytes = 0;
+    for (;;) {
+      const {done,value} = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > EnredoCharacters.maxImageBytes) {
+        await reader.cancel();
+        throw new Error('Image too large');
+      }
+      chunks.push(value);
+    }
+    await attachCharacterPortrait(new Blob(chunks),request);
+  } catch {
+    if (portraitRequest === request) cancelAndroidPortrait(true);
+  }
+}
+
+async function portraitThumbnail(file) {
+  if (!file.size || file.size > EnredoCharacters.maxImageBytes) throw new Error('Image size');
+  const bytes = new Uint8Array(await file.slice(0,12).arrayBuffer());
+  const hasSignature = (signature,start = 0) => signature.every((byte,index) => bytes[index+start] === byte);
+  const type = hasSignature([255,216,255]) ? 'image/jpeg' :
+    hasSignature([137,80,78,71,13,10,26,10]) ? 'image/png' :
+    hasSignature([82,73,70,70]) && hasSignature([87,69,66,80],8) ? 'image/webp' : null;
+  if (!type) throw new Error('Image format');
+  const dataUrl = await new Promise((resolve,reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file.slice(0,file.size,type));
+  });
+  const image = new Image();
+  await new Promise((resolve,reject) => {
+    image.onload = resolve;
+    image.onerror = reject;
+    image.src = dataUrl;
+  });
+  const width = image.naturalWidth, height = image.naturalHeight;
+  if (!width || !height || width*height > 24_000_000) throw new Error('Image dimensions');
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d',{alpha:false});
+  for (const limit of [256,192,128]) {
+    const scale = Math.min(1,limit/Math.max(width,height));
+    canvas.width = Math.max(1,Math.round(width*scale));
+    canvas.height = Math.max(1,Math.round(height*scale));
+    context.fillStyle = '#fff';
+    context.fillRect(0,0,canvas.width,canvas.height);
+    context.drawImage(image,0,0,canvas.width,canvas.height);
+    for (const quality of [.86,.7,.54]) {
+      const thumbnail = canvas.toDataURL('image/jpeg',quality);
+      if (EnredoCharacters.validPortrait(thumbnail)) return thumbnail;
+    }
+  }
+  throw new Error('Thumbnail size');
+}
+
+async function attachCharacterPortrait(file,request) {
+  if (!request) return;
+  try {
+    const data = await portraitThumbnail(file);
+    const p = request.project;
+    if (portraitRequest !== request || !state.projects.includes(p) || !characterById(request.id,p)) return;
+    edit(() => EnredoCharacters.setPortrait(p,request.id,{id:uid(),data}));
+    if (isCharactersView() && characterView.characterId === request.id) $('choosePortrait')?.focus({preventScroll:true});
+  } catch {
+    if (portraitRequest === request) flash('invalidPortrait');
+  } finally {
+    if (portraitRequest === request) portraitRequest = null;
+  }
+}
+
+function removeCharacterPortrait() {
+  const character = selectedCharacter();
+  if (!character?.portraitId) return;
+  edit(() => EnredoCharacters.setPortrait(project(),character.id,null));
+  $('choosePortrait')?.focus({preventScroll:true});
+}
+
+const eventPhases = {development:'development',ending:'arcEnding'};
+const arcOutcomes = {positive:'arcPositive',negative:'arcNegative',steady:'arcSteady'};
+const characterFates = {alive:'arcAlive',dead:'arcDead'};
+const goalStates = {achieved:'goalAchieved',failed:'goalFailed',abandoned:'goalAbandoned'};
+const relationStates = {absent:'relationshipNone',active:'relationshipActive',strained:'relationshipStrained',broken:'relationshipBroken'};
+
+function characterOptions(values,labels,selected,emptyKey = null) {
+  return (emptyKey ? option('',t(emptyKey),!selected) : '') +
+    values.map(value => option(value,t(labels[value]),value === selected)).join('');
+}
+
+const relationshipName = relation => relation.type === 'custom' ? relation.customLabel : t('relation-' + relation.type);
+const selectedArc = () => project().characterArcs.find(arc => arc.id === characterView.arcId && arc.characterId === characterView.characterId);
+
+function renderArcEvent(event,index,eventCount,context) {
+  const node = context.nodes.get(event.nodeId);
+  const edge = context.edges.get(event.edgeId);
+  const route = context.routes.get(event.pathId);
+  const state = event.changes ?? {};
+  const labels = [
+    t(eventPhases[event.phase]),
+    route?.name ?? t('commonArcPath'),
+    event.arcType && t(arcOutcomes[event.arcType]),
+    state.fate && t(characterFates[state.fate]),
+    state.objectiveStatus && t(goalStates[state.objectiveStatus])
+  ].filter(Boolean);
+  const references = node ? characterButton('locateOnMap','data-character-locate="' + esc(node.id) + '"','ghost') : '';
+  const changes = event.relationshipChanges?.map(change => {
+    const relation = context.relations.get(change.relationshipId);
+    return relationshipName(relation) + ' → ' + t(relationStates[change.state]);
+  }).join(' · ');
+  const id = esc(event.id);
+  return '<li class="character-event"><small>' + esc(labels.join(' · ')) + '</small><p>' + esc(event.summary) + '</p>' +
+    (node ? '<small>' + esc([node.title,edge?.label].filter(Boolean).join(' · ')) + '</small>' : '') +
+    (Object.hasOwn(state,'group') ? '<small>' + (state.group === null ? tx('leaveGroup') :
+      tx('group') + ' · ' + esc(state.group)) + '</small>' : '') +
+    (state.belief ? '<small>' + tx('belief') + ' · ' + esc(state.belief) + '</small>' : '') +
+    (changes ? '<small>' + esc(changes) + '</small>' : '') +
+    '<div class="character-actions">' + references + characterButton('editArcEvent','data-edit-arc-event="' + id + '"','ghost') +
+    (index > 0 ? characterButton('arcMoveUp','data-arc-event-up="' + id + '"','ghost') : '') +
+    (index < eventCount-1 ? characterButton('arcMoveDown','data-arc-event-down="' + id + '"','ghost') : '') + '</div></li>';
+}
+
+function renderArcDetails(p,arc) {
+  const context = {
+    nodes:new Map(p.nodes.map(node => [node.id,node])),
+    edges:new Map(p.edges.map(edge => [edge.id,edge])),
+    routes:new Map(p.arcPaths.map(path => [path.id,path])),
+    relations:new Map(p.relationships.map(relation => [relation.id,relation]))
+  };
+  if (!context.routes.has(characterView.pathId)) characterView.pathId = null;
+  const route = context.routes.get(characterView.pathId);
+  const choices = option('',t('allArcPaths'),!route) + p.arcPaths.map(path => option(path.id,path.name,path === route)).join('');
+  const events = EnredoCharacters.eventsForPath(arc,characterView.pathId);
+  const initial = (arc.initial?.summary ? '<p>' + esc(arc.initial.summary) + '</p>' : '') +
+    characterDataList(arc.initial,EnredoCharacters.initialFields.filter(key => key !== 'summary'));
+  return '<div class="character-actions">' + characterButton('editArc','id="editArc"') +
+    characterButton('newArcEvent','id="newArcEvent"','primary') + '</div>' +
+    (initial ? '<section><h4>' + tx('initialState') + '</h4>' + initial + '</section>' : '') +
+    '<div class="character-arc-filter">' +
+    field(t('arcPath'),'<select id="arcPathFilter">' + choices + '</select>') +
+    characterButton('newArcPath','id="newArcPath"') +
+    (route ? characterButton('editArcPath','id="editArcPath"') : '') + '</div>' +
+    (events.length ? '<ol class="character-events">' + events.map((event,index) =>
+      renderArcEvent(event,index,events.length,context)).join('') + '</ol>' : '<p class="hint">' + tx('noArcEvents') + '</p>');
+}
+
+function renderCharacterArcs(p,id) {
+  const arcs = p.characterArcs.filter(arc => arc.characterId === id);
+  const selected = selectedArc();
+  const body = arcs.length ? '<ul class="character-items">' + arcs.map(arc => '<li><button type="button" class="structure-locate"' +
+    ' aria-expanded="' + (arc === selected) + '" data-open-arc="' + esc(arc.id) + '"><strong>' + esc(arc.title) +
+    '</strong><span>' + icon('chevron') + '</span></button></li>').join('') + '</ul>' : '<p class="hint">' + tx('noArcs') + '</p>';
+  return characterSection('characterArcs',body + (selected ? renderArcDetails(p,selected) : ''),characterButton('newArc','id="newArc"'));
+}
+
+function arcDialog(existing = null) {
+  const p = project(), character = selectedCharacter();
+  if (!character) return;
+  const initial = existing?.initial;
+  showDialog({title:t(existing ? 'editArc' : 'newArc'),body:'<div class="fields">' +
+    field(t('title'),input('title',existing?.title ?? '','',true)) +
+    characterTextField('initialSummary','initial-summary',initial?.summary) +
+    '<details class="character-more"><summary>' + tx('initialState') + '</summary><div class="fields">' +
+    characterFields(initial,EnredoCharacters.initialFields.filter(key => key !== 'summary'),'initial-') + '</div></details></div>',
+    submitKey:existing ? 'save' : 'add',onSubmit:data => {
+      const title = data.get('title').trim();
+      if (!title) return;
+      const record = readCharacterFields(data,EnredoCharacters.initialFields,initial,'initial-');
+      closeDialog();
+      edit(() => {
+        if (existing) {
+          Object.assign(existing,{title,initial:record});
+        } else {
+          const id = uid();
+          p.characterArcs.push({id,characterId:character.id,title,initial:record,events:[]});
+          Object.assign(characterView,{arcId:id,pathId:null});
+        }
+      });
+      $('newArcEvent')?.focus({preventScroll:true});
+    },remove:existing ? () => confirmation(t('deleteArc'),t('deleteArcHint',{count:existing.events.length}),() => {
+      edit(() => {
+        p.characterArcs = p.characterArcs.filter(arc => arc.id !== existing.id);
+        Object.assign(characterView,{arcId:null,pathId:null});
+      });
+      $('newArc').focus({preventScroll:true});
+    }) : null});
+}
+
+function arcPathDialog(existing = null) {
+  const p = project();
+  if (!selectedArc()) return;
+  const used = existing && p.characterArcs.some(arc => arc.events.some(event => event.pathId === existing.id));
+  showDialog({title:t(existing ? 'editArcPath' : 'newArcPath'),body:'<div class="fields">' +
+    field(t('name'),input('name',existing?.name ?? '','',true)) +
+    (used ? '<p class="hint">' + tx('arcPathUsed') + '</p>' : '') + '</div>',
+    submitKey:existing ? 'save' : 'add',onSubmit:data => {
+      const name = data.get('name').trim();
+      if (!name) return;
+      if (p.arcPaths.some(path => path.id !== existing?.id && characterSearchKey(path.name) === characterSearchKey(name))) {
+        flash('pathNameExists');
+        return;
+      }
+      closeDialog();
+      edit(() => {
+        if (existing) {
+          existing.name = name;
+        } else {
+          const id = uid();
+          p.arcPaths.push({id,name});
+          characterView.pathId = id;
+        }
+      });
+      $('arcPathFilter')?.focus({preventScroll:true});
+    },remove:existing && !used ? () => confirmation(t('deleteArcPath'),existing.name,() => {
+      edit(() => {
+        p.arcPaths = p.arcPaths.filter(path => path.id !== existing.id);
+        characterView.pathId = null;
+      });
+      $('arcPathFilter')?.focus({preventScroll:true});
+    }) : null});
+}
+
+function arcEventDialog(existing = null) {
+  const p = project(), arc = selectedArc();
+  if (!arc) return;
+  const pathId = existing ? existing.pathId : characterView.pathId;
+  const routes = option('',t('commonArcPath'),!pathId) + p.arcPaths.map(path => option(path.id,path.name,path.id === pathId)).join('');
+  const nodes = destinationOptions(null,existing?.nodeId);
+  const relations = p.relationships.filter(relation => relation.fromCharacterId === arc.characterId);
+  const relationFields = relations.map((relation,index) => {
+    const state = existing?.relationshipChanges?.find(change => change.relationshipId === relation.id)?.state;
+    const other = characterById(relation.toCharacterId,p);
+    return field(relationshipName(relation) + ' → ' + other.name,'<select name="relation' + index + '">' +
+      characterOptions(EnredoCharacters.relationshipStates,relationStates,state,'noRecord') + '</select>');
+  }).join('');
+  const state = existing?.changes ?? {};
+  const dropdown = (key,values,labels,value,name = key) =>
+    field(t(key),'<select name="' + name + '">' + characterOptions(values,labels,value,'noRecord') + '</select>');
+  showDialog({
+    title:t(existing ? 'editArcEvent' : 'newArcEvent'),
+    body:'<div class="fields">' + characterTextField('eventSummary','summary',existing?.summary,true) +
+      field(t('eventPhase'),'<select name="phase">' + characterOptions(EnredoCharacters.phases,eventPhases,existing?.phase) + '</select>') +
+      field(t('arcPath'),'<select name="pathId">' + routes + '</select>') +
+      field(t('linkedBeat'),'<select name="nodeId">' + option('',t('noLinkedBeat'),!existing?.nodeId) + nodes + '</select>') +
+      field(t('incomingConnection'),'<select name="edgeId"></select>') +
+      '<details class="character-more"><summary>' + tx('arcChanges') + '</summary><div class="fields">' +
+      dropdown('arcOutcomeType',EnredoCharacters.arcTypes,arcOutcomes,existing?.arcType) +
+      dropdown('arcFate',EnredoCharacters.fates,characterFates,state.fate,'fate') +
+      dropdown('objectiveStatus',EnredoCharacters.objectiveStates,goalStates,state.objectiveStatus) +
+      field(t('group'),input('group',state.group ?? '')) +
+      '<label class="character-check"><input type="checkbox" name="leaveGroup"' + (state.group === null ? ' checked' : '') +
+      '>' + tx('leaveGroup') + '</label>' + characterTextField('belief','belief',state.belief) +
+      (relationFields ? '<strong>' + tx('relationshipChanges') + '</strong>' + relationFields : '') + '</div></details></div>',
+    submitKey:existing ? 'save' : 'add',
+    extra:form => {
+      const {nodeId,edgeId,phase,arcOutcomeType,group,leaveGroup} = form.elements;
+      const updateEdges = (selected = '') => {
+        const incoming = p.edges.filter(edge => edge.to === nodeId.value);
+        edgeId.innerHTML = option('',t('noConnection'),!selected) + incoming.map(edge => {
+          const source = nodeById(edge.from);
+          return option(edge.id,[source.title,edge.label].filter(Boolean).join(' · '),edge.id === selected);
+        }).join('');
+        edgeId.disabled = !incoming.length;
+      };
+      const updateOutcome = () => { arcOutcomeType.disabled = phase.value !== 'ending'; };
+      const updateGroup = () => { group.disabled = leaveGroup.checked; };
+      nodeId.onchange = () => updateEdges();
+      phase.onchange = updateOutcome;
+      leaveGroup.onchange = updateGroup;
+      updateEdges(existing?.edgeId);
+      updateOutcome();
+      updateGroup();
+    },
+    onSubmit:data => {
+      const summary = data.get('summary').trim();
+      if (!summary) return;
+      const group = data.get('group')?.trim();
+      const belief = data.get('belief').trim();
+      const changes = {...existing?.changes};
+      for (const key of ['group','belief','fate','objectiveStatus']) delete changes[key];
+      if (data.has('leaveGroup')) changes.group = null;
+      else if (group) changes.group = group;
+      if (belief) changes.belief = belief;
+      for (const key of ['fate','objectiveStatus']) if (data.get(key)) changes[key] = data.get(key);
+      const relationshipChanges = relations.flatMap((relation,index) => {
+        const state = data.get('relation' + index);
+        return state ? [{relationshipId:relation.id,state}] : [];
+      });
+      const event = {
+        ...existing,id:existing?.id ?? uid(),summary,phase:data.get('phase'),
+        nodeId:data.get('nodeId') || null,edgeId:data.get('edgeId') || null,pathId:data.get('pathId') || null,
+        arcType:data.get('arcOutcomeType') || null,changes,relationshipChanges
+      };
+      closeDialog();
+      edit(() => {
+        if (existing) Object.assign(existing,event);
+        else arc.events.push(event);
+        if (characterView.pathId && event.pathId && event.pathId !== characterView.pathId) characterView.pathId = event.pathId;
+      });
+      $('characterProfile').querySelector('[data-edit-arc-event="' + CSS.escape(event.id) + '"]')?.focus({preventScroll:true});
+    },
+    remove:existing ? () => {
+      closeDialog();
+      edit(() => { arc.events = arc.events.filter(event => event.id !== existing.id); });
+      $('newArcEvent')?.focus({preventScroll:true});
+    } : null
+  });
+}
+
+function moveArcEvent(id,step) {
+  const arc = selectedArc();
+  if (!arc) return;
+  const visible = EnredoCharacters.eventsForPath(arc,characterView.pathId);
+  const position = visible.findIndex(event => event.id === id);
+  const adjacent = visible[position+step];
+  if (position < 0 || !adjacent) return;
+  const index = arc.events.indexOf(visible[position]);
+  const next = arc.events.indexOf(adjacent);
+  edit(() => {
+    const [event] = arc.events.splice(index,1);
+    arc.events.splice(next,0,event);
+  });
+  $('characterProfile').querySelector('[data-edit-arc-event="' + CSS.escape(id) + '"]')?.focus({preventScroll:true});
+}
+
+function renderCharacterRelationships(p,id) {
+  const relations = p.relationships.filter(relation => relation.fromCharacterId === id || relation.toCharacterId === id);
+  const updates = new Map(relations.map(relation => [relation.id,[]]));
+  const routes = new Map(p.arcPaths.map(path => [path.id,path.name]));
+  for (const arc of p.characterArcs) {
+    for (const event of arc.events) {
+      for (const change of event.relationshipChanges ?? []) {
+        updates.get(change.relationshipId)?.push([event,change.state]);
+      }
+    }
+  }
+  const names = new Map(p.characters.map(character => [character.id,character.name]));
+  const list = relations.map(relation => {
+    const heading = names.get(relation.fromCharacterId) + ' → ' + names.get(relation.toCharacterId);
+    const changes = updates.get(relation.id).map(([event,state]) => '<li><small>' +
+      esc([routes.get(event.pathId) ?? t('commonArcPath'),t(relationStates[state])].join(' · ')) +
+      '</small><p>' + esc(event.summary) + '</p></li>').join('');
+    return '<li class="character-event"><strong>' + esc(heading) + '</strong><small>' +
+      esc([relationshipName(relation),t('initialState'),t(relationStates[relation.initialState])].join(' · ')) + '</small>' +
+      (relation.notes ? '<p>' + esc(relation.notes) + '</p>' : '') +
+      (changes ? '<details class="character-more"><summary>' + tx('relationshipChanges') +
+        '</summary><ul class="character-items">' + changes + '</ul></details>' : '') +
+      characterButton('editRelationship','data-edit-relationship="' + esc(relation.id) + '"','ghost') + '</li>';
+  }).join('');
+  const body = list ? '<ul class="character-items">' + list + '</ul>' :
+    '<p class="hint">' + tx(p.characters.length < 2 ? 'relationshipFirst' : 'relationshipEmpty') + '</p>';
+  return characterSection('relationships',body,p.characters.length > 1 ? characterButton('newRelationship','id="newRelationship"') : '');
+}
+
+function relationshipDialog(existing = null) {
+  const p = project(), character = selectedCharacter();
+  if (!character || p.characters.length < 2) return;
+  const people = p.characters.filter(person => person.id !== character.id).sort(byName);
+  const endpoints = existing ?
+    '<p>' + esc(characterById(existing.fromCharacterId,p).name + ' → ' + characterById(existing.toCharacterId,p).name) + '</p>' :
+    field(t('character'),'<select name="otherCharacterId" required>' + option('',t('chooseCharacter'),true) +
+      people.map(person => option(person.id,person.name)).join('') + '</select>') +
+    field(t('relationshipDirection'),'<select name="direction">' +
+      option('from',t('relationshipFromCharacter'),true) + option('to',t('relationshipToCharacter')) + '</select>');
+  const types = EnredoCharacters.relationshipTypes.map(type =>
+    option(type,t('relation-' + type),type === (existing?.type ?? 'trust'))).join('');
+  showDialog({
+    title:t(existing ? 'editRelationship' : 'newRelationship'),
+    body:'<div class="fields">' + endpoints + field(t('relationshipType'),'<select name="type">' + types + '</select>') +
+      field(t('relationshipLabel'),input('customLabel',existing?.customLabel ?? '')) +
+      field(t('initialState'),'<select name="initialState">' +
+        characterOptions(EnredoCharacters.relationshipStates,relationStates,existing?.initialState ?? 'active') + '</select>') +
+      characterTextField('notes','notes',existing?.notes) + '</div>',
+    submitKey:existing ? 'save' : 'add',
+    extra:form => {
+      const {type,customLabel} = form.elements;
+      const update = () => {
+        customLabel.closest('label').hidden = type.value !== 'custom';
+        customLabel.required = type.value === 'custom';
+      };
+      type.onchange = update;
+      update();
+    },
+    onSubmit:data => {
+      const other = data.get('otherCharacterId');
+      if (!existing && !people.some(person => person.id === other)) return;
+      const type = data.get('type');
+      const customLabel = type === 'custom' ? data.get('customLabel').trim() : '';
+      if (type === 'custom' && !customLabel) return;
+      const outgoing = data.get('direction') !== 'to';
+      const relationship = {
+        ...existing,id:existing?.id ?? uid(),type,customLabel,initialState:data.get('initialState'),notes:data.get('notes').trim(),
+        fromCharacterId:existing?.fromCharacterId ?? (outgoing ? character.id : other),
+        toCharacterId:existing?.toCharacterId ?? (outgoing ? other : character.id)
+      };
+      closeDialog();
+      edit(() => {
+        if (existing) Object.assign(existing,relationship);
+        else p.relationships.push(relationship);
+      });
+      $('characterProfile').querySelector('[data-edit-relationship="' + CSS.escape(relationship.id) + '"]')?.focus({preventScroll:true});
+    },
+    remove:existing ? () => confirmation(t('relationshipDelete'),t('relationshipDeleteHint'),() => {
+      edit(() => EnredoCharacters.forgetRelationships(p,new Set([existing.id])));
+      $('newRelationship')?.focus({preventScroll:true});
+    }) : null
+  });
 }
 
 function renderInspector() {
@@ -943,7 +2844,7 @@ function renderInspector() {
   $('inspectorTitle').innerHTML = icon(n ? 'panel' : 'book') + ' ' + tx(n ? 'nodeDetails' : 'navigation');
   $('clearSelection').hidden = !n;
   if (!n) {
-    const items = overview ? '<div class="overview-chapters">' +
+    const items = isWholeStory() ? '<div class="overview-chapters">' +
       p.chapters.map((c,i) => chapterButton(c,i,false)).join('') + '</div>' : '';
     $('inspector').innerHTML = '<p class="hint">' + tx('selectNodeHint') + '</p>' + items;
     return;
@@ -961,13 +2862,16 @@ function renderInspector() {
   $('inspector').innerHTML =
     '<div class="fields"><label class="field"><span>' + tx('title') + '</span><input id="nodeTitle" maxlength="120" value="' + esc(n.title) + '"></label>' +
     '<label class="field"><span>' + tx('nodeType') + '</span><select id="nodeKind">' + kindOptions(n.kind) + '</select></label>' +
+    narrativeStageField(n,p) +
     '<label class="field"><span>' + tx('notes') + '</span><textarea id="nodeNotes" placeholder="' + tx('notesHint') + '" rows="3">' +
     esc(n.notes[0] === '\n' ? '\n' + n.notes : n.notes) + '</textarea></label></div>' +
+    renderNodeParticipants(n,p) +
     '<section class="paths"><div class="paths-title"><span>' + tx('outgoingPaths') + '</span><span class="count">' + outgoing.length +
     '</span></div><div class="path-list">' + (list || '<p class="hint">' + tx('noPaths') + '</p>') +
     '</div><button class="btn path-add" id="addPath">' + icon('plus') + ' ' + tx('addPath') + '</button></section>' +
     '<div class="node-actions"><button class="btn ghost" id="duplicate">' + icon('copy') + ' ' + tx('duplicate') + '</button>' +
-    '<button class="btn ghost remove" id="removeNode">' + icon('trash') + ' ' + tx('delete') + '</button></div>';
+     '<button class="btn ghost remove" id="removeNode">' + icon('trash') + ' ' + tx('delete') + '</button></div>';
+  if (!EnredoCharacters.issue(p)) displayPortraits($('inspector'),p);
 }
 function kindOptions(active) {
   return kinds.map(value => option(value,t(value),value === active)).join('');
@@ -987,7 +2891,7 @@ function bounds(nodes) {
 function buildScene() {
   const p = project(), headings = [];
   let nodes;
-  if (overview) {
+  if (isWholeStory()) {
     nodes = [];
     const byChapter = new Map(p.chapters.map(c => [c.id,[]]));
     p.nodes.forEach(n => byChapter.get(n.chapter).push(n));
@@ -1005,15 +2909,21 @@ function buildScene() {
   return {nodes,headings,byId,edges:p.edges.filter(e => byId.has(e.from) && byId.has(e.to))};
 }
 function renderCards() {
+  const model = EnredoNarrative.activeNarrativeModel(project());
   $('cards').innerHTML =
     scene.headings.map(c => '<span class="world-label" style="left:' + c.x + 'px;top:' + c.y + 'px">' + esc(c.text) + '</span>').join('') +
     scene.nodes.map(n => {
       const title = esc(n.title || t('untitled'));
-      return '<button class="node' + (n.id === selection ? ' selected' : '') +
+      const active = activeNarrativeStage(n,model);
+      const preserved = n.narrativeStage && !active;
+      const stageName = active ? narrativeText(active.name) :
+        preserved ? t('preservedStage',{stage:narrativeStageName(n.narrativeStage)}) : '';
+      const badge = stageName ? '<span class="node-stage clip' + (preserved ? ' preserved' : '') + '">' + esc(stageName) + '</span>' : '';
+      return '<button class="node' + (n.id === selection ? ' selected' : '') + (badge ? ' has-narrative-stage' : '') +
         (n.id === source ? ' connection-source' : '') + '" data-node="' + esc(n.id) + '" aria-pressed="' + (n.id === selection) +
-        '" style="left:' + n.x + 'px;top:' + n.y + 'px" title="' + title + '"><span class="tag" data-kind="' +
+        '" style="left:' + n.x + 'px;top:' + n.y + 'px" title="' + title + (badge ? ' · ' + esc(stageName) : '') + '"><span class="tag" data-kind="' +
         n.kind + '">' + icon(n.kind) + tx(n.kind) + '</span><span class="node-title">' + title +
-        '</span><span class="port" aria-hidden="true"></span><span class="port out" aria-hidden="true"></span></button>';
+        '</span>' + badge + '<span class="port" aria-hidden="true"></span><span class="port out" aria-hidden="true"></span></button>';
     }).join('');
 }
 
@@ -1109,7 +3019,7 @@ function fitMap() {
 }
 function resizeGraph() {
   const {clientWidth:width,clientHeight:height} = $('graph');
-  if (atHome || !chapter() || !width || !height || !graphViewport) return;
+  if (atHome || !isMapView() || !chapter() || !width || !height || !graphViewport) return;
   if (width === graphViewport.width && height === graphViewport.height) return;
   view.x += (width - graphViewport.width)/2;
   view.y += (height - graphViewport.height)/2;
@@ -1126,7 +3036,7 @@ function zoomAt(factor,x = $('graph').clientWidth/2,y = $('graph').clientHeight/
 }
 
 function renderMode() {
-  $('graph').classList.toggle('overview',overview);
+  $('graph').classList.toggle('overview',isWholeStory());
   $('graph').classList.toggle('connecting',connectMode);
   $('connect').classList.toggle('on',connectMode);
   $('connect').setAttribute('aria-pressed',connectMode);
@@ -1153,12 +3063,12 @@ function renderWorkspaceControls() {
   detailsButton.setAttribute('aria-label',detailsLabel);
   detailsButton.setAttribute('aria-expanded',!detailsCollapsed);
   detailsButton.classList.toggle('on',!detailsCollapsed);
-  $('detailPanel').hidden = detailsCollapsed;
+  $('detailPanel').hidden = detailsCollapsed || !isMapView() || !chapter();
   $('editorWorkspace').classList.toggle('details-collapsed',detailsCollapsed);
   $('addNodeFullscreen').hidden = !diagramFullscreen;
 }
 function setDiagramFullscreen(active) {
-  if (active === diagramFullscreen || (active && (atHome || !chapter()))) return;
+  if (active === diagramFullscreen || (active && (atHome || !isMapView() || !chapter()))) return;
   if (active) diagramScroll = window.scrollY;
   diagramFullscreen = active;
   detailsCollapsed = false;
@@ -1174,8 +3084,9 @@ function toggleDiagramDetails() {
   renderWorkspaceControls();
 }
 function render(fit = false) {
+  if (fit) mapNeedsFit = true;
   if (!project()) atHome = true;
-  if (diagramFullscreen && (atHome || !chapter())) setDiagramFullscreen(false);
+  if (diagramFullscreen && (atHome || !isMapView() || !chapter())) setDiagramFullscreen(false);
   $('goHome').classList.toggle('active',atHome);
   $('goHome').setAttribute('aria-current',atHome ? 'page' : 'false');
   $('spaceView').hidden = !atHome;
@@ -1189,8 +3100,17 @@ function render(fit = false) {
     return;
   }
   const currentChapter = chapter(), currentNode = selectedNode();
-  if (selection && (!currentNode || (!overview && currentNode.chapter !== currentChapter?.id))) selection = null;
+  if (!currentChapter && isWholeStory()) viewMode = 'timeline';
+  if (selection && (!currentNode || (viewMode === 'timeline' && currentNode.chapter !== currentChapter?.id))) selection = null;
   renderHeader();
+  if (isStructureView()) {
+    renderStructure();
+    return;
+  }
+  if (isCharactersView()) {
+    renderCharacters();
+    return;
+  }
   if (!currentChapter) return;
   scene = buildScene();
   renderCards();
@@ -1199,25 +3119,31 @@ function render(fit = false) {
   $('emptyCanvas').hidden = scene.nodes.length > 0;
   $('connect').disabled = scene.nodes.length < 2;
   $('layout').disabled = scene.nodes.length < 2;
-  if (fit) fitMap();
-  else {
+  if (mapNeedsFit) {
+    fitMap();
+    mapNeedsFit = false;
+  } else {
     renderWires();
     updateView();
   }
 }
 
-function switchView(wholeStory) {
-  if (overview === wholeStory) return;
-  overview = wholeStory;
-  if (!overview && selectedNode()) state.chapter = selectedNode().chapter;
+function switchView(next) {
+  if (atHome || viewMode === next || (next === 'whole-story' && !chapter())) return;
+  const previousMapMode = isMapView() ? viewMode : lastMapMode;
+  viewMode = next;
+  lastMapMode = previousMapMode;
   stopConnect();
-  save();
-  render(true);
+  if (isMapView()) {
+    if (next === 'timeline' && selectedNode()) state.chapter = selectedNode().chapter;
+    save();
+  }
+  render(isMapView() && next !== previousMapMode);
 }
 function inspect(id,recenter = false) {
   const n = nodeById(id);
-  if (!n) return;
-  const changedChapter = !overview && n.chapter !== chapter().id;
+  if (!n || !isMapView()) return;
+  const changedChapter = viewMode === 'timeline' && n.chapter !== chapter()?.id;
   if (changedChapter) state.chapter = n.chapter;
   selection = id;
   save();
@@ -1227,6 +3153,7 @@ function inspect(id,recenter = false) {
 function reveal(id) {
   const n = scene.byId.get(id), graph = $('graph');
   if (!n) return;
+  resizeGraph();
   const left = n.x * view.zoom + view.x, top = n.y * view.zoom + view.y;
   if (left >= 13 && top >= 13 && left + W*view.zoom <= graph.clientWidth-13 &&
       top + H*view.zoom <= graph.clientHeight-55) return;
@@ -1255,14 +3182,14 @@ function destinationOptions(from,selected) {
       matches.map(n => option(n.id,n.title || t('untitled'),n.id === selected)).join('') + '</optgroup>' : '';
   }).join('');
 }
-function showDialog({title,body,submitKey,onSubmit,remove,extra}) {
+function showDialog({title,body,submitKey,onSubmit,remove,extra,danger = submitKey === 'delete'}) {
   closeMenus();
   const form = $('dialogForm');
   $('dialogTitle').textContent = title;
   form.innerHTML = body + '<div class="dialog-actions">' +
     (remove ? '<button type="button" class="btn danger" id="dialogRemove">' + tx('delete') + '</button>' : '') +
     '<button type="button" class="btn" id="dialogCancel">' + tx(onSubmit ? 'cancel' : 'close') + '</button>' +
-    (onSubmit ? '<button class="btn ' + (submitKey === 'delete' ? 'danger' : 'primary') + '" type="submit">' + tx(submitKey) + '</button>' : '') +
+    (onSubmit ? '<button class="btn ' + (danger ? 'danger' : 'primary') + '" type="submit">' + tx(submitKey) + '</button>' : '') +
     '</div>';
   form.onsubmit = event => {
     event.preventDefault();
@@ -1301,7 +3228,7 @@ function confirmation(title,message,onConfirm) {
   $('dialogCancel').focus();
 }
 function showHelp() {
-  const helpItems = ['helpHome','helpChapter','helpPath','helpStory',
+  const helpItems = ['helpHome','helpChapter','helpPath','helpStory','helpStructure','helpCharacters',
     android ? 'touchHelpZoom' : 'helpZoom',android ? 'deviceHelpFiles' : 'helpFiles'];
   const body = '<ul>' + helpItems.map(key => '<li>' + t(key) + '</li>').join('') + '</ul>';
   showDialog({title:t('helpTitle'),body});
@@ -1333,18 +3260,47 @@ function removeProject(p) {
       flash('projectDeleted');
     });
 }
+function narrativeModelField(selected) {
+  const {models} = EnredoNarrative;
+  const choices = models.map(model => option(model.id,narrativeText(model.name),model.id === selected)).join('');
+  const placeholder = EnredoNarrative.getNarrativeModel(selected) ? '' :
+    '<option value="" selected disabled>' + tx('chooseNarrativeModel') + '</option>';
+  const explanations = models.map(model => '<div><dt>' + esc(narrativeText(model.name)) + '</dt><dd>' +
+    esc(narrativeText(model.summary)) + '</dd></div>').join('');
+  return field(t('narrativeModel'),'<select name="narrativeModel" required>' + placeholder + choices + '</select>') +
+    '<dl class="model-options">' + explanations + '</dl>';
+}
 function createProject() {
-  showDialog({title:t('newProject'),body:field(t('storyName'),input('title','',t('myStory'),true)),
+  showDialog({title:t('newProject'),body:'<div class="fields">' +
+    field(t('storyName'),input('title','',t('myStory'),true)) + narrativeModelField(EnredoNarrative.defaultModelId) + '</div>',
     submitKey:'createProject',onSubmit:data => {
       const title = data.get('title').trim();
       if (!title) return;
+      const model = EnredoNarrative.getNarrativeModel(data.get('narrativeModel'));
       closeDialog();
       edit(() => {
-        const p = {id:uid(),title,chapters:[{id:uid(),title:t('newChapter')}],nodes:[],edges:[]};
+        const p = EnredoCharacters.normalizeProject({id:uid(),title,chapters:[{id:uid(),title:t('newChapter')}],nodes:[],edges:[],
+          narrativeModel:model?.id ?? EnredoNarrative.defaultModelId});
         state.projects.push(p);
         enterProject(p);
       },{fit:true});
       $('chapterTitle').focus();
+    }});
+}
+function editNarrativeModel() {
+  const p = project();
+  const saved = p.nodes.some(node => node.narrativeStage);
+  const hint = saved ? '<p class="hint">' + tx('keepAssociations') + '</p>' : '';
+  showDialog({title:t('changeNarrativeModel'),body:'<div class="fields">' +
+    narrativeModelField(p.narrativeModel) + hint + '</div>',submitKey:'save',onSubmit:data => {
+      const model = EnredoNarrative.getNarrativeModel(data.get('narrativeModel'));
+      if (!model) return;
+      closeDialog();
+      if (p.narrativeModel !== model.id) {
+        structureStageSelection = null;
+        edit(() => { p.narrativeModel = model.id; });
+      }
+      $('changeNarrativeModel').focus({preventScroll:true});
     }});
 }
 function chapterDialog(existing = null) {
@@ -1375,17 +3331,22 @@ function removeChapter(p,c) {
   if (!c) return;
   confirmation(t('confirmChapter'),t('confirmChapterMessage',{name:c.title}),() => {
       const wasCurrent = chapter()?.id === c.id;
+      const showsWholeMap = isWholeStory() || (!isMapView() && lastMapMode === 'whole-story');
       edit(() => {
         const index = p.chapters.indexOf(c);
         p.chapters.splice(index,1);
         const removed = new Set(p.nodes.filter(n => n.chapter === c.id).map(n => n.id));
+        EnredoCharacters.detachSituations(p,removed);
         p.nodes = p.nodes.filter(n => !removed.has(n.id));
         p.edges = p.edges.filter(e => !removed.has(e.from) && !removed.has(e.to));
         if (removed.has(selection)) selection = null;
         if (wasCurrent) state.chapter = (p.chapters[index] ?? p.chapters.at(-1))?.id ?? null;
-        if (!p.chapters.length) overview = false;
+        if (!p.chapters.length) {
+          lastMapMode = 'timeline';
+          if (isMapView()) viewMode = 'timeline';
+        }
         stopConnect();
-      },{fit:wasCurrent || overview});
+      },{fit:wasCurrent || showsWholeMap});
       $('chapterTitle').focus();
       flash('chapterDeleted');
     });
@@ -1401,21 +3362,27 @@ function appendNode({chapterId,title,kind,origin = null,copy = false}) {
   if (origin?.chapter === chapterId) {
     x = copy ? origin.x + 24 : origin.x + W + 64;
     y = copy ? origin.y + H + 28 : origin.y;
-  } else if (!overview && chapterId === chapter().id && scene.nodes.length) {
+  } else if (viewMode === 'timeline' && chapterId === chapter()?.id && scene.nodes.length) {
     x = (graph.clientWidth/2 - view.x)/view.zoom - W/2;
     y = (graph.clientHeight/2 - view.y)/view.zoom - H/2;
   }
-  const n = {id:uid(),chapter:chapterId,kind,title,notes:copy ? origin.notes : '',...openSpot(chapterId,x,y)};
-  project().nodes.push(n);
+  const n = {id:uid(),chapter:chapterId,kind,title,notes:copy ? origin.notes : '',...openSpot(chapterId,x,y),
+    narrativeStage:copy && origin.narrativeStage ? {...origin.narrativeStage} : null};
+  const p = project();
+  if (copy && !EnredoCharacters.issue(p)) {
+    if (origin.participants) n.participants = origin.participants.map(person => ({...person}));
+    if (origin.focalCharacterId) n.focalCharacterId = origin.focalCharacterId;
+  }
+  p.nodes.push(n);
   return n;
 }
 function addNodeDialog() {
   const chapterId = selectedNode()?.chapter ?? chapter()?.id;
-  if (chapterId === undefined) return;
+  if (chapterId === undefined || !isMapView()) return;
   showDialog({title:t('addNode'),body:'<div class="fields">' +
     field(t('title'),input('title','',t('nodeExample'),true)) +
     field(t('nodeType'),'<select name="kind">' + kindOptions('scene') + '</select>') +
-    (overview ? field(t('chapter'),'<select name="chapter">' + chapterOptions(chapterId) + '</select>') : '') +
+    (isWholeStory() ? field(t('chapter'),'<select name="chapter">' + chapterOptions(chapterId) + '</select>') : '') +
     '</div>',submitKey:'add',onSubmit:data => {
       const title = data.get('title').trim();
       if (!title) return;
@@ -1433,6 +3400,7 @@ function removeSelected() {
   if (!n) return;
   confirmation(t('confirmNode'),t('confirmNodeMessage',{name:n.title || t('untitled')}),() => {
     edit(() => {
+      EnredoCharacters.detachSituations(p,new Set([n.id]));
       p.nodes = p.nodes.filter(item => item.id !== n.id);
       p.edges = p.edges.filter(e => e.from !== n.id && e.to !== n.id);
       selection = null;
@@ -1447,6 +3415,39 @@ function duplicateSelected() {
     selection = appendNode({chapterId:n.chapter,title:n.title + t('copySuffix'),kind:n.kind,origin:n,copy:true}).id;
   });
   reveal(selection);
+}
+
+function focusNarrativeStage(node) {
+  const field = $('nodeNarrativeStage');
+  if (field && !field.disabled) field.focus({preventScroll:true});
+  else cardFor(node.id)?.focus({preventScroll:true});
+}
+function updateNarrativeStage(node,assignment) {
+  edit(() => { node.narrativeStage = assignment; });
+  focusNarrativeStage(node);
+}
+function convertNarrativeStage() {
+  const node = selectedNode(), model = EnredoNarrative.activeNarrativeModel(project());
+  if (!node?.narrativeStage || activeNarrativeStage(node,model) || !model.stages.length) return;
+  showDialog({title:t('convertAssociation'),body:'<div class="fields"><p class="hint">' +
+    esc(preservedStageDescription(node.narrativeStage)) + '</p><p>' + tx('convertAssociationHint') + '</p>' +
+    field(t('narrativeStage'),'<select name="stepId" required>' + narrativeStageOptions(model,'','chooseNarrativeStage') + '</select>') +
+    '</div>',submitKey:'convertAssociation',onSubmit:data => {
+      const stepId = data.get('stepId');
+      if (!EnredoNarrative.getNarrativeStage(model.id,stepId)) return;
+      closeDialog();
+      updateNarrativeStage(node,{modelId:model.id,stepId});
+    }});
+}
+function confirmRemoveNarrativeStage() {
+  const node = selectedNode();
+  if (!node?.narrativeStage) return;
+  showDialog({title:t('removeAssociationTitle'),body:'<p>' + tx('removeAssociationHint') + '</p>',
+    danger:true,submitKey:'removeAssociation',onSubmit:() => {
+      closeDialog();
+      updateNarrativeStage(node,null);
+    }});
+  $('dialogCancel').focus();
 }
 
 function editPath(origin,existing = null,destination = null) {
@@ -1490,14 +3491,21 @@ function editPath(origin,existing = null,destination = null) {
       closeDialog();
       edit(() => {
         const to = isNew ? appendNode({chapterId:data.get('chapter'),title,kind:data.get('kind'),origin}).id : target;
-        if (existing) Object.assign(existing,{to,label});
-        else p.edges.push({id:uid(),from:origin.id,to,label});
+        if (existing) {
+          if (existing.to !== to) EnredoCharacters.detachConnection(p,existing.id);
+          Object.assign(existing,{to,label});
+        } else {
+          p.edges.push({id:uid(),from:origin.id,to,label});
+        }
         selection = origin.id;
         stopConnect();
-      },{fit:isNew && (overview || data.get('chapter') === chapter().id)});
+      },{fit:isNew && (isWholeStory() || data.get('chapter') === chapter()?.id)});
     },
     remove:existing ? () => confirmation(t('confirmConnection'),t('confirmConnectionMessage'),() => {
-      edit(() => { p.edges = p.edges.filter(e => e.id !== existing.id); });
+      edit(() => {
+        EnredoCharacters.detachConnection(p,existing.id);
+        p.edges = p.edges.filter(e => e.id !== existing.id);
+      });
     }) : null});
 }
 function edgeDialog(id) {
@@ -1507,7 +3515,8 @@ function edgeDialog(id) {
 
 function autoLayout() {
   const p = project();
-  const targets = overview ? p.chapters : [chapter()];
+  if (!isMapView() || !chapter()) return;
+  const targets = isWholeStory() ? p.chapters : [chapter()];
   edit(() => {
     for (const c of targets) layoutChapter(p,c.id);
   },{fit:true});
@@ -1594,14 +3603,19 @@ async function importProject(file) {
   try {
     const data = JSON.parse(await file.text());
     if (data.format !== 'enredo' || data.version !== 1 || !validProject(data.project)) throw new Error('Invalid Enredo project format');
+    const issue = EnredoCharacters.validationError(data.project);
+    if (issue) {
+      flash('invalidCharacterImport',{field:issue});
+      return;
+    }
     edit(() => {
-      const p = {...data.project,id:uid()};
+      const p = EnredoCharacters.normalizeProject(EnredoNarrative.normalizeProject({...data.project,id:uid()}));
       if (state.projects.some(item => item.title === p.title)) p.title += t('importSuffix');
       state.projects.push(p);
       enterProject(p);
     },{fit:true});
     $('chapterTitle').focus();
-    flash('imported');
+    flash(storageFailed ? 'importedUnsaved' : 'imported');
   } catch {
     flash('invalidImport');
   }
@@ -1618,12 +3632,17 @@ function handleAndroidBack() {
   else if (document.querySelector('[data-menu][aria-expanded="true"]')) closeMenus();
   else if (connectMode) toggleConnect();
   else if (diagramFullscreen) setDiagramFullscreen(false);
+  else if (!atHome && isCharactersView()) leaveCharacterView();
+  else if (!atHome && isStructureView()) {
+    switchView(chapter() ? lastMapMode : 'timeline');
+    $(isWholeStory() ? 'overviewTab' : 'currentTab').focus();
+  }
   else if (!atHome) openHome();
   else return false;
   return true;
 }
 function toggleConnect() {
-  if ($('connect').disabled) return;
+  if (!isMapView() || $('connect').disabled) return;
   if (connectMode) stopConnect();
   else {
     connectMode = true;
@@ -1702,8 +3721,8 @@ function setupGraph() {
     }
     if (control || (!touch && target.closest('[data-edge]'))) return;
     const card = target.closest('[data-node]');
-    if (!touch && card && (overview || connectMode) && event.button !== 1) return;
-    const n = card && !overview && !connectMode && event.button !== 1 ? nodeById(card.dataset.node) : null;
+    if (!touch && card && (isWholeStory() || connectMode) && event.button !== 1) return;
+    const n = card && !isWholeStory() && !connectMode && event.button !== 1 ? nodeById(card.dataset.node) : null;
     drag = {pointer:event.pointerId,startX:event.clientX,startY:event.clientY,n,
       x:n?.x ?? view.x,y:n?.y ?? view.y,started:false};
     if (event.button === 1) event.preventDefault();
@@ -1732,7 +3751,7 @@ function setupGraph() {
       graph.setPointerCapture(event.pointerId);
       graph.classList.add('panning');
       if (drag.n) {
-        drag.before = JSON.stringify(state);
+        drag.before = EnredoCharacters.captureHistory(state);
         drag.selection = selection;
         selection = drag.n.id;
         renderInspector();
@@ -1837,7 +3856,21 @@ document.addEventListener('click',event => {
   if (button.id === 'addPath' && selectedNode()) editPath(selectedNode());
   if (button.id === 'duplicate') duplicateSelected();
   if (button.id === 'removeNode') removeSelected();
+  if (button.id === 'convertNarrativeStage') convertNarrativeStage();
+  if (button.id === 'removeNarrativeStage') confirmRemoveNarrativeStage();
   closeMenus();
+});
+
+$('structureView').addEventListener('click',event => {
+  const step = event.target.closest('[data-narrative-stage]');
+  if (step) {
+    const id = step.dataset.narrativeStage;
+    structureStageSelection = structureStageSelection === id ? null : id;
+    renderStructure();
+    $('structureStages').querySelector('[data-narrative-stage="' + CSS.escape(id) + '"]')?.focus({preventScroll:true});
+  }
+  const target = event.target.closest('[data-locate-node]');
+  if (target) locateProjectNode(target.dataset.locateNode);
 });
 
 function updateText(event) {
@@ -1847,7 +3880,7 @@ function updateText(event) {
   const key = element.id === 'nodeTitle' ? 'title' : 'notes';
   if (n[key] === element.value) return;
   if (!element.dataset.edited) {
-    remember(JSON.stringify(state));
+    remember(EnredoCharacters.captureHistory(state));
     element.dataset.edited = 'true';
   }
   n[key] = element.value;
@@ -1858,11 +3891,31 @@ function updateText(event) {
   }
 }
 $('inspector').addEventListener('input',updateText);
+$('inspector').addEventListener('click',event => {
+  const button = event.target.closest('button');
+  if (button?.id === 'addParticipant') participantDialog();
+  if (button?.dataset.editParticipant) participantDialog(button.dataset.editParticipant);
+  if (button?.dataset.openParticipant) openCharacter(button.dataset.openParticipant,true);
+});
 $('inspector').addEventListener('focusout',event => { delete event.target.dataset.edited; });
 $('inspector').addEventListener('change',event => {
-  if (event.target.id !== 'nodeKind' || !selectedNode()) return;
-  edit(() => { selectedNode().kind = event.target.value; });
-  $('nodeKind').focus();
+  const node = selectedNode();
+  if (!node) return;
+  if (event.target.id === 'nodeKind') {
+    edit(() => { node.kind = event.target.value; });
+    $('nodeKind').focus();
+  }
+  if (event.target.id === 'nodeNarrativeStage' && !event.target.disabled) {
+    const model = EnredoNarrative.activeNarrativeModel(project());
+    const active = activeNarrativeStage(node,model);
+    const stepId = event.target.value;
+    if (!stepId && active) {
+      event.target.value = active.id;
+      confirmRemoveNarrativeStage();
+    } else if (stepId !== active?.id && EnredoNarrative.getNarrativeStage(model.id,stepId)) {
+      updateNarrativeStage(node,{modelId:model.id,stepId});
+    }
+  }
 });
 $('inspector').addEventListener('keydown',event => {
   if (event.key === 'Enter' && event.target.id === 'nodeTitle') {
@@ -1878,7 +3931,9 @@ const actions = {
   addNode:addNodeDialog, emptyAdd:addNodeDialog, dialogClose:closeDialog,
   addNodeFullscreen:addNodeDialog,toggleFullscreen:() => setDiagramFullscreen(!diagramFullscreen),toggleDetails:toggleDiagramDetails,
   helpButton:showHelp,fileHelp:showHelp,exportProject,importProject:chooseProjectFile,
-  currentTab:() => switchView(false),overviewTab:() => switchView(true),
+  currentTab:() => switchView('timeline'),overviewTab:() => switchView('whole-story'),
+  structureTab:() => switchView('structure'),changeNarrativeModel:editNarrativeModel,
+  charactersTab:openCharacters,newCharacter:() => characterDialog(),manageCharacterRoles:showCharacterRoles,
   clearSelection:() => { selection = null; stopConnect(); render(); },
   undo:() => historyStep('undo'),redo:() => historyStep('redo'),connect:toggleConnect,layout:autoLayout,
   undoHome:() => historyStep('undo'),redoHome:() => historyStep('redo'),
@@ -1890,6 +3945,53 @@ $('importFile').addEventListener('change',event => {
   const file = event.target.files[0];
   event.target.value = '';
   if (file) importProject(file);
+});
+$('portraitFile').addEventListener('change',event => {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (file) attachCharacterPortrait(file,portraitRequest);
+  else portraitRequest = null;
+});
+$('portraitFile').addEventListener('cancel',() => { portraitRequest = null; });
+$('characterSearch').addEventListener('input',renderCharacterList);
+$('characterRoleFilter').addEventListener('change',renderCharacterList);
+$('characterGroupFilter').addEventListener('change',renderCharacterList);
+$('characterList').addEventListener('click',event => {
+  const button = event.target.closest('[data-character-id]');
+  if (button) openCharacter(button.dataset.characterId);
+});
+const characterActions = {
+  backFromCharacter:leaveCharacterView,editCharacter:() => characterDialog(selectedCharacter()),
+  choosePortrait:chooseCharacterPortrait,removePortrait:removeCharacterPortrait,
+  newArc:() => arcDialog(),editArc:() => arcDialog(selectedArc()),
+  newArcPath:() => arcPathDialog(),editArcPath:() => arcPathDialog(project().arcPaths.find(path => path.id === characterView.pathId)),
+  newArcEvent:() => arcEventDialog(),newRelationship:() => relationshipDialog()
+};
+$('characterProfile').addEventListener('click',event => {
+  const button = event.target.closest('button');
+  if (!button) return;
+  const {characterLocate,openArc,editArcEvent,arcEventUp,arcEventDown,editRelationship} = button.dataset;
+  if (characterLocate) locateProjectNode(characterLocate);
+  else if (openArc) {
+    characterView.arcId = characterView.arcId === openArc ? null : openArc;
+    characterView.pathId = null;
+    renderCharacters();
+    $('characterProfile').querySelector('[data-open-arc="' + CSS.escape(openArc) + '"]')?.focus({preventScroll:true});
+  } else if (editArcEvent) {
+    const entry = selectedArc()?.events.find(arcEvent => arcEvent.id === editArcEvent);
+    if (entry) arcEventDialog(entry);
+  } else if (arcEventUp) moveArcEvent(arcEventUp,-1);
+  else if (arcEventDown) moveArcEvent(arcEventDown,1);
+  else if (editRelationship) {
+    const entry = project().relationships.find(relation => relation.id === editRelationship);
+    if (entry) relationshipDialog(entry);
+  } else if (Object.hasOwn(characterActions,button.id)) characterActions[button.id]();
+});
+$('characterProfile').addEventListener('change',event => {
+  if (event.target.id !== 'arcPathFilter') return;
+  characterView.pathId = event.target.value || null;
+  renderCharacters();
+  $('arcPathFilter')?.focus({preventScroll:true});
 });
 $('languageSelect').addEventListener('change',event => changeLanguage(event.target.value));
 $('minimap').addEventListener('click',event => {
@@ -1908,14 +4010,18 @@ document.addEventListener('keydown',event => {
     else if (diagramFullscreen) setDiagramFullscreen(false);
     return;
   }
-  if (event.target.matches('input, textarea, select, [contenteditable]')) return;
+  const editingStage = event.target.id === 'nodeNarrativeStage';
+  if (!editingStage && event.target.matches('input, textarea, select, [contenteditable]')) return;
   const key = event.key.toLowerCase();
   if ((event.ctrlKey || event.metaKey) && (key === 'z' || key === 'y')) {
     event.preventDefault();
     historyStep(key === 'y' || event.shiftKey ? 'redo' : 'undo');
+    const node = selectedNode();
+    if (editingStage && node) focusNarrativeStage(node);
     return;
   }
-  if (event.ctrlKey || event.metaKey || event.altKey || atHome || !chapter()) return;
+  if (editingStage) return;
+  if (event.ctrlKey || event.metaKey || event.altKey || atHome || !isMapView() || !chapter()) return;
   if (key === 'n') addNodeDialog();
   if (key === 'c') toggleConnect();
   if (key === 'f') fitMap();

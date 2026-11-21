@@ -42,15 +42,18 @@ public final class MainActivity extends Activity {
     private static final String ORIGIN = "https://appassets.androidplatform.net";
     private static final String EDITOR_URL = ORIGIN + "/index.html";
     private static final String IMPORT_URL = ORIGIN + "/project-import.json";
+    private static final String PORTRAIT_URL = ORIGIN + "/character-portrait";
     private static final String POLICY = "default-src 'none'; script-src 'unsafe-inline'; "
             + "style-src 'unsafe-inline'; img-src data:; connect-src 'self'; "
             + "base-uri 'none'; form-action 'none'";
     private static final Map<String, String> NO_CACHE = Collections.singletonMap("Cache-Control", "no-store");
     private static final int OPEN_PROJECT = 1;
     private static final int SAVE_PROJECT = 2;
+    private static final int OPEN_PORTRAIT = 3;
 
     private final ExecutorService fileWorker = Executors.newSingleThreadExecutor();
     private final AtomicReference<Uri> pendingImport = new AtomicReference<>();
+    private final AtomicReference<Uri> pendingPortrait = new AtomicReference<>();
     private WebView editor;
     private File exportDraft;
     private boolean editorReady;
@@ -166,6 +169,21 @@ public final class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void choosePortrait() {
+            runOnUiThread(() -> {
+                if (!canChooseFile()) {
+                    runEditorAction("cancelAndroidPortrait(true)");
+                    return;
+                }
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT)
+                        .addCategory(Intent.CATEGORY_OPENABLE)
+                        .setType("image/*")
+                        .putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/jpeg", "image/png", "image/webp"});
+                launchPicker(intent, OPEN_PORTRAIT);
+            });
+        }
+
+        @JavascriptInterface
         public void exportProject(String filename, String json) {
             runOnUiThread(() -> {
                 if (!canChooseFile()) return;
@@ -176,7 +194,8 @@ public final class MainActivity extends Activity {
     }
 
     private boolean canChooseFile() {
-        return !isDestroyed() && pickerRequest == 0 && !writingExport && pendingImport.get() == null;
+        return !isDestroyed() && pickerRequest == 0 && !writingExport
+                && pendingImport.get() == null && pendingPortrait.get() == null;
     }
 
     private void stageExport(String filename, String json) {
@@ -212,6 +231,7 @@ public final class MainActivity extends Activity {
         } catch (ActivityNotFoundException | SecurityException error) {
             pickerRequest = 0;
             if (request == SAVE_PROJECT) finishExport(false);
+            else if (request == OPEN_PORTRAIT) runEditorAction("cancelAndroidPortrait(true)");
             else runEditorAction("flash('importFailed')");
         }
     }
@@ -220,15 +240,23 @@ public final class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
-        if (request != OPEN_PROJECT && request != SAVE_PROJECT) return;
+        if (request != OPEN_PROJECT && request != SAVE_PROJECT && request != OPEN_PORTRAIT) return;
         pickerRequest = 0;
         if (result != RESULT_OK) {
             if (request == SAVE_PROJECT) exportDraft.delete();
+            else if (request == OPEN_PORTRAIT) runEditorAction("cancelAndroidPortrait()");
             return;
         }
         Uri uri = data == null ? null : data.getData();
         boolean isDocument = uri != null && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme());
-        if (request == OPEN_PROJECT) {
+        if (request == OPEN_PORTRAIT) {
+            if (isDocument) {
+                pendingPortrait.set(uri);
+                runEditorAction("receiveAndroidPortrait()");
+            } else {
+                runEditorAction("cancelAndroidPortrait(true)");
+            }
+        } else if (request == OPEN_PROJECT) {
             if (isDocument) {
                 pendingImport.set(uri);
                 runEditorAction("importAndroidProject()");
@@ -303,6 +331,15 @@ public final class MainActivity extends Activity {
                         }
                     }
                 }
+                if (!request.isForMainFrame() && PORTRAIT_URL.equals(url)) {
+                    Uri uri = pendingPortrait.getAndSet(null);
+                    if (uri != null) {
+                        InputStream image = getContentResolver().openInputStream(uri);
+                        if (image != null) {
+                            return new WebResourceResponse("application/octet-stream", null, 200, "OK", NO_CACHE, image);
+                        }
+                    }
+                }
             } catch (IOException | SecurityException error) {
                 Log.w(TAG, "Could not read local content", error);
                 return unavailable(500, "Read Failed");
@@ -330,6 +367,7 @@ public final class MainActivity extends Activity {
         fileWorker.shutdown();
         editorReady = false;
         pendingImport.set(null);
+        pendingPortrait.set(null);
         editor.removeJavascriptInterface("EnredoAndroid");
         ((FrameLayout) editor.getParent()).removeView(editor);
         editor.destroy();
