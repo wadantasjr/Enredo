@@ -135,7 +135,7 @@ Enredo.characters = ((app) => {
       '</article>';
   }
 
-  function render(p) {
+  function render(p = project()) {
     const root = $('charactersView');
     if (data.issue(p)) {
       root.innerHTML = renderHeader(p) + '<section class="character-data-warning" role="status"><strong>' + tx('characterDataUnavailable') +
