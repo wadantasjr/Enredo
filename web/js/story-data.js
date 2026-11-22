@@ -42,7 +42,7 @@ Enredo.storyData = ((app) => {
       ['porta','fonte',''], ['fonte','registro',choose('Investigate','Investigar')], ['registro','sirene',''], ['sirene','amanhecer','']
     ].map(([from,to,label]) => ({id:uid(),from,to,label}));
     return {id:'exemplo',title:choose('After the Signal','Depois do sinal'),
-      chapters,nodes,edges,narrativeModel:app.narrative.defaultModelId};
+      chapters,nodes,edges,narrativeModel:app.narrative.defaultModelId,...app.characterData.emptyCollections()};
   }
 
   function validProject(p) {
@@ -65,7 +65,7 @@ Enredo.storyData = ((app) => {
   const hasId = value => typeof value === 'string' && value.trim().length > 0;
 
   function normalizeProject(project) {
-    return {
+    const normalized = {
       ...project,
       narrativeModel: hasId(project.narrativeModel) ? project.narrativeModel : app.narrative.defaultModelId,
       nodes: project.nodes.map(node => {
@@ -75,6 +75,7 @@ Enredo.storyData = ((app) => {
           ...(app.imageStore.validNodeImage(image) ? {image,...(app.imageStore.validOriginalImageId(originalImageId) ? {originalImageId} : {})} : {}) };
       })
     };
+    return app.characterData.normalizeProject(normalized);
   }
 
   function normalizeState(state) {

@@ -39,6 +39,7 @@ Enredo.storyBeats = ((app) => {
       '</div></div>' +
       '<label class="field"><span>' + tx('notes') + '</span><textarea id="nodeNotes" placeholder="' + tx('notesHint') + '" rows="3">' +
       esc(n.notes[0] === '\n' ? '\n' + n.notes : n.notes) + '</textarea></label></div>' +
+      app.characters.renderNodeParticipants(n,p) +
       '<section class="paths"><div class="paths-title"><span>' + tx('outgoingPaths') + '</span><span class="count">' + outgoing.length +
       '</span></div><div class="path-list">' + (list || '<p class="hint">' + tx('noPaths') + '</p>') +
       '</div><button class="btn path-add" id="addPath">' + icon('plus') + ' ' + tx('addPath') + '</button></section>' +
@@ -71,6 +72,8 @@ Enredo.storyBeats = ((app) => {
     }
     const n = {id:uid(),chapter:chapterId,kind,title,notes:copy ? origin.notes : '',...openSpot(chapterId,x,y,height),
       narrativeStage:copy && origin.narrativeStage ? {...origin.narrativeStage} : null,
+      participants:copy ? app.characterData.participantsOf(origin).map(person => ({...person})) : [],
+      ...(copy && origin.focalCharacterId ? {focalCharacterId:origin.focalCharacterId} : {}),
       ...(image ? {image,...(origin.originalImageId ? {originalImageId:origin.originalImageId} : {})} : {})};
     app.store.project().nodes.push(n);
     return n;
@@ -101,8 +104,11 @@ Enredo.storyBeats = ((app) => {
     if (!n) return;
     app.dialogs.confirmation(t('confirmNode'),t('confirmNodeMessage',{name:n.title || t('untitled')}),() => {
       app.store.edit(() => {
+        const removedEdges = p.edges.filter(edge => edge.from === n.id || edge.to === n.id);
+        app.characterData.detachSituations(p,new Set([n.id]));
+        for (const edge of removedEdges) app.characterData.detachConnection(p,edge.id,{unlinkRoute:true});
         p.nodes = p.nodes.filter(item => item.id !== n.id);
-        p.edges = p.edges.filter(e => e.from !== n.id && e.to !== n.id);
+        p.edges = p.edges.filter(edge => edge.from !== n.id && edge.to !== n.id);
         app.session.selection = null;
         app.diagram.stopConnect();
       });
@@ -125,7 +131,7 @@ Enredo.storyBeats = ((app) => {
     const key = element.id === 'nodeTitle' ? 'title' : 'notes';
     if (node[key] === element.value) return;
     if (!element.dataset.edited) {
-      app.store.remember(JSON.stringify(app.store.state));
+      app.store.remember(app.characterData.captureHistory(app.store.state));
       element.dataset.edited = 'true';
     }
     node[key] = element.value;

@@ -26,6 +26,10 @@ Use Enredo [in your browser](#getting-started) or install the [Android app](#and
 - Label connections to show which choice leads to each path.
 - Drag cards to rearrange the map and switch between **Timeline** and **Whole story**.
 - Choose a **Narrative Model** when you create a project. Use **Structure** to explore the model and find associated beats across chapters. Set a beat’s optional **Narrative Stage** in its details panel. See the [narrative models guide](docs/narrative-models.md).
+- Use **Characters** to create one central profile with separate life phases. Add an optional portrait to each phase; phases without one use the central portrait. Use **Merge another profile** to combine duplicate entries and transfer arcs, map links, relationships, and portraits. Resolve relationships between the two profiles and duplicate links to the same story beat before merging.
+- Record a character’s arcs and events by story path. Link an event to a map connection to use that connection’s name; later edits to the map label update the path name.
+- Add one-way relationships, custom relationship types, and low, medium, or high levels for trust, loyalty, and hostility. Use the graph to open a character or relationship, then review its change history.
+- Record alternative outcomes on separate paths. The editor keeps the central character profile and does not simulate which ending a playthrough reaches.
 - Delete chapters or projects after confirming. Use **Undo** to recover a deletion while the tab is open.
 
 ### Language, saving, and backups
@@ -35,6 +39,8 @@ Enredo starts in English. Use the language selector at the top to choose **Portu
 Projects and original images are saved automatically in your browser. To back up or transfer a story with its original images and thumbnails, open it and choose **Files → Export project (.json)**. In the destination browser or computer, choose **Files → Import project (.json)**.
 
 Projects without a saved model open in **Free Structure**. Backups include the selected model and beat associations, including associations preserved after a model change.
+
+Character profiles, phases, participant links, arcs, paths, relationships, and portraits are also saved in the project and included in JSON backups.
 
 If you already use `Enredo.html`, export your projects there and import the JSON files into this `index.html`. Opening a copy of the editor from a different path can use a different browser storage area.
 
@@ -79,6 +85,10 @@ Use o Enredo [no navegador](#como-começar) ou instale o [aplicativo Android](#a
 - Nomear as conexões para indicar qual escolha leva a cada caminho.
 - Arrastar cartões para reorganizar o mapa e alternar entre **Timeline** e **História inteira**.
 - Escolher um **Modelo Narrativo** ao criar um projeto. Use **Estrutura** para consultar o modelo e localizar situações de vários capítulos. No painel de detalhes, escolha a **Etapa Narrativa** de cada situação. Veja o [guia de modelos narrativos](docs/narrative-models.md).
+- Use **Personagens** para criar uma ficha central com fases diferentes. Adicione um retrato opcional a cada fase; as fases sem imagem usam o retrato central. Use **Unir outra ficha** para combinar cadastros duplicados e transferir arcos, vínculos com o mapa, relacionamentos e retratos. Resolva relacionamentos entre as duas fichas e vínculos duplicados com a mesma situação antes de uni-las.
+- Registre arcos e acontecimentos por caminho. Ao ligar um acontecimento a uma conexão do mapa, o caminho usa o nome dessa conexão. Se o rótulo mudar no mapa, o nome também muda.
+- Cadastre relacionamentos direcionais e tipos personalizados. Registre confiança, lealdade e hostilidade em níveis baixos, médios ou altos. Use o grafo para abrir uma pessoa ou relação e consultar o histórico de mudanças.
+- Registre destinos diferentes em caminhos separados. O editor mantém a ficha central e não simula qual desfecho uma partida alcança.
 - Excluir capítulos e projetos mediante confirmação. Use **Desfazer** enquanto a aba estiver aberta para recuperar uma exclusão.
 
 ### Idioma, salvamento e backup
@@ -88,6 +98,8 @@ O Enredo abre em inglês por padrão. No seletor de idioma no topo da tela, esco
 O Enredo salva os projetos e as imagens originais automaticamente no navegador. Para guardar uma cópia ou transferir a história com as imagens originais e miniaturas, abra o projeto e escolha **Arquivos → Exportar projeto (.json)**. No navegador ou computador de destino, use **Arquivos → Importar projeto (.json)**.
 
 Projetos sem modelo salvo abrem em **Estrutura Livre**. O JSON inclui o modelo e as associações das situações, inclusive as que ficam guardadas após a troca de modelo.
+
+As fichas, fases, participações, arcos, caminhos, relacionamentos e retratos também ficam salvos no projeto e são incluídos no backup JSON.
 
 Se já estiver usando o `Enredo.html`, exporte seus projetos por lá e importe os arquivos JSON neste `index.html`. Abrir uma cópia do editor em outro caminho pode fazer o navegador usar um armazenamento diferente.
 

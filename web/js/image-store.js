@@ -108,6 +108,27 @@ Enredo.imageStore = (() => {
     }
   }
 
+  async function prepareCharacterPortrait(file) {
+    const bitmap = await createImageBitmap(file);
+    try {
+      const side = Math.min(bitmap.width,bitmap.height);
+      const cropX = Math.round((bitmap.width - side) / 2);
+      const cropY = Math.round((bitmap.height - side) / 2);
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      for (const [size,quality] of [[256,.82],[192,.76],[144,.7],[112,.64]]) {
+        canvas.width = size;
+        canvas.height = size;
+        context.drawImage(bitmap,cropX,cropY,side,side,0,0,size,size);
+        const data = canvas.toDataURL('image/jpeg',quality);
+        if (Enredo.characterData.validPortrait(data)) return data;
+      }
+      throw new Error('Could not encode a compact portrait');
+    } finally {
+      bitmap.close();
+    }
+  }
+
   return {
     discardOriginalImages,
     imageFromBackup,
@@ -115,6 +136,7 @@ Enredo.imageStore = (() => {
     originalImageDataUrl,
     originalImageIds,
     prepareNodeImage,
+    prepareCharacterPortrait,
     readOriginalImage,
     saveOriginalImages,
     validNodeImage,

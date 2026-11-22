@@ -53,7 +53,7 @@ Enredo.projects = ((app) => {
         app.dialogs.closeDialog();
         app.store.edit(() => {
           const p = {id:uid(),title,chapters:[{id:uid(),title:t('newChapter')}],nodes:[],edges:[],
-            narrativeModel:model?.id ?? app.narrative.defaultModelId};
+            narrativeModel:model?.id ?? app.narrative.defaultModelId,...app.characterData.emptyCollections()};
           app.store.state.projects.push(p);
           app.workspace.enterProject(p);
         },{fit:true});
@@ -112,6 +112,9 @@ Enredo.projects = ((app) => {
           const index = p.chapters.indexOf(c);
           p.chapters.splice(index,1);
           const removed = new Set(p.nodes.filter(n => n.chapter === c.id).map(n => n.id));
+          const removedEdges = p.edges.filter(edge => removed.has(edge.from) || removed.has(edge.to));
+          app.characterData.detachSituations(p,removed);
+          for (const edge of removedEdges) app.characterData.detachConnection(p,edge.id,{unlinkRoute:true});
           p.nodes = p.nodes.filter(n => !removed.has(n.id));
           p.edges = p.edges.filter(e => !removed.has(e.from) && !removed.has(e.to));
           if (removed.has(app.session.selection)) app.session.selection = null;

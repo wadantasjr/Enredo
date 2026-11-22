@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="web/css/responsive.css">
 <link rel="stylesheet" href="web/css/fullscreen.css">
 <link rel="stylesheet" href="web/css/structure.css">
+<link rel="stylesheet" href="web/css/characters.css">
 </head>
 <body>
 <div class="app">
@@ -94,6 +95,7 @@
               <button type="button" class="tab" id="currentTab" aria-controls="graph"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
               <button type="button" class="tab" id="overviewTab" aria-controls="graph"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
               <button type="button" class="tab" id="structureTab" aria-controls="structureView"><span data-icon="panel"></span> <span data-i18n="structure">Structure</span></button>
+              <button type="button" class="tab" id="charactersTab" aria-controls="charactersView"><span data-icon="people"></span> <span data-i18n="characters">Characters</span></button>
             </div>
             <div class="graph-actions" role="group" id="graphActions" aria-label="Map tools" data-i18n-label="mapTools">
               <button class="icon-btn undo-control" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo" data-i18n-label="undo" data-i18n-title="undo" data-shortcut="Ctrl+Z" data-icon="undo"></button>
@@ -117,6 +119,7 @@
               <button type="button" class="btn" id="redoEmptyChapter"><span data-icon="redo"></span> <span data-i18n="redo">Redo</span></button>
             </div>
           </section>
+          <section class="characters-view" id="charactersView" aria-label="Characters" data-i18n-label="characters" hidden></section>
           <div class="graph" id="graph" tabindex="0" aria-label="Story beat diagram" data-i18n-label="nodeDiagram">
             <div class="world" id="world"><svg class="wires" id="wires" aria-hidden="true"></svg><div id="cards"></div></div>
             <div class="empty-canvas" id="emptyCanvas" hidden><strong data-i18n="firstNode">Start with a story beat</strong><p data-i18n="firstNodeHint">Add a scene or choice, then connect the paths that follow.</p><button class="btn primary" id="emptyAdd"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
@@ -174,6 +177,7 @@
 <script src="web/js/platform.js"></script>
 <script src="web/js/preferences.js"></script>
 <script src="web/js/narrative-models.js"></script>
+<script src="web/js/character-data.js"></script>
 <script src="web/js/story-data.js"></script>
 <script src="web/js/session.js"></script>
 <script src="web/js/image-store.js"></script>
@@ -188,6 +192,7 @@
 <script src="web/js/story-beats.js"></script>
 <script src="web/js/paths.js"></script>
 <script src="web/js/image-editor.js"></script>
+<script src="web/js/characters.js"></script>
 <script src="web/js/project-files.js"></script>
 <script src="web/js/main.js"></script>
 </body>

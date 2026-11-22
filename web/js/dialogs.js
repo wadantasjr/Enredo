@@ -4,8 +4,9 @@ Enredo.dialogs = ((app) => {
   const { $, esc, bindActions } = app.dom;
   const { tx, t } = app.preferences;
 
-  function showDialog({title,body,submitKey,onSubmit,remove,extra,danger = submitKey === 'delete'}) {
+  function showDialog({title,body,submitKey,onSubmit,remove,extra,className = '',danger = submitKey === 'delete'}) {
     app.workspace.closeMenus();
+    $('dialog').className = className;
     const form = $('dialogForm');
     $('dialogTitle').textContent = title;
     form.innerHTML = body + '<div class="dialog-actions">' +
@@ -30,10 +31,11 @@ Enredo.dialogs = ((app) => {
 
   function closeDialog() {
     $('dialog').close();
+    $('dialog').className = '';
   }
 
-  function confirmation(title,message,onConfirm) {
-    showDialog({title,body:'<p>' + esc(message) + '</p>',submitKey:'delete',onSubmit:() => {
+  function confirmation(title,message,onConfirm,{submitKey = 'delete',danger = true} = {}) {
+    showDialog({title,body:'<p>' + esc(message) + '</p>',submitKey,danger,onSubmit:() => {
       closeDialog();
       onConfirm();
     }});
@@ -41,7 +43,7 @@ Enredo.dialogs = ((app) => {
   }
 
   function showHelp() {
-    const helpItems = ['helpHome','helpChapter','helpPath','helpStory','helpStructure',
+    const helpItems = ['helpHome','helpChapter','helpPath','helpStory','helpStructure','helpCharacters',
       app.platform.android ? 'touchHelpZoom' : 'helpZoom',app.platform.android ? 'deviceHelpFiles' : 'helpFiles'];
     const body = '<ul>' + helpItems.map(key => '<li>' + t(key) + '</li>').join('') + '</ul>';
     showDialog({title:t('helpTitle'),body});

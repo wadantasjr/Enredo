@@ -11,6 +11,7 @@ Enredo.platform = ((app) => {
     else if (document.querySelector('[data-menu][aria-expanded="true"]')) app.workspace.closeMenus();
     else if (app.session.connectMode) app.diagramInput.toggleConnect();
     else if (app.session.diagramFullscreen) app.workspace.setDiagramFullscreen(false);
+    else if (!app.session.atHome && app.session.charactersOpen) app.characters.goBack();
     else if (!app.session.atHome && app.session.isStructureView()) {
       app.workspace.switchView(app.store.chapter() ? app.session.lastMapMode : 'timeline');
       $(app.session.isWholeStory() ? 'overviewTab' : 'currentTab').focus();

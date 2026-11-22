@@ -112,7 +112,7 @@ Enredo.diagramInput = ((app) => {
         graph.setPointerCapture(event.pointerId);
         graph.classList.add('panning');
         if (drag.n) {
-          drag.before = JSON.stringify(app.store.state);
+          drag.before = app.characterData.captureHistory(app.store.state);
           drag.selection = app.session.selection;
           app.session.selection = drag.n.id;
           app.storyBeats.renderInspector();
