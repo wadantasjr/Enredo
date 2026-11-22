@@ -14,7 +14,7 @@ Enredo.characterData = ((app) => {
   const motivationFields = ['goal','need','reason','obstacles','internalConflict','externalConflict','cost','successConsequence','failureConsequence'];
   const initialFields = ['summary','belief','goal','need','conflict'];
   const profileFields = ['alias','description','group','notes'];
-  const phaseFields = ['description','group','notes'];
+  const phaseFields = ['alias','description','group','notes'];
   const maxPortraitBytes = 24 * 1024;
   const invalidProjects = new WeakMap();
 
@@ -86,6 +86,7 @@ Enredo.characterData = ((app) => {
         if (!isRecord(phase) || !hasText(phase.id) || phaseIds.has(phase.id) || !hasText(phase.title) ||
             !optionalFields(phase,phaseFields) || !optionalFields(phase.personality,personalityFields) ||
             !optionalFields(phase.motivation,motivationFields)) return phasePath;
+        if (phase.portraitId != null && !portraits.has(phase.portraitId)) return phasePath + '.portraitId';
         phaseIds.set(phase.id,character.id);
       }
       characters.set(character.id,character);
@@ -253,27 +254,31 @@ Enredo.characterData = ((app) => {
   }
 
   function prunePortrait(project,portraitId) {
-    if (portraitId && !project.characters.some(character => character.portraitId === portraitId)) {
+    const inUse = project.characters.some(character => character.portraitId === portraitId ||
+      (character.phases ?? []).some(phase => phase.portraitId === portraitId));
+    if (portraitId && !inUse) {
       project.portraits = project.portraits.filter(portrait => portrait.id !== portraitId);
     }
   }
 
-  function setPortrait(project,characterId,data) {
+  function setPortrait(project,characterId,data,phaseId = null) {
     const character = project.characters.find(item => item.id === characterId);
-    if (!character || (data != null && !validPortrait(data))) return false;
-    const oldId = character.portraitId;
+    const target = phaseId == null ? character : character?.phases.find(phase => phase.id === phaseId);
+    if (!target || (data != null && !validPortrait(data))) return false;
+    const oldId = target.portraitId;
     const existing = data && project.portraits.find(portrait => portrait.data === data);
     if (data && !existing) {
       const id = app.dom.uid();
       project.portraits = [...project.portraits,{id,data}];
-      character.portraitId = id;
-    } else character.portraitId = existing?.id ?? null;
+      target.portraitId = id;
+    } else target.portraitId = existing?.id ?? null;
     prunePortrait(project,oldId);
     return true;
   }
 
   function removeCharacter(project,id) {
     const removed = project.characters.find(character => character.id === id);
+    const portraitIds = [removed?.portraitId,...(removed?.phases ?? []).map(phase => phase.portraitId)].filter(Boolean);
     project.characters = project.characters.filter(character => character.id !== id);
     project.characterArcs = project.characterArcs.filter(arc => arc.characterId !== id);
     for (const node of project.nodes) {
@@ -282,17 +287,99 @@ Enredo.characterData = ((app) => {
     }
     const related = project.relationships.filter(relation => relation.fromCharacterId === id || relation.toCharacterId === id);
     forgetRelationships(project,new Set(related.map(relation => relation.id)));
-    prunePortrait(project,removed?.portraitId);
+    for (const portraitId of portraitIds) prunePortrait(project,portraitId);
   }
 
   function removePhase(project,characterId,phaseId) {
     const character = project.characters.find(item => item.id === characterId);
     if (!character) return;
+    const removed = character.phases.find(phase => phase.id === phaseId);
     character.phases = character.phases.filter(phase => phase.id !== phaseId);
     for (const node of project.nodes) for (const participant of node.participants ?? []) {
       if (participant.characterId === characterId && participant.phaseId === phaseId) participant.phaseId = null;
     }
     for (const arc of project.characterArcs) if (arc.phaseId === phaseId) arc.phaseId = null;
+    prunePortrait(project,removed?.portraitId);
+  }
+
+  function normalizedCharacterName(value) {
+    return String(value ?? '').normalize('NFC').trim().replace(/\s+/gu,' ').toLocaleLowerCase();
+  }
+
+  function mergeCandidates(project,targetId) {
+    const target = project.characters.find(character => character.id === targetId);
+    if (!target) return [];
+    const name = normalizedCharacterName(target.name);
+    return project.characters.filter(character => character.id !== targetId && normalizedCharacterName(character.name) === name);
+  }
+
+  function mergeSummary(project,targetId,sourceId) {
+    const target = project.characters.find(character => character.id === targetId);
+    const source = project.characters.find(character => character.id === sourceId);
+    if (!target || !source || target === source) return {ok:false,reason:'missing'};
+    if (normalizedCharacterName(target.name) !== normalizedCharacterName(source.name)) return {ok:false,reason:'differentNames'};
+    const selfRelationships = project.relationships.filter(relation =>
+      (relation.fromCharacterId === targetId && relation.toCharacterId === sourceId) ||
+      (relation.fromCharacterId === sourceId && relation.toCharacterId === targetId));
+    const overlappingBeats = project.nodes.filter(node => {
+      const people = participantsOf(node);
+      return people.some(person => person.characterId === targetId) && people.some(person => person.characterId === sourceId);
+    }).length;
+    const beats = project.nodes.reduce((count,node) => count + participantsOf(node).filter(person => person.characterId === sourceId).length,0);
+    const arcs = project.characterArcs.filter(arc => arc.characterId === sourceId).length;
+    const relationships = project.relationships.filter(relation => relation.fromCharacterId === sourceId || relation.toCharacterId === sourceId).length;
+    const reason = selfRelationships.length ? 'selfRelationships' : overlappingBeats ? 'overlappingBeats' : null;
+    return {ok:!reason,reason,selfRelationships:selfRelationships.length,overlappingBeats,beats,arcs,relationships};
+  }
+
+  function mergeCharacter(project,targetId,sourceId,targetPhaseTitle,sourcePhaseTitle,phaseOrder = 'sourceFirst') {
+    const summary = mergeSummary(project,targetId,sourceId);
+    const target = project.characters.find(character => character.id === targetId);
+    const source = project.characters.find(character => character.id === sourceId);
+    if (!summary.ok || !hasText(targetPhaseTitle) || !hasText(sourcePhaseTitle)) return {...summary,ok:false};
+
+    const toPhase = (character,title) => ({id:app.dom.uid(),title:title.trim(),alias:character.alias ?? '',group:character.group ?? '',
+      description:character.description ?? '',notes:character.notes ?? '',personality:{...(character.personality ?? {})},
+      motivation:{...(character.motivation ?? {})},...(character.portraitId ? {portraitId:character.portraitId} : {})});
+    const targetPhase = toPhase(target,targetPhaseTitle), sourcePhase = toPhase(source,sourcePhaseTitle);
+    const targetPhases = target.phases ?? [], sourcePhases = source.phases ?? [];
+    const sourcePortraitIds = [source.portraitId,...(source.phases ?? []).map(item => item.portraitId)].filter(Boolean);
+
+    target.roleIds = [...new Set([...(target.roleIds ?? []),...(source.roleIds ?? []),target.primaryRoleId,source.primaryRoleId].filter(Boolean))];
+    target.primaryRoleId ??= source.primaryRoleId ?? null;
+    target.description = '';
+    target.group = '';
+    target.notes = '';
+    target.personality = {};
+    target.motivation = {};
+    target.phases = phaseOrder === 'targetFirst'
+      ? [...targetPhases,targetPhase,...sourcePhases,sourcePhase]
+      : [...sourcePhases,sourcePhase,...targetPhases,targetPhase];
+
+    for (const arc of project.characterArcs) {
+      if (arc.characterId === targetId && arc.phaseId == null) arc.phaseId = targetPhase.id;
+      if (arc.characterId === sourceId) {
+        arc.characterId = targetId;
+        if (arc.phaseId == null) arc.phaseId = sourcePhase.id;
+      }
+    }
+    for (const node of project.nodes) {
+      for (const person of participantsOf(node)) {
+        if (person.characterId === targetId && person.phaseId == null) person.phaseId = targetPhase.id;
+        else if (person.characterId === sourceId) {
+          person.characterId = targetId;
+          if (person.phaseId == null) person.phaseId = sourcePhase.id;
+        }
+      }
+      if (node.focalCharacterId === sourceId) node.focalCharacterId = targetId;
+    }
+    for (const relation of project.relationships) {
+      if (relation.fromCharacterId === sourceId) relation.fromCharacterId = targetId;
+      if (relation.toCharacterId === sourceId) relation.toCharacterId = targetId;
+    }
+    project.characters = project.characters.filter(character => character.id !== sourceId);
+    for (const portraitId of sourcePortraitIds) prunePortrait(project,portraitId);
+    return {...summary,ok:true,targetPhaseId:targetPhase.id,sourcePhaseId:sourcePhase.id};
   }
 
   function removeRole(project,roleId) {
@@ -343,6 +430,9 @@ Enredo.characterData = ((app) => {
     initials,
     initialsForCharacter,
     issue,
+    mergeCharacter,
+    mergeCandidates,
+    mergeSummary,
     maxPortraitBytes,
     motivationFields,
     normalizeProject,

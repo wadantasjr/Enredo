@@ -26,7 +26,7 @@ Use Enredo [in your browser](#getting-started) or install the [Android app](#and
 - Label connections to show which choice leads to each path.
 - Drag cards to rearrange the map and switch between **Timeline** and **Whole story**.
 - Choose a **Narrative Model** when you create a project. Use **Structure** to explore the model and find associated beats across chapters. Set a beat’s optional **Narrative Stage** in its details panel. See the [narrative models guide](docs/narrative-models.md).
-- Use **Characters** to create a central profile, add separate life phases, and connect a character to story beats. Portraits use the initials of the first and last name when no image is set.
+- Use **Characters** to create one central profile with separate life phases. Add an optional portrait to each phase; phases without one use the central portrait. Use **Merge another profile** to combine duplicate entries and transfer arcs, map links, relationships, and portraits. Resolve relationships between the two profiles and duplicate links to the same story beat before merging.
 - Record a character’s arcs and events by story path. Link an event to a map connection to use that connection’s name; later edits to the map label update the path name.
 - Add one-way relationships, custom relationship types, and low, medium, or high levels for trust, loyalty, and hostility. Use the graph to open a character or relationship, then review its change history.
 - Record alternative outcomes on separate paths. The editor keeps the central character profile and does not simulate which ending a playthrough reaches.
@@ -85,7 +85,7 @@ Use o Enredo [no navegador](#como-começar) ou instale o [aplicativo Android](#a
 - Nomear as conexões para indicar qual escolha leva a cada caminho.
 - Arrastar cartões para reorganizar o mapa e alternar entre **Timeline** e **História inteira**.
 - Escolher um **Modelo Narrativo** ao criar um projeto. Use **Estrutura** para consultar o modelo e localizar situações de vários capítulos. No painel de detalhes, escolha a **Etapa Narrativa** de cada situação. Veja o [guia de modelos narrativos](docs/narrative-models.md).
-- Use **Personagens** para criar uma ficha central, registrar fases diferentes e ligar personagens às situações. Sem retrato, o editor mostra as iniciais do primeiro e do último nome.
+- Use **Personagens** para criar uma ficha central com fases diferentes. Adicione um retrato opcional a cada fase; as fases sem imagem usam o retrato central. Use **Unir outra ficha** para combinar cadastros duplicados e transferir arcos, vínculos com o mapa, relacionamentos e retratos. Resolva relacionamentos entre as duas fichas e vínculos duplicados com a mesma situação antes de uni-las.
 - Registre arcos e acontecimentos por caminho. Ao ligar um acontecimento a uma conexão do mapa, o caminho usa o nome dessa conexão. Se o rótulo mudar no mapa, o nome também muda.
 - Cadastre relacionamentos direcionais e tipos personalizados. Registre confiança, lealdade e hostilidade em níveis baixos, médios ou altos. Use o grafo para abrir uma pessoa ou relação e consultar o histórico de mudanças.
 - Registre destinos diferentes em caminhos separados. O editor mantém a ficha central e não simula qual desfecho uma partida alcança.

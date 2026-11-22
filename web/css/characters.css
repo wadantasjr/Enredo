@@ -67,9 +67,11 @@
 .portrait-controls .hint{margin:0}
 .character-phase-list,.character-items,.character-event-list,.character-relationship-list{display:grid;gap:7px;margin:0;padding:0;list-style:none}
 .character-phase-button,.character-arc-button{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 8px;width:100%;text-align:left;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface-subtle);color:var(--ink)}
-.character-phase-button strong,.character-arc-button strong{overflow-wrap:anywhere}
-.character-phase-button span,.character-arc-button small{grid-column:1;color:var(--muted);font-size:.78rem;overflow-wrap:anywhere}
-.character-phase-button svg{grid-column:2;grid-row:1 / span 2;width:16px;height:16px;color:var(--accent)}
+.character-phase-button{grid-template-columns:auto minmax(0,1fr) auto}
+.character-phase-copy{display:grid;grid-column:2;gap:2px;min-width:0}
+.character-phase-copy strong,.character-arc-button strong{overflow-wrap:anywhere}
+.character-phase-copy>span,.character-arc-button small{color:var(--muted);font-size:.78rem;overflow-wrap:anywhere}
+.character-phase-button>svg{grid-column:3;grid-row:1;width:16px;height:16px;color:var(--accent)}
 .character-arc-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:7px}
 .character-arc-button{grid-template-columns:minmax(0,1fr);align-content:start}
 .character-arc-button.active{border-color:var(--sidebar-active-line);background:var(--sidebar-active)}

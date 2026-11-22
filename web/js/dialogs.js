@@ -34,8 +34,8 @@ Enredo.dialogs = ((app) => {
     $('dialog').className = '';
   }
 
-  function confirmation(title,message,onConfirm) {
-    showDialog({title,body:'<p>' + esc(message) + '</p>',submitKey:'delete',onSubmit:() => {
+  function confirmation(title,message,onConfirm,{submitKey = 'delete',danger = true} = {}) {
+    showDialog({title,body:'<p>' + esc(message) + '</p>',submitKey,danger,onSubmit:() => {
       closeDialog();
       onConfirm();
     }});

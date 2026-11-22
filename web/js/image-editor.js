@@ -14,11 +14,12 @@ Enredo.imageEditor = ((app) => {
     chooseImageFile();
   }
 
-  function chooseCharacterPortrait(characterId) {
+  function chooseCharacterPortrait(characterId,phaseId = null) {
     const project = app.store.project();
     const character = project?.characters.find(item => item.id === characterId);
-    if (!character) return;
-    imagePick = {type:'character',project,character};
+    const phase = phaseId == null ? null : character?.phases.find(item => item.id === phaseId);
+    if (!character || (phaseId != null && !phase)) return;
+    imagePick = {type:'character',project,character,phase};
     chooseImageFile();
   }
 
@@ -49,7 +50,8 @@ Enredo.imageEditor = ((app) => {
   async function loadImage(file,pick) {
     if (!pick || imagePick !== pick) return;
     const isCurrent = () => imagePick === pick && app.store.state.projects.includes(pick.project) &&
-      (pick.type === 'node' ? pick.project.nodes.includes(pick.node) : pick.project.characters.includes(pick.character));
+      (pick.type === 'node' ? pick.project.nodes.includes(pick.node) : pick.project.characters.includes(pick.character) &&
+        (!pick.phase || pick.character.phases.includes(pick.phase)));
     let savedId, committed = false;
     try {
       if (file.size > app.imageStore.nodeImageFileLimit) {
@@ -73,7 +75,7 @@ Enredo.imageEditor = ((app) => {
       if (!isCurrent()) return;
       committed = app.store.edit(() => {
         if (pick.type === 'node') Object.assign(pick.node,{image,originalImageId:savedId});
-        else app.characterData.setPortrait(pick.project,pick.character.id,image);
+        else app.characterData.setPortrait(pick.project,pick.character.id,image,pick.phase?.id ?? null);
       },{saveError:'imageSaveFailed'});
       if (pick.type === 'node' && app.store.selectedNode()?.id === pick.node.id && app.store.project()?.id === pick.project.id) {
         $('chooseNodeImage')?.focus({preventScroll:true});
@@ -115,11 +117,13 @@ Enredo.imageEditor = ((app) => {
     $('chooseNodeImage')?.focus({preventScroll:true});
   }
 
-  function removeCharacterPortrait(characterId) {
+  function removeCharacterPortrait(characterId,phaseId = null) {
     const p = app.store.project(), character = p?.characters.find(item => item.id === characterId);
-    if (!character?.portraitId) return;
-    if (imagePick?.type === 'character' && imagePick.character === character) imagePick = null;
-    app.store.edit(() => app.characterData.setPortrait(p,character.id,null),{saveError:'imageSaveFailed'});
+    const phase = phaseId == null ? null : character?.phases.find(item => item.id === phaseId);
+    const owner = phase ?? character;
+    if (!owner?.portraitId || (phaseId != null && !phase)) return;
+    if (imagePick?.type === 'character' && imagePick.character === character && imagePick.phase === phase) imagePick = null;
+    app.store.edit(() => app.characterData.setPortrait(p,character.id,null,phase?.id ?? null),{saveError:'imageSaveFailed'});
     $('choosePortrait')?.focus({preventScroll:true});
   }
 
@@ -132,8 +136,8 @@ Enredo.imageEditor = ((app) => {
     });
     $('charactersView').addEventListener('click',event => {
       const button = event.target.closest('button');
-      if (button?.id === 'choosePortrait') chooseCharacterPortrait(button.dataset.characterId);
-      if (button?.id === 'removePortrait') removeCharacterPortrait(button.dataset.characterId);
+      if (button?.id === 'choosePortrait') chooseCharacterPortrait(button.dataset.characterId,button.dataset.phaseId || null);
+      if (button?.id === 'removePortrait') removeCharacterPortrait(button.dataset.characterId,button.dataset.phaseId || null);
     });
     $('imageViewerClose').addEventListener('click',() => $('imageViewer').close());
     $('imageViewer').addEventListener('close',() => {

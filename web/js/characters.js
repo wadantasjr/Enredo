@@ -11,7 +11,10 @@ Enredo.characters = ((app) => {
   const phaseById = (character,id) => character?.phases.find(phase => phase.id === id);
   const currentCharacter = () => characterById(view.characterId);
   const selectedArc = (p = project()) => p.characterArcs.find(arc => arc.id === view.arcId && arc.characterId === view.characterId);
-  const portraitFor = (character,p = project()) => p.portraits.find(portrait => portrait.id === character.portraitId)?.data ?? '';
+  const portraitFor = (character,p = project(),phase = null) => {
+    const portraitId = phase?.portraitId || character?.portraitId;
+    return p.portraits.find(portrait => portrait.id === portraitId)?.data ?? '';
+  };
 
   function textArea(name,label,value = '',rows = 3,required = false) {
     return '<label class="field"><span>' + tx(label) + '</span><textarea name="' + esc(name) + '" rows="' + rows + '"' +
@@ -37,8 +40,8 @@ Enredo.characters = ((app) => {
       esc(roleLabel(id,p)) + (character.primaryRoleId === id ? ' · ' + tx('primaryRole') : '') + '</span>').join('');
   }
 
-  function avatar(character,p = project(),size = 'normal') {
-    const image = portraitFor(character,p);
+  function avatar(character,p = project(),size = 'normal',phase = null) {
+    const image = portraitFor(character,p,phase);
     const label = esc(character.name);
     return '<span class="character-avatar ' + size + '" aria-label="' + label + '">' +
       (image ? '<img src="' + esc(image) + '" alt="">' : '<span aria-hidden="true">' + esc(data.initials(character.name)) + '</span>') + '</span>';
@@ -121,11 +124,13 @@ Enredo.characters = ((app) => {
     const phase = phaseById(character,view.phaseId);
     if (!phase) view.phaseId = null;
     const title = phase ? phase.title : t('centralProfile');
+    const alias = phase?.alias || character.alias;
     const back = view.originNodeId ? '<button type="button" class="btn" id="backToMap">' + icon('branch') + ' ' + tx('backToMap') + '</button>' : '';
-    return '<article class="character-profile"><header class="character-profile-heading">' + avatar(character,p,'large') +
-      '<div class="character-profile-title"><h3>' + esc(character.name) + (character.alias ? ' <small>“' + esc(character.alias) + '”</small>' : '') +
+    return '<article class="character-profile"><header class="character-profile-heading">' + avatar(character,p,'large',phase) +
+      '<div class="character-profile-title"><h3>' + esc(character.name) + (alias ? ' <small>“' + esc(alias) + '”</small>' : '') +
       '</h3><p>' + esc(title) + '</p></div><div class="character-profile-actions">' + back +
       '<button type="button" class="btn" id="editCharacter">' + icon('edit') + ' ' + tx('editCharacter') + '</button>' +
+      (data.mergeCandidates(p,character.id).length ? '<button type="button" class="btn" id="mergeCharacter">' + icon('branch') + ' ' + tx('mergeCharacter') + '</button>' : '') +
       '<button type="button" class="btn danger" id="deleteCharacter">' + icon('trash') + ' ' + tx('delete') + '</button></div></header>' +
       '<nav class="character-sections" aria-label="' + tx('characterSections') + '">' +
       [['profile','characterProfile'],['arcs','characterArcs'],['relationships','relationships']].map(([key,label]) =>
@@ -166,7 +171,7 @@ Enredo.characters = ((app) => {
       '</h4><div class="character-tags">' + roleNames(character,p) + '</div></section>' : '';
     const traits = !phase ? renderTraits(character) : renderTraits(phase);
     const phases = !phase ? renderPhases(p,character) : '';
-    const portrait = !phase ? renderPortrait(p,character) : '';
+    const portrait = renderPortrait(p,character,phase);
     const phaseActions = phase ? '<div class="character-section-heading"><button type="button" class="btn" data-phase="">' + icon('right') + ' ' + tx('centralProfile') +
       '</button><div><button type="button" class="btn" id="editPhase">' + icon('edit') + ' ' + tx('editPhase') + '</button>' +
       '<button type="button" class="btn danger" id="deletePhase">' + icon('trash') + ' ' + tx('delete') + '</button></div></div>' : '';
@@ -175,14 +180,18 @@ Enredo.characters = ((app) => {
       roles + traits + phases + '</div>';
   }
 
-  function renderPortrait(p,character) {
-    const image = portraitFor(character,p);
-    return '<section class="character-section"><h4>' + tx('portrait') + '</h4><div class="portrait-editor">' +
-      '<div class="portrait-preview">' + avatar(character,p,'large') + '</div><div class="portrait-controls">' +
-      '<p class="hint">' + tx('portraitHint') + '</p><button type="button" class="btn" id="choosePortrait" data-character-id="' + esc(character.id) + '">' +
-      icon('upload') + ' ' + tx(image ? 'replacePortrait' : 'addPortrait') + '</button>' +
-      (image ? '<button type="button" class="btn" id="removePortrait" data-character-id="' + esc(character.id) + '">' + icon('trash') + ' ' + tx('removePortrait') + '</button>' : '') +
-      '</div></div></section>';
+  function renderPortrait(p,character,phase = null) {
+    const hasOwnPortrait = !!(phase ? phase.portraitId : character.portraitId);
+    const phaseId = phase?.id ?? '';
+    const title = phase ? tx('phasePortrait') : tx('portrait');
+    const hint = phase ? tx(hasOwnPortrait ? 'phasePortraitOwnHint' : 'phasePortraitDefaultHint') : tx('portraitHint');
+    const remove = phase
+      ? (hasOwnPortrait ? '<button type="button" class="btn" id="removePortrait" data-character-id="' + esc(character.id) + '" data-phase-id="' + esc(phaseId) + '">' +
+        icon('undo') + ' ' + tx('useCentralPortrait') + '</button>' : '')
+      : (hasOwnPortrait ? '<button type="button" class="btn" id="removePortrait" data-character-id="' + esc(character.id) + '">' + icon('trash') + ' ' + tx('removePortrait') + '</button>' : '');
+    return '<section class="character-section"><h4>' + title + '</h4><div class="portrait-editor"><div class="portrait-controls">' +
+      '<p class="hint">' + hint + '</p><button type="button" class="btn" id="choosePortrait" data-character-id="' + esc(character.id) + '" data-phase-id="' + esc(phaseId) + '">' +
+      icon('upload') + ' ' + tx(hasOwnPortrait ? 'replacePortrait' : 'addPortrait') + '</button>' + remove + '</div></div></section>';
   }
 
   function renderTraits(record) {
@@ -194,8 +203,9 @@ Enredo.characters = ((app) => {
 
   function renderPhases(p,character) {
     const rows = character.phases.length ? '<ul class="character-phase-list">' + character.phases.map(phase =>
-      '<li><button type="button" class="character-phase-button" data-phase="' + esc(phase.id) + '"><strong>' + esc(phase.title) +
-      '</strong><span>' + esc(phase.group || phase.description || '') + '</span>' + icon('right') + '</button></li>').join('') + '</ul>' :
+      '<li><button type="button" class="character-phase-button" data-phase="' + esc(phase.id) + '">' + avatar(character,p,'tiny',phase) +
+      '<span class="character-phase-copy"><strong>' + esc(phase.title) + '</strong><span>' + esc(phase.group || phase.description || '') +
+      '</span></span>' + icon('right') + '</button></li>').join('') + '</ul>' :
       '<p class="hint">' + tx('noPhases') + '</p>';
     return '<section class="character-section"><div class="character-section-heading"><h4>' + tx('characterPhases') + '</h4>' +
       '<button type="button" class="btn" id="newPhase">' + icon('plus') + ' ' + tx('newPhase') + '</button></div>' + rows + '</section>';
@@ -316,8 +326,8 @@ Enredo.characters = ((app) => {
       const character = characterById(person.characterId,p);
       if (!character) return '';
       const phase = phaseById(character,person.phaseId);
-      return '<li><button type="button" class="node-character-open" data-open-participant="' + esc(character.id) + '" data-origin-node="' + esc(node.id) + '">' +
-        avatar(character,p,'tiny') + '<span><strong>' + esc(character.name) + '</strong><small>' + esc(phase?.title ?? t('centralProfile')) +
+      return '<li><button type="button" class="node-character-open" data-open-participant="' + esc(character.id) + '" data-origin-node="' + esc(node.id) + '" data-phase-id="' + esc(phase?.id ?? '') + '">' +
+        avatar(character,p,'tiny',phase) + '<span><strong>' + esc(character.name) + '</strong><small>' + esc(phase?.title ?? t('centralProfile')) +
         (person.dramaticFunction ? ' · ' + esc(person.dramaticFunction) : '') + '</small></span></button><button type="button" class="icon-btn small" data-edit-participant="' +
         index + '" aria-label="' + tx('editParticipant') + '">' + icon('edit') + '</button><button type="button" class="icon-btn small" data-remove-participant="' +
         index + '" aria-label="' + tx('removeParticipant') + '">' + icon('trash') + '</button></li>';
@@ -463,13 +473,14 @@ Enredo.characters = ((app) => {
 
   function phaseDialog(character,existing = null) {
     const body = '<div class="fields">' + field(t('phaseName'),input('title',existing?.title ?? '',t('phaseNameHint'),true)) +
-      field(t('group'),input('group',existing?.group ?? '')) + textArea('description','description',existing?.description,3) + textArea('notes','notes',existing?.notes,3) +
+      field(t('alias'),input('alias',existing?.alias ?? '',t('aliasHint'))) + field(t('group'),input('group',existing?.group ?? '')) +
+      textArea('description','description',existing?.description,3) + textArea('notes','notes',existing?.notes,3) +
       '<details class="character-details"><summary>' + tx('personality') + '</summary><div class="fields">' + listField('personality','personality',existing?.personality,data.personalityFields) + '</div></details>' +
       '<details class="character-details"><summary>' + tx('motivation') + '</summary><div class="fields">' + listField('motivation','motivation',existing?.motivation,data.motivationFields) + '</div></details></div>';
     app.dialogs.showDialog({title:t(existing ? 'editPhase' : 'newPhase'),body,className:'character-dialog',submitKey:existing ? 'save' : 'add',onSubmit:form => {
       const title = form.get('title').trim();
       if (!title) return;
-      const phase = {...existing,id:existing?.id ?? uid(),title,group:form.get('group').trim(),description:form.get('description').trim(),
+      const phase = {...existing,id:existing?.id ?? uid(),title,alias:form.get('alias').trim(),group:form.get('group').trim(),description:form.get('description').trim(),
         notes:form.get('notes').trim(),personality:readObjectFields(form,'personality',data.personalityFields),
         motivation:readObjectFields(form,'motivation',data.motivationFields)};
       app.dialogs.closeDialog();
@@ -486,6 +497,58 @@ Enredo.characters = ((app) => {
       });
       $('newPhase')?.focus({preventScroll:true});
     }) : null});
+  }
+
+  function mergeDialog(target) {
+    const p = project();
+    const sources = data.mergeCandidates(p,target.id);
+    if (!sources.length) return;
+    const sourceOptions = sources.map(character => option(character.id,[character.name,character.group].filter(Boolean).join(' · '))).join('');
+    const body = '<div class="fields"><p class="hint">' + tx('mergeCharacterHint') + '</p>' +
+      '<p><strong>' + tx('mergeCurrentProfile') + ':</strong> ' + esc(target.name) + (target.group ? ' · ' + esc(target.group) : '') + '</p>' +
+      field(t('mergeSource'),'<select name="sourceId">' + sourceOptions + '</select>') +
+      field(t('mergeTargetPhaseName'),input('targetPhaseTitle','','',true)) +
+      field(t('mergeSourcePhaseName'),input('sourcePhaseTitle','','',true)) +
+      field(t('mergePhaseOrder'),'<select name="phaseOrder">' +
+        option('sourceFirst',t('mergeSourceFirst'),true) + option('targetFirst',t('mergeTargetFirst')) + '</select>') + '</div>';
+    app.dialogs.showDialog({title:t('mergeCharacter'),body,className:'character-dialog',submitKey:'mergeProfilesAction',onSubmit:form => {
+      const source = characterById(form.get('sourceId'),p);
+      const targetPhaseTitle = form.get('targetPhaseTitle').trim(), sourcePhaseTitle = form.get('sourcePhaseTitle').trim();
+      const phaseOrder = form.get('phaseOrder');
+      if (!source || !targetPhaseTitle || !sourcePhaseTitle) return;
+      const summary = data.mergeSummary(p,target.id,source.id);
+      if (!summary.ok) {
+        const message = summary.reason === 'selfRelationships' ? 'mergeSelfRelationshipConflict' :
+          summary.reason === 'overlappingBeats' ? 'mergeOverlappingBeatsConflict' : 'mergeUnavailable';
+        app.preferences.flash(message);
+        return;
+      }
+      app.dialogs.closeDialog();
+      app.dialogs.confirmation(t('mergeCharacterConfirmTitle'),t('mergeCharacterConfirmHint',{
+        source:source.name,target:target.name,sourcePhase:sourcePhaseTitle,targetPhase:targetPhaseTitle,
+        arcs:summary.arcs,beats:summary.beats,relationships:summary.relationships
+      }),() => {
+        let result;
+        const saved = app.store.edit(() => {
+          result = data.mergeCharacter(p,target.id,source.id,targetPhaseTitle,sourcePhaseTitle,phaseOrder);
+          if (result.ok) {
+            view.characterId = target.id;
+            view.phaseId = result.targetPhaseId;
+            view.section = 'profile';
+            view.arcId = null;
+            view.pathId = null;
+          }
+        },{saveError:'projectSaveFailed'});
+        if (!saved) return;
+        if (!result?.ok) {
+          const message = result?.reason === 'selfRelationships' ? 'mergeSelfRelationshipConflict' :
+            result?.reason === 'overlappingBeats' ? 'mergeOverlappingBeatsConflict' : 'mergeUnavailable';
+          app.preferences.flash(message);
+          return;
+        }
+        $('editCharacter')?.focus({preventScroll:true});
+      },{submitKey:'mergeProfilesAction',danger:false});
+    }});
   }
 
   function deleteCharacter(character) {
@@ -877,7 +940,7 @@ Enredo.characters = ((app) => {
     } : null});
   }
 
-  function openCharacter(id,originNodeId = null) {
+  function openCharacter(id,originNodeId = null,phaseId = null) {
     const character = characterById(id);
     if (!character) return;
     if (view.characterId !== id) {
@@ -887,6 +950,8 @@ Enredo.characters = ((app) => {
       view.arcId = null;
       view.pathId = null;
     }
+    view.phaseId = phaseById(character,phaseId) ? phaseId : null;
+    view.section = 'profile';
     view.graph = false;
     if (originNodeId) view.originNodeId = originNodeId;
     app.session.charactersOpen = true;
@@ -945,6 +1010,7 @@ Enredo.characters = ((app) => {
       const node = app.store.selectedNode();
       if (node) profileDialog(null,{participateNodeId:node.id});
     } else if (button.id === 'editCharacter' && character) profileDialog(character);
+    else if (button.id === 'mergeCharacter' && character) mergeDialog(character);
     else if (button.id === 'deleteCharacter' && character) deleteCharacter(character);
     else if (button.id === 'manageCharacterRoles') roleDialog();
     else if (button.id === 'manageRelationshipKinds') relationshipKindDialog();
@@ -1026,7 +1092,7 @@ Enredo.characters = ((app) => {
     else if (button.id === 'newCharacterFromNode') profileDialog(null,{participateNodeId:node.id});
     else if (button.dataset.editParticipant !== undefined) participantDialog(node,Number(button.dataset.editParticipant));
     else if (button.dataset.removeParticipant !== undefined) removeParticipant(node,Number(button.dataset.removeParticipant));
-    else if (button.dataset.openParticipant) openCharacter(button.dataset.openParticipant,button.dataset.originNode);
+    else if (button.dataset.openParticipant) openCharacter(button.dataset.openParticipant,button.dataset.originNode,button.dataset.phaseId || null);
   }
 
   function bindEvents() {
