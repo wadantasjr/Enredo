@@ -7,12 +7,15 @@ Enredo.storyBeats = ((app) => {
   function renderInspector() {
     const p = app.store.project();
     const n = app.store.selectedNode();
+    const inspector = $('inspector');
+    if (inspector.dataset.inspectedBeat !== (n?.id ?? '')) inspector.scrollTop = 0;
+    inspector.dataset.inspectedBeat = n?.id ?? '';
     $('inspectorTitle').innerHTML = icon(n ? 'panel' : 'book') + ' ' + tx(n ? 'nodeDetails' : 'navigation');
     $('clearSelection').hidden = !n;
     if (!n) {
       const items = app.session.isWholeStory() ? '<div class="overview-chapters">' +
         p.chapters.map((c,i) => app.workspace.chapterButton(c,i,false)).join('') + '</div>' : '';
-      $('inspector').innerHTML = '<p class="hint">' + tx('selectNodeHint') + '</p>' + items;
+      inspector.innerHTML = '<p class="hint">' + tx('selectNodeHint') + '</p>' + items;
       return;
     }
     const outgoing = p.edges.filter(e => e.from === n.id);
@@ -25,7 +28,7 @@ Enredo.storyBeats = ((app) => {
         '<button class="icon-btn small" data-edge="' + esc(e.id) + '" title="' + tx('editConnection') + '" aria-label="' +
         tx('editNamedConnection',{name:target.title}) + '">' + icon('edit') + '</button></div>';
     }).join('');
-    $('inspector').innerHTML =
+    inspector.innerHTML =
       '<div class="fields"><label class="field"><span>' + tx('title') + '</span><input id="nodeTitle" maxlength="120" value="' + esc(n.title) + '"></label>' +
       '<label class="field"><span>' + tx('nodeType') + '</span><select id="nodeKind">' + kindOptions(n.kind) + '</select></label>' +
       app.structure.narrativeStageField(n,p) +
@@ -39,6 +42,7 @@ Enredo.storyBeats = ((app) => {
       '</div></div>' +
       '<label class="field"><span>' + tx('notes') + '</span><textarea id="nodeNotes" placeholder="' + tx('notesHint') + '" rows="3">' +
       esc(n.notes[0] === '\n' ? '\n' + n.notes : n.notes) + '</textarea></label></div>' +
+      app.projectManagement.renderBeatTasks(n,p) +
       app.characters.renderNodeParticipants(n,p) +
       '<section class="paths"><div class="paths-title"><span>' + tx('outgoingPaths') + '</span><span class="count">' + outgoing.length +
       '</span></div><div class="path-list">' + (list || '<p class="hint">' + tx('noPaths') + '</p>') +
@@ -105,7 +109,9 @@ Enredo.storyBeats = ((app) => {
     app.dialogs.confirmation(t('confirmNode'),t('confirmNodeMessage',{name:n.title || t('untitled')}),() => {
       app.store.edit(() => {
         const removedEdges = p.edges.filter(edge => edge.from === n.id || edge.to === n.id);
-        app.characterData.detachSituations(p,new Set([n.id]));
+        const removed = new Set([n.id]);
+        app.characterData.detachSituations(p,removed);
+        app.projectManagementData.detachBeats(p,removed);
         for (const edge of removedEdges) app.characterData.detachConnection(p,edge.id,{unlinkRoute:true});
         p.nodes = p.nodes.filter(item => item.id !== n.id);
         p.edges = p.edges.filter(edge => edge.from !== n.id && edge.to !== n.id);

@@ -14,7 +14,7 @@ Enredo.store = ((app) => {
         }
       }
     } catch {}
-    return {active:'exemplo',chapter:'sinal',projects:[app.storyData.sample()]};
+    return null;
   }
 
   let state = readState();
@@ -22,6 +22,22 @@ Enredo.store = ((app) => {
   const undoStack = [], redoStack = [];
 
   let storageFailed = false;
+
+  async function initialize() {
+    if (state) {
+      save();
+      return;
+    }
+    const p = app.sampleProject.create();
+    // The sample preview remains usable when IndexedDB is unavailable.
+    const beat = await app.sampleProject.saveOriginal(p).catch(() => null);
+    const saved = readState();
+    state = saved ?? {active:p.id,chapter:p.chapters[0].id,projects:[p]};
+    if ((saved || !save()) && beat) {
+      app.imageStore.discardOriginalImages([beat.originalImageId]);
+      delete beat.originalImageId;
+    }
+  }
 
   const project = () => state.projects.find(p => p.id === state.active) ?? state.projects[0];
 
@@ -120,6 +136,7 @@ Enredo.store = ((app) => {
     chapter,
     edit,
     historyStep,
+    initialize,
     nodeById,
     project,
     remember,

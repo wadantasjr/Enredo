@@ -1,0 +1,79 @@
+.workspace.management-mode{grid-template-columns:minmax(0,1fr);min-height:0}
+.management-mode .graph-shell{min-height:0}
+.management-mode .workspace-actions,.management-mode .map-tool{display:none}
+.management-mode .graph-actions .undo-control{display:inline-grid}
+.workspace.management-mode.no-map .graph-actions{display:flex}
+
+.management-view{flex:1;min-width:0;min-height:0;overflow:auto;scrollbar-gutter:stable;background:var(--surface-subtle);padding:clamp(12px,3vw,24px)}
+.management-heading,.management-toolbar,.management-actions,.management-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.management-heading,.management-toolbar{justify-content:space-between;margin-bottom:14px}
+.management-heading h2{margin:0;font-size:1.25rem}
+.management-toolbar{padding-bottom:12px;border-bottom:1px solid var(--line)}
+.management-tabs .btn{background:transparent}
+.management-tabs .btn[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-dark);border-color:var(--icon-active-line)}
+.management-filter{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;font-size:.8rem;color:var(--muted)}
+.management-filter.is-hidden{visibility:hidden}
+.management-filter span{flex:none}
+.management-filter select{width:14rem;min-height:36px;color:var(--ink)}
+.management-empty{padding:12px 0}
+
+.management-list,.management-agenda{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.management-card{display:grid;gap:8px;min-width:0;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.management-card-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.management-item-title,.management-beat{border:0;background:none;padding:0;min-width:0;text-align:left;overflow-wrap:anywhere}
+.management-item-title{font-weight:700;font-size:.95rem;line-height:1.4}
+.management-item-title:hover,.management-beat:hover{color:var(--accent-dark);text-decoration:underline}
+.management-beat{color:var(--accent-dark)}
+.management-beat svg{width:14px;height:14px}
+.management-meta{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;min-width:0;color:var(--muted);font-size:.8rem;overflow-wrap:anywhere}
+.management-notes{margin:0;color:var(--muted);font-size:.875rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.management-status{background:var(--status-bg,var(--count-bg));color:var(--status-ink,var(--count-ink));border-radius:5px;
+  flex:none;max-width:50%;padding:2px 6px;font-size:.75rem;font-weight:650;overflow-wrap:anywhere}
+.management-status[data-status="doing"],.management-status[data-status="active"],.gantt-bar[data-status="doing"],.gantt-bar[data-status="active"]{
+  --status-bg:var(--tag-scene-bg);--status-ink:var(--tag-scene-ink)}
+.management-status[data-status="review"],.gantt-bar[data-status="review"]{--status-bg:var(--tag-outcome-bg);--status-ink:var(--tag-outcome-ink)}
+.management-status[data-status="done"],.management-status[data-status="completed"],.gantt-bar[data-status="done"],.gantt-bar[data-status="completed"]{
+  --status-bg:var(--tag-merge-bg);--status-ink:var(--tag-merge-ink)}
+.beat-task-list .path-item{justify-content:space-between;min-height:36px;gap:8px;padding:5px 7px}
+.beat-task-list .management-item-title{font-size:.85rem}
+.management-dates{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr));gap:8px}
+
+.management-scroll{overflow:auto;padding:2px}
+.management-scroll:focus-visible{outline-offset:-2px}
+.management-board{display:grid;grid-template-columns:repeat(4,minmax(11.5rem,1fr));gap:8px}
+.management-column{min-width:0;padding:8px;background:var(--surface-muted);border:1px solid var(--line);border-radius:8px}
+.management-column.is-drop-target{background:var(--accent-soft);border-color:var(--accent)}
+.management-column header{display:flex;align-items:center;gap:5px;margin-bottom:8px}
+.management-column h3,.management-day h3,.management-unscheduled h3{font-size:.875rem;margin:0}
+.management-column header button{margin-left:auto}
+.management-column .management-card{padding:8px}
+.management-column .management-meta{align-items:flex-start;flex-direction:column}
+.management-column .hint{margin:8px 0 4px}
+@media (pointer:fine){.management-column [draggable="true"]{cursor:grab}}
+
+.management-day h3,.management-unscheduled h3{margin-bottom:5px}
+.management-agenda,.management-unscheduled .management-list{gap:12px}
+.management-event{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.management-event span{color:var(--muted);font-size:.8rem}
+.management-unscheduled{margin-top:16px}
+
+.gantt-table{width:100%;min-width:39rem;table-layout:fixed;border-collapse:separate;border-spacing:0;text-align:left;font-size:.85rem}
+.gantt-table caption{text-align:left;color:var(--muted);margin:0 0 7px}
+.gantt-table th,.gantt-table td{padding:5px 8px;border-bottom:1px solid var(--line)}
+.gantt-table th:first-child{position:sticky;left:0;z-index:1;width:10.5rem;background:var(--surface-subtle);border-right:1px solid var(--line)}
+.gantt-table th small{display:block;font-weight:400;font-size:.75rem;color:var(--muted);overflow-wrap:anywhere}
+.gantt-axis,.gantt-track{position:relative;min-height:1.5rem}
+.gantt-axis span{position:absolute;top:0;color:var(--muted);font-size:.75rem;font-weight:400;white-space:nowrap}
+.gantt-track{background:linear-gradient(to right,var(--line) 1px,transparent 1px) 0 0/var(--gantt-step) 100%}
+.gantt-bar{position:absolute;inset-block:3px;border-radius:4px;background:var(--status-bg,var(--accent-soft));border:1px solid var(--status-ink,var(--accent));min-width:3px}
+.gantt-bar[data-kind="sprint"]{border-width:2px}
+.gantt-bar.milestone{border-radius:2px;min-width:4px}
+
+.android .management-view .btn,.android .management-filter select,.android .management-move,.android .beat-task-list .management-item-title{min-height:44px}
+@media(max-width:940px){.management-view{overflow:visible}}
+@media(max-width:600px){
+  .gantt-table th:first-child{width:8rem}
+  .management-toolbar{align-items:stretch}
+  .management-filter{flex:1 1 100%}
+  .management-filter select{width:100%}
+}

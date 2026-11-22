@@ -1,12 +1,14 @@
-.workspace{flex:1;min-height:570px;display:grid;grid-template-columns:minmax(0,1fr) 292px;border:1px solid var(--line);border-radius:13px;box-shadow:var(--workspace-shadow);overflow:hidden}
+.workspace{flex:1;min-height:570px;display:grid;grid-template-columns:minmax(0,1fr) 292px;grid-template-rows:auto 1fr;border:1px solid var(--line);border-radius:13px;box-shadow:var(--workspace-shadow);overflow:hidden}
 .graph-shell{display:flex;flex-direction:column;min-width:0}
-.graph-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px;padding:0 9px 0 12px;min-height:53px;border-bottom:1px solid var(--line)}
-.tabs{align-self:stretch;display:flex;flex-wrap:wrap;gap:12px;min-width:0}
-.tab{background:none;border:0;border-bottom:2px solid transparent;padding:0 3px;font-size:.875rem;font-weight:650;color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.graph-bar{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:0 9px 0 12px;min-height:53px;border-bottom:1px solid var(--line)}
+.tabs{align-self:stretch;display:flex;flex-wrap:wrap;column-gap:12px;min-width:0}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:0 3px;min-height:52px;font-size:.875rem;font-weight:650;color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap}
 .tab:hover,.tab.active{color:var(--accent-dark)}
 .tab.active{border-bottom-color:var(--accent)}
 .tab svg{width:16px;height:16px}
-.graph-actions{gap:2px}
+/* Reserve space for the map tools so the tabs wrap at the same width in every view. */
+.workspace-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:4px;margin-left:auto;min-width:min(100%,186px);min-height:33px}
+.graph-actions{gap:2px;flex-wrap:wrap;justify-content:flex-end}
 .workspace-actions{display:flex;align-items:center;gap:2px;flex:none}
 .split{width:1px;height:20px;background:var(--line);margin:0 4px}
 .graph{position:relative;isolation:isolate;flex:1;min-height:450px;overflow:hidden;background-color:var(--canvas);background-image:radial-gradient(circle,var(--grid-dot) 1px,transparent 1.1px);background-size:20px 20px;touch-action:none;cursor:grab}

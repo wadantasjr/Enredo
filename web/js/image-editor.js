@@ -35,7 +35,7 @@ Enredo.imageEditor = ((app) => {
     try {
       const file = originalImageId ? await app.imageStore.readOriginalImage(originalImageId) : null;
       if (node !== app.store.selectedNode() || image !== node.image || originalImageId !== node.originalImageId ||
-          app.session.atHome || app.session.isStructureView() || $('dialog').open || viewer.open) return;
+          app.session.atHome || !app.session.hasMapView() || $('dialog').open || viewer.open) return;
       imageViewerUrl = file ? URL.createObjectURL(file) : null;
       $('imageViewerTitle').textContent = t(file ? 'viewOriginalImage' : 'viewSavedImage');
       $('imageViewerSize').textContent = '';

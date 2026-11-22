@@ -14,9 +14,15 @@ Use Enredo [in your browser](#getting-started) or install the [Android app](#and
 ### Getting started
 
 1. Download or clone this repository and open [`index.html`](index.html) in your browser. Keep the [`web/`](web/) folder beside it. Enredo runs offline without installation.
-2. In **My space**, open the sample story or click **New project**.
+2. In **My space**, open **After the Signal** or click **New project**. Use **Add sample** to open a fresh copy in the current language.
 3. Use the **+** button next to **Chapters** to organize your story into parts. Within a chapter, click **Add story beat**.
 4. Select a story beat to write notes, then click **Add path**. You can create a destination or link to an existing beat, even in another chapter.
+
+### Explore the sample project
+
+- In **Timeline**, select **The night shift** to see its notes, original image, focal character, narrative stage, connection and linked task. Switch to **Whole story** to trace the two routes into the lighthouse and the two endings.
+- Open **Structure** to find the beats associated with all 12 stages. In **Characters**, explore Mara’s two phases and compare what changes in her arc and relationships on each ending path.
+- In **Project Management**, open **Kanban** to see all four task statuses. Filter by sprint or backlog, then use **Schedule** and **Gantt** to see how the work overlaps.
 
 ### What you can do
 
@@ -32,6 +38,13 @@ Use Enredo [in your browser](#getting-started) or install the [Android app](#and
 - Record alternative outcomes on separate paths. The editor keeps the central character profile and does not simulate which ending a playthrough reaches.
 - Delete chapters or projects after confirming. Use **Undo** to recover a deletion while the tab is open.
 
+### Project Management
+
+- Open **Project Management → Tasks** to create tasks with a status, priority, optional dates, and an optional story beat. In the details of a story beat, use **New task** to create a task already linked to that beat. Deleting the beat keeps its tasks in the project and clears their beat link.
+- Use **Sprints** to set a goal and dates and track how many tasks are done. Assign tasks to a sprint in the task form. Tasks without a sprint appear in the **Backlog**, including tasks from a deleted sprint.
+- In **Kanban**, drag cards between **To do**, **In progress**, **In review**, and **Done**, or use the status selector on each card. Filter by sprint or backlog in the task list, board, and planning views.
+- Use **Schedule** for an agenda of sprint dates, task starts, and due dates. Use **Gantt** to see how tasks and sprints overlap. Tasks without dates appear below both views.
+
 ### Language, saving, and backups
 
 Enredo starts in English. Use the language selector at the top to choose **Português**. The browser remembers your choice the next time you open the editor.
@@ -41,6 +54,8 @@ Projects and original images are saved automatically in your browser. To back up
 Projects without a saved model open in **Free Structure**. Backups include the selected model and beat associations, including associations preserved after a model change.
 
 Character profiles, phases, participant links, arcs, paths, relationships, and portraits are also saved in the project and included in JSON backups.
+
+JSON backups also include tasks, sprints, and their links to story beats. Older backups open with empty task and sprint lists.
 
 If you already use `Enredo.html`, export your projects there and import the JSON files into this `index.html`. Opening a copy of the editor from a different path can use a different browser storage area.
 
@@ -73,9 +88,15 @@ Use o Enredo [no navegador](#como-começar) ou instale o [aplicativo Android](#a
 ### Como começar
 
 1. Baixe ou clone o repositório e abra o [`index.html`](index.html) no navegador. Mantenha a pasta [`web/`](web/) ao lado do arquivo. O Enredo funciona offline, sem instalação.
-2. Em **Meu espaço**, abra a história de exemplo ou clique em **Novo projeto**.
+2. Em **Meu espaço**, abra **Depois do sinal** ou clique em **Novo projeto**. Use **Adicionar exemplo** para abrir uma nova cópia no idioma selecionado.
 3. Use o botão **+** ao lado de **Capítulos** para organizar a história em partes. Dentro de um capítulo, clique em **Adicionar situação**.
 4. Selecione uma situação para escrever notas e clique em **Adicionar caminho**. Você pode criar uma situação de destino ou ligar a uma que já existe, inclusive em outro capítulo.
+
+### Explore o projeto de exemplo
+
+- Na **Timeline**, selecione **O turno da noite** para ver as notas, a imagem original, a personagem focal, a etapa narrativa, a conexão e a tarefa vinculada. Alterne para **História inteira** para acompanhar as duas rotas até o farol e os dois desfechos.
+- Abra **Estrutura** para localizar as situações associadas às 12 etapas. Em **Personagens**, explore as duas fases de Mara e compare como seu arco e seus relacionamentos mudam em cada desfecho.
+- Em **Gestão de projeto**, abra o **Kanban** para ver os quatro status das tarefas. Filtre por sprint ou backlog e use **Cronograma** e **Gantt** para ver quais trabalhos se sobrepõem.
 
 ### O que você pode fazer
 
@@ -91,6 +112,13 @@ Use o Enredo [no navegador](#como-começar) ou instale o [aplicativo Android](#a
 - Registre destinos diferentes em caminhos separados. O editor mantém a ficha central e não simula qual desfecho uma partida alcança.
 - Excluir capítulos e projetos mediante confirmação. Use **Desfazer** enquanto a aba estiver aberta para recuperar uma exclusão.
 
+### Gestão de projeto
+
+- Abra **Gestão de projeto → Tarefas** para criar tarefas com status, prioridade, datas opcionais e vínculo opcional com uma situação. Nos detalhes da situação, use **Nova tarefa** para criá-la já vinculada. Excluir a situação remove o vínculo e mantém as tarefas no projeto.
+- Em **Sprints**, defina o objetivo e as datas e acompanhe quantas tarefas foram concluídas. Atribua tarefas a uma sprint pelo formulário da tarefa. Tarefas sem sprint ficam no **Backlog**, inclusive as tarefas de uma sprint excluída.
+- No **Kanban**, arraste cartões entre **A fazer**, **Em andamento**, **Em revisão** e **Concluída**, ou use o seletor de status de cada cartão. Filtre por sprint ou backlog na lista de tarefas, no quadro e nas visualizações de planejamento.
+- Use o **Cronograma** para consultar as datas das sprints, o início e o prazo das tarefas. Use o **Gantt** para visualizar a sobreposição de tarefas e sprints. Tarefas sem data aparecem abaixo das duas visualizações.
+
 ### Idioma, salvamento e backup
 
 O Enredo abre em inglês por padrão. No seletor de idioma no topo da tela, escolha **Português**. O navegador guarda essa preferência para a próxima vez que você abrir o editor.
@@ -100,6 +128,8 @@ O Enredo salva os projetos e as imagens originais automaticamente no navegador. 
 Projetos sem modelo salvo abrem em **Estrutura Livre**. O JSON inclui o modelo e as associações das situações, inclusive as que ficam guardadas após a troca de modelo.
 
 As fichas, fases, participações, arcos, caminhos, relacionamentos e retratos também ficam salvos no projeto e são incluídos no backup JSON.
+
+Os backups JSON também incluem tarefas, sprints e seus vínculos com as situações. Backups antigos abrem com as listas de tarefas e sprints vazias.
 
 Se já estiver usando o `Enredo.html`, exporte seus projetos por lá e importe os arquivos JSON neste `index.html`. Abrir uma cópia do editor em outro caminho pode fazer o navegador usar um armazenamento diferente.
 
@@ -126,7 +156,7 @@ O APK usa uma chave de desenvolvimento em `android/.signing/enredo-debug.jks`. G
 ## Organização do código / Code layout
 
 - [`index.html`](index.html) contém a marcação e carrega os arquivos compartilhados pelo navegador e pelo Android.
-- [`web/js/`](web/js/) separa diagrama, situações, imagens, projetos, backup, estrutura narrativa e preferências. Cada módulo expõe pela interface `Enredo` as funções que outras áreas usam. [`main.js`](web/js/main.js) inicializa o editor.
+- [`web/js/`](web/js/) separa diagrama, situações, imagens, projetos, gestão de projeto, backup, estrutura narrativa e preferências. Cada módulo expõe pela interface `Enredo` as funções que outras áreas usam. [`main.js`](web/js/main.js) inicializa o editor.
 - [`web/css/`](web/css/) agrupa os estilos por área da interface.
 - [`android/app/src/main/java/app/enredo/editor/`](android/app/src/main/java/app/enredo/editor/) separa a atividade principal, a janela, o WebView, a ponte JavaScript e o seletor de documentos.
 

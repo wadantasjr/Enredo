@@ -12,8 +12,9 @@
 - Preserve existing project data and support importing older Enredo JSON backups. Keep editor preferences separate from story data, and keep original images in IndexedDB. Backups with original images use version 2. Backups without originals use version 1.
 - When changing the diagram or its details panel, check Timeline, Whole story, and full screen. Check narrow and wide layouts and make sure selecting a beat keeps the diagram controls accessible.
 
-## Verification and commits
+## Verification, commits, and releases
 
 - Test the offline browser entry point. For changes to project files, test export and reimport and open an older backup. For shared asset or packaging changes, run `pwsh -File ./scripts/build-html.ps1` and, when the SDK and JDK are available, `pwsh -File ./android/build.ps1`.
 - Keep generated HTML, APKs, build output, and signing keys out of Git.
 - Write commit titles and bodies in English. Follow the recent history with a short imperative subject such as `feat: add ...`, `fix: correct ...`, or `chore: update ...`. Use the body to explain other changes and compatibility decisions when needed.
+- Write GitHub release notes in Brazilian Portuguese and English, with the Portuguese section first.

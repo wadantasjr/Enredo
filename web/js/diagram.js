@@ -199,7 +199,7 @@ Enredo.diagram = ((app) => {
 
   function resizeGraph() {
     const {clientWidth:width,clientHeight:height} = $('graph');
-    if (app.session.atHome || app.session.isStructureView() || !app.store.chapter() || !width || !height || !graphViewport) return;
+    if (app.session.atHome || !app.session.hasMapView() || !app.store.chapter() || !width || !height || !graphViewport) return;
     if (width === graphViewport.width && height === graphViewport.height) return;
     view.x += (width - graphViewport.width)/2;
     view.y += (height - graphViewport.height)/2;
@@ -255,7 +255,7 @@ Enredo.diagram = ((app) => {
 
   function refreshThumbnailSize() {
     if (app.session.atHome || !app.store.chapter()) return;
-    if (app.session.isStructureView()) {
+    if (!app.session.hasMapView()) {
       app.session.mapNeedsFit = true;
       return;
     }

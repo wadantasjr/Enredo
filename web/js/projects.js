@@ -52,13 +52,38 @@ Enredo.projects = ((app) => {
         const model = app.narrative.getNarrativeModel(data.get('narrativeModel'));
         app.dialogs.closeDialog();
         app.store.edit(() => {
-          const p = {id:uid(),title,chapters:[{id:uid(),title:t('newChapter')}],nodes:[],edges:[],
+          const p = {id:uid(),title,chapters:[{id:uid(),title:t('newChapter')}],nodes:[],edges:[],tasks:[],sprints:[],
             narrativeModel:model?.id ?? app.narrative.defaultModelId,...app.characterData.emptyCollections()};
           app.store.state.projects.push(p);
           app.workspace.enterProject(p);
         },{fit:true});
         $('chapterTitle').focus();
       }});
+  }
+
+  async function addSample() {
+    const button = $('addSample');
+    if (button.disabled) return;
+    button.disabled = true;
+    let beat;
+    try {
+      const p = app.sampleProject.create();
+      beat = await app.sampleProject.saveOriginal(p);
+      const title = p.title;
+      const titles = new Set(app.store.state.projects.map(item => item.title));
+      for (let number = 2; titles.has(p.title); number += 1) p.title = title + ' (' + number + ')';
+      if (app.store.edit(() => {
+        app.store.state.projects.push(p);
+        app.store.state.active = p.id;
+        app.store.state.chapter = p.chapters[0].id;
+      },{fit:true,saveError:'projectSaveFailed',afterSave:() => app.workspace.enterProject(p)})) {
+        $('chapterTitle').focus();
+      } else app.imageStore.discardOriginalImages([beat.originalImageId]);
+    } catch {
+      app.preferences.flash(beat ? 'projectSaveFailed' : 'imageSaveFailed');
+    } finally {
+      button.disabled = false;
+    }
   }
 
   function editNarrativeModel() {
@@ -114,6 +139,7 @@ Enredo.projects = ((app) => {
           const removed = new Set(p.nodes.filter(n => n.chapter === c.id).map(n => n.id));
           const removedEdges = p.edges.filter(edge => removed.has(edge.from) || removed.has(edge.to));
           app.characterData.detachSituations(p,removed);
+          app.projectManagementData.detachBeats(p,removed);
           for (const edge of removedEdges) app.characterData.detachConnection(p,edge.id,{unlinkRoute:true});
           p.nodes = p.nodes.filter(n => !removed.has(n.id));
           p.edges = p.edges.filter(e => !removed.has(e.from) && !removed.has(e.to));
@@ -133,6 +159,7 @@ Enredo.projects = ((app) => {
   function bindEvents() {
     bindActions({
       newHomeProject:createProject,
+      addSample,
       addChapter:() => chapterDialog(),
       renameChapter:() => chapterDialog(app.store.chapter()),
       newEmptyChapter:() => chapterDialog(),

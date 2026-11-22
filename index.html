@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="web/css/fullscreen.css">
 <link rel="stylesheet" href="web/css/structure.css">
 <link rel="stylesheet" href="web/css/characters.css">
+<link rel="stylesheet" href="web/css/project-management.css">
 </head>
 <body>
 <div class="app">
@@ -73,13 +74,14 @@
         <div class="heading-actions">
           <button type="button" class="icon-btn" id="undoHome" title="Undo (Ctrl+Z)" aria-label="Undo" data-i18n-label="undo" data-i18n-title="undo" data-shortcut="Ctrl+Z" data-icon="undo"></button>
           <button type="button" class="icon-btn" id="redoHome" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" data-i18n-label="redo" data-i18n-title="redo" data-shortcut="Ctrl+Shift+Z" data-icon="redo"></button>
+          <button type="button" class="btn" id="addSample"><span data-icon="book"></span> <span data-i18n="addSample">Add sample</span></button>
           <button type="button" class="btn primary" id="newHomeProject"><span data-icon="plus"></span> <span data-i18n="newProject">New project</span></button>
         </div>
       </div>
       <div class="project-grid" id="projectGrid"></div>
       <div class="empty-library" id="emptyProjects" hidden>
         <strong data-i18n="noProjects">You have no projects yet</strong>
-        <p data-i18n="noProjectsHint">Create a story or import an existing project from a JSON file.</p>
+        <p data-i18n="noProjectsHint">Create a story, add the sample, or import a project from a JSON file.</p>
         <button type="button" class="btn" id="emptyImport"><span data-icon="upload"></span> <span data-i18n="importProject">Import project</span></button>
       </div>
     </section>
@@ -89,14 +91,15 @@
         <div class="heading-actions"><button class="btn primary" id="addNode"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
       </section>
       <section class="workspace" id="editorWorkspace" aria-label="Story map" data-i18n-label="storyMap">
-        <div class="graph-shell">
-          <div class="graph-bar">
-            <div class="tabs" role="group" aria-label="View" data-i18n-label="view">
-              <button type="button" class="tab" id="currentTab" aria-controls="graph"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
-              <button type="button" class="tab" id="overviewTab" aria-controls="graph"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
-              <button type="button" class="tab" id="structureTab" aria-controls="structureView"><span data-icon="panel"></span> <span data-i18n="structure">Structure</span></button>
-              <button type="button" class="tab" id="charactersTab" aria-controls="charactersView"><span data-icon="people"></span> <span data-i18n="characters">Characters</span></button>
-            </div>
+        <div class="graph-bar">
+          <div class="tabs" role="group" aria-label="View" data-i18n-label="view">
+            <button type="button" class="tab" id="currentTab" aria-controls="graph"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
+            <button type="button" class="tab" id="overviewTab" aria-controls="graph"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
+            <button type="button" class="tab" id="structureTab" aria-controls="structureView"><span data-icon="panel"></span> <span data-i18n="structure">Structure</span></button>
+            <button type="button" class="tab" id="charactersTab" aria-controls="charactersView"><span data-icon="people"></span> <span data-i18n="characters">Characters</span></button>
+            <button type="button" class="tab" id="projectManagementTab" aria-controls="projectManagementView"><span data-icon="tasks"></span> <span data-i18n="projectManagement">Project Management</span></button>
+          </div>
+          <div class="workspace-tools">
             <div class="graph-actions" role="group" id="graphActions" aria-label="Map tools" data-i18n-label="mapTools">
               <button class="icon-btn undo-control" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo" data-i18n-label="undo" data-i18n-title="undo" data-shortcut="Ctrl+Z" data-icon="undo"></button>
               <button class="icon-btn undo-control" id="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" data-i18n-label="redo" data-i18n-title="redo" data-shortcut="Ctrl+Shift+Z" data-icon="redo"></button>
@@ -110,6 +113,8 @@
               <button type="button" class="icon-btn" id="toggleFullscreen" title="Full screen diagram" aria-label="Full screen diagram" data-icon="expand"></button>
             </div>
           </div>
+        </div>
+        <div class="graph-shell">
           <section class="empty-library chapter-empty" id="emptyChapters" hidden>
             <strong data-i18n="noChapters">This project has no chapters yet</strong>
             <p data-i18n="noChaptersHint">Create a chapter to start building your timeline.</p>
@@ -120,6 +125,26 @@
             </div>
           </section>
           <section class="characters-view" id="charactersView" aria-label="Characters" data-i18n-label="characters" hidden></section>
+          <section class="management-view" id="projectManagementView" aria-labelledby="managementTitle" hidden>
+            <header class="management-heading">
+              <h2 id="managementTitle" tabindex="-1" data-i18n="projectManagement">Project Management</h2>
+              <div class="management-actions">
+                <button type="button" class="btn" id="newSprint"><span data-icon="plus"></span> <span data-i18n="newSprint">New sprint</span></button>
+                <button type="button" class="btn primary" id="newTask"><span data-icon="plus"></span> <span data-i18n="newTask">New task</span></button>
+              </div>
+            </header>
+            <div class="management-toolbar">
+              <div class="management-tabs" role="group" aria-label="Project Management views" data-i18n-label="managementViews">
+                <button type="button" class="btn" data-management-view="tasks" aria-controls="managementPanel" data-i18n="tasks">Tasks</button>
+                <button type="button" class="btn" data-management-view="sprints" aria-controls="managementPanel" data-i18n="sprints">Sprints</button>
+                <button type="button" class="btn" data-management-view="kanban" aria-controls="managementPanel" data-i18n="kanban">Kanban</button>
+                <button type="button" class="btn" data-management-view="schedule" aria-controls="managementPanel" data-i18n="schedule">Schedule</button>
+                <button type="button" class="btn" data-management-view="gantt" aria-controls="managementPanel" data-i18n="gantt">Gantt</button>
+              </div>
+              <label class="management-filter" id="managementFilter"><span data-i18n="filterSprint">Sprint filter</span><select id="managementSprintFilter"></select></label>
+            </div>
+            <div id="managementPanel"></div>
+          </section>
           <div class="graph" id="graph" tabindex="0" aria-label="Story beat diagram" data-i18n-label="nodeDiagram">
             <div class="world" id="world"><svg class="wires" id="wires" aria-hidden="true"></svg><div id="cards"></div></div>
             <div class="empty-canvas" id="emptyCanvas" hidden><strong data-i18n="firstNode">Start with a story beat</strong><p data-i18n="firstNodeHint">Add a scene or choice, then connect the paths that follow.</p><button class="btn primary" id="emptyAdd"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
@@ -178,9 +203,12 @@
 <script src="web/js/preferences.js"></script>
 <script src="web/js/narrative-models.js"></script>
 <script src="web/js/character-data.js"></script>
+<script src="web/js/project-management-data.js"></script>
 <script src="web/js/story-data.js"></script>
 <script src="web/js/session.js"></script>
 <script src="web/js/image-store.js"></script>
+<script src="web/js/sample-images.js"></script>
+<script src="web/js/sample-project.js"></script>
 <script src="web/js/store.js"></script>
 <script src="web/js/workspace.js"></script>
 <script src="web/js/structure.js"></script>
@@ -193,6 +221,7 @@
 <script src="web/js/paths.js"></script>
 <script src="web/js/image-editor.js"></script>
 <script src="web/js/characters.js"></script>
+<script src="web/js/project-management.js"></script>
 <script src="web/js/project-files.js"></script>
 <script src="web/js/main.js"></script>
 </body>

@@ -158,7 +158,7 @@ Enredo.preferences = ((app) => {
 
   function applyFontSize() {
     document.documentElement.style.fontSize = fontSize + '%';
-    if (!app.session.atHome && !app.session.isStructureView() && app.store.chapter()) app.diagram.renderWires();
+    if (!app.session.atHome && app.session.hasMapView() && app.store.chapter()) app.diagram.renderWires();
   }
 
   function editFontSize() {

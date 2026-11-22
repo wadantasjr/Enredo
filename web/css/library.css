@@ -71,9 +71,9 @@
 .heading h1{font-size:clamp(1.65rem,2.35vw,2.15rem);line-height:1.15;letter-spacing:-.045em;margin:3px 0 6px}
 .heading-title{display:flex;align-items:center;gap:7px;overflow-wrap:anywhere}
 .heading p{font-size:.875rem;color:var(--muted);margin:0}
-.space-heading{margin:5px 0 24px}
+.space-heading{margin:5px 0 24px;flex-wrap:wrap}
 .space-heading h1{margin:0 0 5px}
-.space-heading .heading-actions{gap:6px}
+.space-heading .heading-actions{gap:6px;flex-wrap:wrap;max-width:100%}
 .space-heading .primary{margin-left:6px}
 .project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,264px),1fr));gap:14px}
 .project-card{display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}

@@ -56,7 +56,6 @@
 .android .structure-preserved summary{align-content:center}
 @media(max-width:940px){.workspace.structure-mode{min-height:0}.structure-view{overflow:visible}}
 @media(max-width:600px){
-  .tab{min-height:44px}
   .graph-actions .undo-control{display:inline-grid}
   .structure-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
   .structure-stage-status{max-width:6rem}
