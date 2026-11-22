@@ -58,14 +58,20 @@ Enredo.paths = ((app) => {
         app.dialogs.closeDialog();
         app.store.edit(() => {
           const to = isNew ? app.storyBeats.appendNode({chapterId:data.get('chapter'),title,kind:data.get('kind'),origin}).id : target;
-          if (existing) Object.assign(existing,{to,label});
+          if (existing) {
+            if (existing.to !== to) app.characterData.detachConnection(p,existing.id);
+            Object.assign(existing,{to,label});
+          }
           else p.edges.push({id:uid(),from:origin.id,to,label});
           app.session.selection = origin.id;
           app.diagram.stopConnect();
         },{fit:isNew && (app.session.isWholeStory() || data.get('chapter') === app.store.chapter()?.id)});
       },
       remove:existing ? () => app.dialogs.confirmation(t('confirmConnection'),t('confirmConnectionMessage'),() => {
-        app.store.edit(() => { p.edges = p.edges.filter(e => e.id !== existing.id); });
+        app.store.edit(() => {
+          app.characterData.detachConnection(p,existing.id,{unlinkRoute:true});
+          p.edges = p.edges.filter(e => e.id !== existing.id);
+        });
       }) : null});
   }
 

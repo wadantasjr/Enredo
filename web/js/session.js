@@ -1,6 +1,7 @@
 Enredo.session = {
   atHome: true,
   diagramFullscreen: false,
+  charactersOpen: false,
   detailsCollapsed: false,
   diagramScroll: 0,
   viewMode: 'timeline',

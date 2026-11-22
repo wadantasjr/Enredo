@@ -63,16 +63,16 @@ Enredo.store = ((app) => {
   }
 
   function edit(callback,{fit = false, saveError, afterSave} = {}) {
-    const before = JSON.stringify(state);
+    const before = app.characterData.captureHistory(state);
     callback();
-    const after = JSON.stringify(state);
-    if (!save(after,!saveError) && saveError) {
-      state = JSON.parse(before);
+    const after = app.characterData.captureHistory(state);
+    if (!save(JSON.stringify(state),!saveError) && saveError) {
+      state = app.characterData.restoreHistory(before);
       app.workspace.render();
       app.preferences.flash(saveError);
       return false;
     }
-    if (after !== before) remember(before);
+    if (JSON.stringify(after) !== JSON.stringify(before)) remember(before);
     afterSave?.();
     app.workspace.render(fit);
     return true;
@@ -94,8 +94,8 @@ Enredo.store = ((app) => {
     const [take,put] = direction === 'undo' ? [undoStack,redoStack] : [redoStack,undoStack];
     if (!take.length) return;
     const previousProject = project(), previousChapter = chapter()?.id;
-    put.push(JSON.stringify(state));
-    state = JSON.parse(take.pop());
+    put.push(app.characterData.captureHistory(state));
+    state = app.characterData.restoreHistory(take.pop());
     const restoredProject = project();
     if (previousProject?.id !== restoredProject?.id) app.workspace.resetEditor();
     else app.diagram.stopConnect();

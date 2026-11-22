@@ -4,13 +4,25 @@ Enredo.imageEditor = ((app) => {
   const { $, uid } = app.dom;
   const { t } = app.preferences;
 
-  let nodeImagePick = null;
+  let imagePick = null;
   let imageViewerUrl;
 
   function chooseNodeImage() {
     const node = app.store.selectedNode();
     if (!node) return;
-    nodeImagePick = {project:app.store.project(),node};
+    imagePick = {type:'node',project:app.store.project(),node};
+    chooseImageFile();
+  }
+
+  function chooseCharacterPortrait(characterId) {
+    const project = app.store.project();
+    const character = project?.characters.find(item => item.id === characterId);
+    if (!character) return;
+    imagePick = {type:'character',project,character};
+    chooseImageFile();
+  }
+
+  function chooseImageFile() {
     if (app.platform.android) app.platform.android.chooseImage();
     else $('nodeImageFile').click();
   }
@@ -34,64 +46,81 @@ Enredo.imageEditor = ((app) => {
     }
   }
 
-  async function loadNodeImage(file,pick) {
-    if (!pick || nodeImagePick !== pick) return;
-    const isCurrent = () => nodeImagePick === pick &&
-      app.store.state.projects.includes(pick.project) && pick.project.nodes.includes(pick.node);
+  async function loadImage(file,pick) {
+    if (!pick || imagePick !== pick) return;
+    const isCurrent = () => imagePick === pick && app.store.state.projects.includes(pick.project) &&
+      (pick.type === 'node' ? pick.project.nodes.includes(pick.node) : pick.project.characters.includes(pick.character));
     let savedId, committed = false;
     try {
       if (file.size > app.imageStore.nodeImageFileLimit) {
         app.preferences.flash('imageTooLarge');
         return;
       }
-      const image = await app.imageStore.prepareNodeImage(file);
+      const image = pick.type === 'node'
+        ? await app.imageStore.prepareNodeImage(file)
+        : await app.imageStore.prepareCharacterPortrait(file);
       if (!isCurrent()) return;
-      const id = uid();
-      try {
-        await app.imageStore.saveOriginalImages([[id,file]]);
-        savedId = id;
-      } catch {
-        if (isCurrent()) app.preferences.flash('imageSaveFailed');
-        return;
+      if (pick.type === 'node') {
+        const id = uid();
+        try {
+          await app.imageStore.saveOriginalImages([[id,file]]);
+          savedId = id;
+        } catch {
+          if (isCurrent()) app.preferences.flash('imageSaveFailed');
+          return;
+        }
       }
       if (!isCurrent()) return;
       committed = app.store.edit(() => {
-        Object.assign(pick.node,{image,originalImageId:id});
+        if (pick.type === 'node') Object.assign(pick.node,{image,originalImageId:savedId});
+        else app.characterData.setPortrait(pick.project,pick.character.id,image);
       },{saveError:'imageSaveFailed'});
-      if (app.store.selectedNode()?.id === pick.node.id && app.store.project()?.id === pick.project.id) $('chooseNodeImage')?.focus({preventScroll:true});
+      if (pick.type === 'node' && app.store.selectedNode()?.id === pick.node.id && app.store.project()?.id === pick.project.id) {
+        $('chooseNodeImage')?.focus({preventScroll:true});
+      } else if (pick.type === 'character' && app.session.charactersOpen && app.store.project()?.id === pick.project.id) {
+        $('choosePortrait')?.focus({preventScroll:true});
+      }
     } catch {
-      if (nodeImagePick === pick) app.preferences.flash('imageReadFailed');
+      if (imagePick === pick) app.preferences.flash('imageReadFailed');
     } finally {
       if (savedId && !committed) app.imageStore.discardOriginalImages([savedId]);
-      if (nodeImagePick === pick) nodeImagePick = null;
+      if (imagePick === pick) imagePick = null;
     }
   }
 
   async function importAndroidImage() {
-    const pick = nodeImagePick;
+    const pick = imagePick;
     try {
       const response = await fetch('/node-image',{cache:'no-store'});
       if (!response.ok) throw new Error('Could not read the selected image');
-      await loadNodeImage(await response.blob(),pick);
+      await loadImage(await response.blob(),pick);
     } catch {
-      if (pick && nodeImagePick === pick) cancelAndroidImage('imageReadFailed');
+      if (pick && imagePick === pick) cancelAndroidImage('imageReadFailed');
     }
   }
 
   function cancelAndroidImage(message) {
-    nodeImagePick = null;
+    imagePick = null;
     if (message) app.preferences.flash(message);
   }
 
   function removeNodeImage() {
     const node = app.store.selectedNode();
     if (!node?.image) return;
-    if (nodeImagePick?.node === node) nodeImagePick = null;
+    if (imagePick?.node === node) imagePick = null;
     app.store.edit(() => {
       delete node.image;
       delete node.originalImageId;
     },{saveError:'imageSaveFailed'});
     $('chooseNodeImage')?.focus({preventScroll:true});
+  }
+
+  function removeCharacterPortrait(characterId) {
+    const p = app.store.project(), character = p?.characters.find(item => item.id === characterId);
+    if (!character?.portraitId) return;
+    if (imagePick?.type === 'character' && imagePick.character === character) imagePick = null;
+    app.store.edit(() => app.characterData.setPortrait(p,character.id,null),{saveError:'imageSaveFailed'});
+    $('choosePortrait')?.focus({preventScroll:true});
   }
 
   function bindEvents() {
@@ -100,6 +129,11 @@ Enredo.imageEditor = ((app) => {
       if (button?.id === 'chooseNodeImage') chooseNodeImage();
       if (button?.id === 'viewNodeImage') viewNodeImage();
       if (button?.id === 'removeNodeImage') removeNodeImage();
+    });
+    $('charactersView').addEventListener('click',event => {
+      const button = event.target.closest('button');
+      if (button?.id === 'choosePortrait') chooseCharacterPortrait(button.dataset.characterId);
+      if (button?.id === 'removePortrait') removeCharacterPortrait(button.dataset.characterId);
     });
     $('imageViewerClose').addEventListener('click',() => $('imageViewer').close());
     $('imageViewer').addEventListener('close',() => {
@@ -119,14 +153,15 @@ Enredo.imageEditor = ((app) => {
     $('nodeImageFile').addEventListener('change',event => {
       const file = event.target.files[0];
       event.target.value = '';
-      if (file) loadNodeImage(file,nodeImagePick);
+      if (file) loadImage(file,imagePick);
     });
-    $('nodeImageFile').addEventListener('cancel',() => { nodeImagePick = null; });
+    $('nodeImageFile').addEventListener('cancel',() => { imagePick = null; });
   }
 
   return {
     bindEvents,
     cancelAndroidImage,
+    chooseCharacterPortrait,
     importAndroidImage
   };
 })(Enredo);
