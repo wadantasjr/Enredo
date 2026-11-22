@@ -48,6 +48,7 @@ $tools = Join-Path $AndroidSdk "build-tools/$BuildToolsVersion"
 $platformJar = Join-Path $AndroidSdk "platforms/android-$platformVersion/android.jar"
 $lambdaStubs = Join-Path $tools 'core-lambda-stubs.jar'
 $app = Join-Path $PSScriptRoot 'app/src/main'
+$webRoot = Split-Path -Parent $PSScriptRoot
 $output = Join-Path $PSScriptRoot 'Enredo.apk'
 
 foreach ($requiredFile in @($platformJar, $lambdaStubs, "$tools/aapt2.exe", "$tools/d8.bat", "$tools/zipalign.exe",
@@ -65,12 +66,11 @@ $env:JAVA_HOME = $JavaHome
 try {
     Push-Location -LiteralPath $work.FullName
     try {
-        New-Item -ItemType Directory -Path assets, generated, classes, dex | Out-Null
-        Copy-Item -LiteralPath (Join-Path (Split-Path -Parent $PSScriptRoot) 'index.html') -Destination 'assets/index.html'
+        New-Item -ItemType Directory -Path generated, classes, dex | Out-Null
 
         Invoke-BuildTool "$tools/aapt2.exe" @('compile', '--dir', "$app/res", '-o', 'resources.zip')
         Invoke-BuildTool "$tools/aapt2.exe" @('link', '-I', $platformJar, '--manifest', "$app/AndroidManifest.xml",
-            '--java', 'generated', '-A', 'assets', '-o', 'unsigned.apk', 'resources.zip')
+            '--java', 'generated', '-o', 'unsigned.apk', 'resources.zip')
 
         $sources = @(Get-ChildItem -LiteralPath "$app/java", 'generated' -Filter '*.java' -File -Recurse |
             ForEach-Object { $_.FullName })
@@ -83,6 +83,14 @@ try {
         Add-Type -AssemblyName System.IO.Compression.FileSystem
         $unsigned = [IO.Compression.ZipFile]::Open((Join-Path $work.FullName 'unsigned.apk'), 'Update')
         try {
+            # AssetManager uses forward slashes even when the APK is built on Windows.
+            $webFiles = @(Get-Item -LiteralPath (Join-Path $webRoot 'index.html')) +
+                @(Get-ChildItem -LiteralPath (Join-Path $webRoot 'web') -File -Recurse)
+            foreach ($webFile in $webFiles) {
+                $assetPath = [IO.Path]::GetRelativePath($webRoot,$webFile.FullName).Replace('\','/')
+                [IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+                    $unsigned, $webFile.FullName, "assets/$assetPath", 'Optimal') | Out-Null
+            }
             foreach ($dex in Get-ChildItem -LiteralPath 'dex' -Filter 'classes*.dex' -File) {
                 [IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
                     $unsigned, $dex.FullName, $dex.Name, 'NoCompression') | Out-Null

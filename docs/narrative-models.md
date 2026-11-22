@@ -102,9 +102,9 @@ Use os marcos para marcar mudanças de direção, variações de pressão e rela
 
 ## Organização interna e dados
 
-O catálogo funciona no próprio `index.html`. Os IDs de modelo são `free`, `three-acts`, `journey-12` e `beats-15`. Cada entrada tem um ID de etapa estável, um tipo (`act`, `sequence`, `stage` ou `milestone`), uma ordem e textos em inglês e português. `parentId` liga sequências e marcos de Três Atos a um ato. `suggestedPosition` dá a posição de referência dos quinze marcos. A interface usa o idioma atual para exibir o nome, a descrição, a finalidade e as perguntas. Os IDs são iguais nos dois idiomas.
+O catálogo fica em [`web/js/narrative-models.js`](../web/js/narrative-models.js). Os IDs de modelo são `free`, `three-acts`, `journey-12` e `beats-15`. Cada entrada tem um ID de etapa estável, um tipo (`act`, `sequence`, `stage` ou `milestone`), uma ordem e textos em inglês e português. `parentId` liga sequências e marcos de Três Atos a um ato. `suggestedPosition` dá a posição de referência dos quinze marcos. A interface usa o idioma atual para exibir o nome, a descrição, a finalidade e as perguntas. Os IDs são iguais nos dois idiomas.
 
-O JSON usa o envelope `format: "enredo"`, `version: 1`. O projeto recebe `narrativeModel`. A situação recebe `narrativeStage`, que aceita `null` ou um objeto com `modelId` e `stepId`. Cada situação tem uma associação opcional. Ela pertence à situação e acompanha sua duplicação.
+O JSON usa o envelope `format: "enredo"`. Exportações com imagens originais usam `version: 2` e incluem os arquivos no campo `images`. As demais usam `version: 1`, como no exemplo abaixo. O projeto recebe `narrativeModel`. A situação recebe `narrativeStage`, que aceita `null` ou um objeto com `modelId` e `stepId`. Cada situação tem uma associação opcional. Ela pertence à situação e acompanha sua duplicação.
 
 ```json
 {

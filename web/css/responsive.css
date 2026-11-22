@@ -1,0 +1,31 @@
+@media(min-width:1151px){.workspace{height:calc(100dvh - 260px);flex:none;grid-template-rows:minmax(0,1fr)}.graph-shell,.graph{min-height:0}}
+/* Size the shared row from the diagram and let the details scroll within it. */
+@media(min-width:941px){.inspector{contain:size}.inspector-body{scrollbar-gutter:stable}}
+@media(max-width:1150px){.app{grid-template-columns:185px minmax(0,1fr)}.content{padding:20px 17px}.topbar{padding:0 17px}.workspace{grid-template-columns:minmax(0,1fr) 245px}.inspector-body{padding-inline:12px}.graph-actions .undo-control{display:none}.tabs{gap:8px}.tab{gap:4px}.tab svg{display:none}}
+@media(max-width:940px){.app{grid-template-columns:155px minmax(0,1fr)}.brand{padding-inline:12px}.side-body{padding:17px 8px}.workspace{grid-template-columns:minmax(0,1fr)}.inspector{border-left:0;border-top:1px solid var(--line)}.graph{height:58vh;flex:none;min-height:330px}.graph-actions .undo-control{display:inline-grid}}
+@media(max-width:600px){.app{display:block}.sidebar{border:0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto 1fr}.brand{height:auto;align-self:start;padding-top:10px;border:0}.brand strong{font-size:18px}.brand-mark{height:28px;width:28px}.brand-mark svg{height:19px;width:19px}.side-body{padding:7px 9px 8px 0;min-width:0}.side-label{display:none}.project-picker{margin:0 0 3px}.project-button{padding:4px 6px}.project-glyph{height:24px;width:24px}.side-section{margin:0;float:right}.chapter-list{display:flex;overflow:auto;margin-right:31px}.chapter-link{white-space:nowrap;width:auto;min-height:32px;padding:3px 5px;font-size:.8rem}.side-footer{display:none}.topbar{height:46px;padding-inline:10px}.crumb>span,.crumb>svg{display:none}.top-actions{gap:7px}.content{padding:13px 8px}.heading{margin-bottom:12px}.heading p{font-size:.8rem}.heading-actions .btn{font-size:.8rem;padding-inline:6px}.graph-actions .undo-control,.graph-actions .split,.footer-note span:first-child{display:none}.graph-bar{padding:0 5px;min-height:44px}.tab{font-size:.8rem}.minimap{width:100px;height:60px}.graph-footer{gap:8px}.footer-note{justify-content:flex-end}}
+@media(max-width:600px){.side-home{margin-bottom:3px}.chapter-row{flex:none;max-width:180px}.chapter-row .chapter-link{width:auto}.space-heading{align-items:flex-start;gap:8px}.space-heading .heading-actions{gap:2px}.space-heading .primary{margin-left:2px}.space-heading .icon-btn{width:24px}.empty-library-actions .btn{white-space:normal}}
+@media(max-width:600px){.save:not(.failed) .save-copy{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.save.failed .save-copy{max-width:75px;white-space:normal;line-height:1.2}.top-actions{gap:6px}}
+.android .top-actions .btn,.android .dialog-actions .btn{min-height:44px}
+.android .display-button{min-width:44px}
+.android .menu button,.android .project-button{min-height:44px}
+.android .tabs{min-height:44px}
+.android .graph-actions .undo-control{display:inline-grid}
+.android .graph-actions .icon-btn,.android .graph-controls .icon-btn,.android .workspace-actions .icon-btn{width:44px;height:44px}
+@media(max-width:940px){
+  .workspace-actions{margin-left:auto}
+  .graph-actions{order:1;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+}
+@media(max-width:600px){
+  .topbar{height:auto;min-height:46px;gap:6px}
+  .android .topbar{min-height:54px}
+  .brand strong{font-size:1.125rem}
+  .top-actions{flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end}
+  .heading>div:first-child,.heading-title h1{min-width:0}
+  .heading p{overflow-wrap:anywhere}
+  .heading-actions{flex-shrink:0}
+  .android .graph-bar{gap:0}
+  .android .graph{height:48dvh;min-height:245px}
+  .android .graph-controls{left:7px;bottom:7px}
+  .android .minimap{right:7px;bottom:7px}
+}

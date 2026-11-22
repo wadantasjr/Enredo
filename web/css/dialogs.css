@@ -1,0 +1,19 @@
+dialog{color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0;width:min(450px,calc(100vw - 28px));max-height:90dvh;box-shadow:var(--dialog-shadow)}
+dialog::backdrop{background:var(--backdrop)}
+.dialog-head{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.dialog-head h2{font-size:1.125rem;margin:0}
+.original-image-dialog{width:max-content;max-width:calc(100vw - 28px);max-height:90dvh}
+.original-image-dialog[open]{display:flex;flex-direction:column}
+.original-image-dialog .dialog-head{flex:none;gap:12px}
+.original-image-size{color:var(--muted);font-size:.875rem}
+.original-image-viewport{overflow:auto;min-width:0;min-height:0;overscroll-behavior:contain;background:var(--surface-subtle)}
+.original-image-viewport img{display:block;width:auto;height:auto;max-width:none}
+.dialog-form{padding:17px 18px}
+.dialog-actions{margin-top:18px;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:7px}
+.dialog-actions .danger{margin-right:auto}
+.dialog-actions button[type="submit"].danger{margin-right:0;background:var(--danger-bg);color:var(--inverse-ink);border-color:var(--danger-bg)}
+.dialog-actions button[type="submit"].danger:hover{background:var(--danger-hover)}
+.dialog-form p{margin:0 0 10px}
+.dialog-form ul{padding-left:20px;margin:0;color:var(--muted);font-size:.9rem}
+.dialog-form li+li{margin-top:6px}
+.toast{z-index:20;position:fixed;right:24px;bottom:24px;max-width:calc(100vw - 48px);padding:10px 14px;border-radius:9px;background:var(--toast-bg);color:var(--inverse-ink);box-shadow:0 6px 25px var(--danger-shadow);font-size:.875rem}
