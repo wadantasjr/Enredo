@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="web/css/structure.css">
 <link rel="stylesheet" href="web/css/characters.css">
 <link rel="stylesheet" href="web/css/project-management.css">
+<link rel="stylesheet" href="web/css/chapter-groups.css">
 </head>
 <body>
 <div class="app">
@@ -29,8 +30,11 @@
           <button class="project-button" id="projectButton" data-menu="projectMenu" aria-expanded="false"><span class="project-glyph" data-icon="book"></span><span class="clip" id="projectName"></span><span class="chevron" data-icon="chevron"></span></button>
           <div class="menu" id="projectMenu" hidden></div>
         </div>
-        <div class="side-section"><span class="side-label" data-i18n="chapters">Chapters</span><button class="icon-btn small" id="addChapter" title="New chapter" aria-label="New chapter" data-i18n-label="newChapter" data-i18n-title="newChapter" data-icon="plus"></button></div>
-        <nav class="chapter-list" id="chapters" aria-label="Chapters" data-i18n-label="chapters"></nav>
+        <div class="side-section"><span class="side-label" data-i18n="groups">Groups</span><div class="chapter-section-actions">
+          <button class="icon-btn small" id="addChapterGroup" title="New group" aria-label="New group" data-i18n-label="newGroup" data-i18n-title="newGroup" data-icon="folder"></button>
+          <button class="icon-btn small" id="addChapter" title="New chapter" aria-label="New chapter" data-i18n-label="newChapter" data-i18n-title="newChapter" data-icon="plus"></button>
+        </div></div>
+        <nav class="chapter-list" id="chapters" aria-label="Groups and chapters" data-i18n-label="groupsAndChapters"></nav>
       </div>
     </div>
     <div class="side-footer"><button class="btn ghost" id="helpButton"><span data-icon="help"></span> <span data-i18n="help">How to use</span></button></div>
@@ -91,7 +95,7 @@
         <div class="heading-actions"><button class="btn primary" id="addNode"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
       </section>
       <section class="workspace" id="editorWorkspace" aria-label="Story map" data-i18n-label="storyMap">
-        <div class="graph-bar">
+        <div class="graph-bar" id="graphBar">
           <div class="tabs" role="group" aria-label="View" data-i18n-label="view">
             <button type="button" class="tab" id="currentTab" aria-controls="graph"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
             <button type="button" class="tab" id="overviewTab" aria-controls="graph"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
@@ -123,6 +127,9 @@
               <button type="button" class="btn" id="undoEmptyChapter"><span data-icon="undo"></span> <span data-i18n="undo">Undo</span></button>
               <button type="button" class="btn" id="redoEmptyChapter"><span data-icon="redo"></span> <span data-i18n="redo">Redo</span></button>
             </div>
+          </section>
+          <section class="chapter-presentation" id="chapterPresentation" hidden>
+            <div id="presentationContent"></div>
           </section>
           <section class="characters-view" id="charactersView" aria-label="Characters" data-i18n-label="characters" hidden></section>
           <section class="management-view" id="projectManagementView" aria-labelledby="managementTitle" hidden>
@@ -186,6 +193,7 @@
 </div>
 <input type="file" id="importFile" accept=".json,application/json" hidden>
 <input type="file" id="nodeImageFile" accept="image/*" hidden>
+<input type="file" id="coverImageFile" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden>
 <dialog id="dialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle"></h2><button class="icon-btn" id="dialogClose" aria-label="Close" data-i18n-label="close" data-icon="close"></button></div><form class="dialog-form" id="dialogForm"></form></dialog>
 <dialog class="original-image-dialog" id="imageViewer" aria-labelledby="imageViewerTitle">
   <div class="dialog-head">
@@ -194,6 +202,20 @@
   </div>
   <div class="original-image-viewport" id="imageViewport" tabindex="0" role="region" aria-labelledby="imageViewerTitle">
     <img id="imageViewerPhoto" alt="">
+  </div>
+</dialog>
+<dialog class="cover-crop-dialog" id="coverCropDialog" aria-labelledby="coverCropTitle">
+  <div class="dialog-head">
+    <div><h2 id="coverCropTitle" data-i18n="cropCover">Crop cover</h2><p class="hint" data-i18n="cropCoverHint">Drag the image or use the sliders to choose what appears in the 16:9 cover.</p></div>
+    <button type="button" class="icon-btn" id="coverCropClose" aria-label="Close" data-i18n-label="close" data-icon="close"></button>
+  </div>
+  <div class="cover-crop-body">
+    <div class="cover-crop-viewport" id="coverCropViewport" tabindex="0" role="group" aria-label="Cover crop preview" data-i18n-label="coverCropPreview">
+      <img id="coverCropImage" alt="">
+    </div>
+    <label class="field"><span data-i18n="coverFocusHorizontal">Horizontal position</span><input type="range" id="coverFocusX" min="0" max="100" value="50"></label>
+    <label class="field"><span data-i18n="coverFocusVertical">Vertical position</span><input type="range" id="coverFocusY" min="0" max="100" value="50"></label>
+    <div class="dialog-actions"><button type="button" class="btn" id="coverCropCancel" data-i18n="cancel">Cancel</button><button type="button" class="btn primary" id="saveCoverCrop" data-i18n="saveCover">Save cover</button></div>
   </div>
 </dialog>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -223,6 +245,7 @@
 <script src="web/js/characters.js"></script>
 <script src="web/js/project-management.js"></script>
 <script src="web/js/project-files.js"></script>
+<script src="web/js/chapter-groups.js"></script>
 <script src="web/js/main.js"></script>
 </body>
 </html>

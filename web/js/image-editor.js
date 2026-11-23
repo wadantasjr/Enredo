@@ -6,6 +6,7 @@ Enredo.imageEditor = ((app) => {
 
   let imagePick = null;
   let imageViewerUrl;
+  let coverCrop = null;
 
   function chooseNodeImage() {
     const node = app.store.selectedNode();
@@ -26,6 +27,160 @@ Enredo.imageEditor = ((app) => {
   function chooseImageFile() {
     if (app.platform.android) app.platform.android.chooseImage();
     else $('nodeImageFile').click();
+  }
+
+  function coverMarkup(cover,className = '') {
+    const assetId = cover?.assetId;
+    const focusX = Math.round((cover?.focusX ?? 0.5) * 100);
+    const focusY = Math.round((cover?.focusY ?? 0.5) * 100);
+    return '<span class="cover-frame ' + className + '">' +
+      (assetId ? '<img class="cover-image" data-cover-id="' + app.dom.esc(assetId) + '" data-focus-x="' + focusX +
+        '" data-focus-y="' + focusY + '" alt="" hidden>' : '') +
+      '<span class="cover-fallback" aria-hidden="true">' + app.dom.icon('book') + '</span></span>';
+  }
+
+  function coverControls(type,id,cover) {
+    const encodedId = app.dom.esc(id);
+    const labelKey = type === 'project' ? 'projectCover' : type === 'group' ? 'groupCover' : 'chapterCover';
+    const label = app.preferences.tx(labelKey);
+    return '<div class="cover-editor" data-cover-owner="' + type + '" data-cover-id="' + encodedId + '"><span class="field-label">' + label + '</span>' +
+      coverMarkup(cover,'cover-editor-preview') + '<div class="cover-editor-actions">' +
+      '<button type="button" class="btn" data-cover-action="choose" data-cover-type="' + type +
+      '" data-cover-id="' + encodedId + '">' + app.preferences.tx(cover ? 'replaceCover' : 'chooseCover') + '</button>' +
+      '<button type="button" class="btn danger" data-cover-action="remove" data-cover-type="' + type +
+      '" data-cover-id="' + encodedId + '"' + (cover ? '' : ' hidden') + '>' + app.preferences.tx('removeCover') + '</button>' +
+      '</div></div>';
+  }
+
+  function renderCoverPreviews(root = document) {
+    root.querySelectorAll('img[data-cover-id]').forEach(image => {
+      const id = image.dataset.coverId;
+      image.style.objectPosition = (image.dataset.focusX || '50') + '% ' + (image.dataset.focusY || '50') + '%';
+      app.imageStore.coverPreviewUrl(id).then(url => {
+        if (!image.isConnected || image.dataset.coverId !== id) return;
+        image.addEventListener('error',() => {
+          if (image.dataset.coverId !== id) return;
+          image.hidden = true;
+          image.parentElement?.classList.remove('has-cover');
+        },{once:true});
+        image.src = url;
+        image.hidden = false;
+        image.parentElement?.classList.add('has-cover');
+      }).catch(() => {});
+    });
+  }
+
+  function refreshCoverControls(root = document) {
+    root.querySelectorAll('.cover-editor[data-cover-owner]').forEach(editor => {
+      const type = editor.dataset.coverOwner, id = editor.dataset.coverId, p = app.store.project();
+      const cover = coverTarget(p,type,id)?.cover;
+      editor.outerHTML = coverControls(type,id,cover);
+    });
+    renderCoverPreviews(root);
+  }
+
+  function coverTarget(project,type,id) {
+    if (type === 'project') return project;
+    if (type === 'group') return project?.chapterGroups?.find(group => group.id === id);
+    if (type === 'chapter') return project?.chapters?.find(chapter => chapter.id === id);
+    return null;
+  }
+
+  function chooseCoverImage(type,id) {
+    const project = app.store.project();
+    const target = coverTarget(project,type,id);
+    if (!project || !target) return;
+    imagePick = {type:'cover',coverType:type,project,target,id};
+    if (app.platform.android) app.platform.android.chooseImage();
+    else $('coverImageFile').click();
+  }
+
+  function pickIsCurrent(pick) {
+    return imagePick === pick && app.store.state.projects.includes(pick.project) &&
+      (pick.type === 'node' ? pick.project.nodes.includes(pick.node) : pick.type === 'character'
+        ? pick.project.characters.includes(pick.character) && (!pick.phase || pick.character.phases.includes(pick.phase))
+        : pick.coverType === 'project' ? pick.target === pick.project
+          : pick.coverType === 'group' ? pick.project.chapterGroups?.includes(pick.target)
+            : pick.project.chapters.includes(pick.target));
+  }
+
+  function setCoverCropFocus(focusX,focusY) {
+    if (!coverCrop) return;
+    coverCrop.focusX = Math.max(0,Math.min(1,focusX));
+    coverCrop.focusY = Math.max(0,Math.min(1,focusY));
+    const image = $('coverCropImage');
+    image.style.objectPosition = (coverCrop.focusX * 100) + '% ' + (coverCrop.focusY * 100) + '%';
+    $('coverFocusX').value = String(Math.round(coverCrop.focusX * 100));
+    $('coverFocusY').value = String(Math.round(coverCrop.focusY * 100));
+  }
+
+  function closeCoverCrop() {
+    const crop = coverCrop;
+    coverCrop = null;
+    $('coverCropImage').removeAttribute('src');
+    if (crop?.url) URL.revokeObjectURL(crop.url);
+    if (crop && imagePick === crop.pick) imagePick = null;
+  }
+
+  function cancelCoverCrop() {
+    const dialog = $('coverCropDialog');
+    if (dialog.open) dialog.close();
+    else closeCoverCrop();
+  }
+
+  async function saveCoverCrop() {
+    const crop = coverCrop;
+    if (!crop || !pickIsCurrent(crop.pick)) {
+      cancelCoverCrop();
+      return;
+    }
+    const saveButton = $('saveCoverCrop');
+    saveButton.disabled = true;
+    try {
+      const assetId = await app.imageStore.saveCoverImage(crop.prepared.source,crop.prepared.thumbnail);
+      if (coverCrop !== crop || !pickIsCurrent(crop.pick)) {
+        cancelCoverCrop();
+        return;
+      }
+      const committed = app.store.edit(() => {
+        crop.pick.target.cover = {assetId,focusX:crop.focusX,focusY:crop.focusY};
+      },{saveError:'imageSaveFailed'});
+      if (committed) app.imageEditor.refreshCoverControls(document);
+      const pick = crop.pick;
+      cancelCoverCrop();
+      if (committed) Array.from(document.querySelectorAll('[data-cover-action="choose"]'))
+        .find(button => button.dataset.coverType === pick.coverType && button.dataset.coverId === pick.id)
+        ?.focus({preventScroll:true});
+    } catch {
+      if (coverCrop === crop) app.preferences.flash('imageSaveFailed');
+    } finally {
+      saveButton.disabled = false;
+    }
+  }
+
+  function openCoverCrop(pick,prepared) {
+    const existing = pick.target.cover;
+    const url = URL.createObjectURL(prepared.source);
+    coverCrop = {pick,prepared,url,focusX:existing?.focusX ?? 0.5,focusY:existing?.focusY ?? 0.5};
+    const image = $('coverCropImage');
+    image.src = url;
+    setCoverCropFocus(coverCrop.focusX,coverCrop.focusY);
+    try {
+      $('coverCropDialog').showModal();
+    } catch (error) {
+      closeCoverCrop();
+      throw error;
+    }
+    $('coverCropClose').focus({preventScroll:true});
+  }
+
+  function removeCover(type,id) {
+    const project = app.store.project();
+    const target = coverTarget(project,type,id);
+    if (!project || !target || !target.cover) return;
+    if (imagePick?.type === 'cover' && imagePick.target === target) imagePick = null;
+    app.store.edit(() => { delete target.cover; },{saveError:'imageSaveFailed'});
+    refreshCoverControls(document);
   }
 
   async function viewNodeImage() {
@@ -49,30 +204,34 @@ Enredo.imageEditor = ((app) => {
 
   async function loadImage(file,pick) {
     if (!pick || imagePick !== pick) return;
-    const isCurrent = () => imagePick === pick && app.store.state.projects.includes(pick.project) &&
-      (pick.type === 'node' ? pick.project.nodes.includes(pick.node) : pick.project.characters.includes(pick.character) &&
-        (!pick.phase || pick.character.phases.includes(pick.phase)));
-    let savedId, committed = false;
+    let savedId, committed = false, waitingForCrop = false;
     try {
       if (file.size > app.imageStore.nodeImageFileLimit) {
         app.preferences.flash('imageTooLarge');
         return;
       }
+      if (pick.type === 'cover') {
+        const prepared = await app.imageStore.prepareCoverImage(file);
+        if (!pickIsCurrent(pick)) return;
+        openCoverCrop(pick,prepared);
+        waitingForCrop = true;
+        return;
+      }
       const image = pick.type === 'node'
         ? await app.imageStore.prepareNodeImage(file)
         : await app.imageStore.prepareCharacterPortrait(file);
-      if (!isCurrent()) return;
+      if (!pickIsCurrent(pick)) return;
       if (pick.type === 'node') {
         const id = uid();
         try {
           await app.imageStore.saveOriginalImages([[id,file]]);
           savedId = id;
         } catch {
-          if (isCurrent()) app.preferences.flash('imageSaveFailed');
+          if (pickIsCurrent(pick)) app.preferences.flash('imageSaveFailed');
           return;
         }
       }
-      if (!isCurrent()) return;
+      if (!pickIsCurrent(pick)) return;
       committed = app.store.edit(() => {
         if (pick.type === 'node') Object.assign(pick.node,{image,originalImageId:savedId});
         else app.characterData.setPortrait(pick.project,pick.character.id,image,pick.phase?.id ?? null);
@@ -83,10 +242,10 @@ Enredo.imageEditor = ((app) => {
         $('choosePortrait')?.focus({preventScroll:true});
       }
     } catch {
-      if (imagePick === pick) app.preferences.flash('imageReadFailed');
+      if (imagePick === pick) app.preferences.flash(pick.type === 'cover' ? 'coverImageInvalid' : 'imageReadFailed');
     } finally {
-      if (savedId && !committed) app.imageStore.discardOriginalImages([savedId]);
-      if (imagePick === pick) imagePick = null;
+      if (savedId && !committed && pick.type !== 'cover') app.imageStore.discardOriginalImages([savedId]);
+      if (!waitingForCrop && imagePick === pick) imagePick = null;
     }
   }
 
@@ -154,18 +313,74 @@ Enredo.imageEditor = ((app) => {
       $('imageViewer').close();
       app.preferences.flash('imageViewFailed');
     });
+    $('coverCropClose').addEventListener('click',cancelCoverCrop);
+    $('coverCropCancel').addEventListener('click',cancelCoverCrop);
+    $('saveCoverCrop').addEventListener('click',saveCoverCrop);
+    $('coverCropDialog').addEventListener('close',closeCoverCrop);
+    $('coverFocusX').addEventListener('input',event => {
+      if (coverCrop) setCoverCropFocus(Number(event.target.value) / 100,coverCrop.focusY);
+    });
+    $('coverFocusY').addEventListener('input',event => {
+      if (coverCrop) setCoverCropFocus(coverCrop.focusX,Number(event.target.value) / 100);
+    });
+    $('coverCropViewport').addEventListener('pointerdown',event => {
+      if (!coverCrop || event.button !== 0) return;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      coverCrop.dragPoint = {x:event.clientX,y:event.clientY};
+    });
+    $('coverCropViewport').addEventListener('pointermove',event => {
+      if (!coverCrop?.dragPoint || !event.currentTarget.hasPointerCapture(event.pointerId)) return;
+      const image = $('coverCropImage'), box = event.currentTarget.getBoundingClientRect();
+      if (!image.naturalWidth || !image.naturalHeight) return;
+      const scale = Math.max(box.width / image.naturalWidth,box.height / image.naturalHeight);
+      const overflowX = image.naturalWidth * scale - box.width;
+      const overflowY = image.naturalHeight * scale - box.height;
+      const dx = event.clientX - coverCrop.dragPoint.x, dy = event.clientY - coverCrop.dragPoint.y;
+      setCoverCropFocus(overflowX ? coverCrop.focusX - dx / overflowX : coverCrop.focusX,
+        overflowY ? coverCrop.focusY - dy / overflowY : coverCrop.focusY);
+      coverCrop.dragPoint = {x:event.clientX,y:event.clientY};
+    });
+    $('coverCropViewport').addEventListener('pointerup',event => {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+      if (coverCrop) coverCrop.dragPoint = null;
+    });
+    $('coverCropViewport').addEventListener('pointercancel',() => { if (coverCrop) coverCrop.dragPoint = null; });
     $('nodeImageFile').addEventListener('change',event => {
       const file = event.target.files[0];
       event.target.value = '';
       if (file) loadImage(file,imagePick);
     });
     $('nodeImageFile').addEventListener('cancel',() => { imagePick = null; });
+    $('coverImageFile').addEventListener('change',event => {
+      const file = event.target.files[0];
+      event.target.value = '';
+      if (file) loadImage(file,imagePick);
+    });
+    $('coverImageFile').addEventListener('cancel',() => { imagePick = null; });
+    $('dialogForm').addEventListener('click',event => {
+      const button = event.target.closest('[data-cover-action]');
+      if (!button) return;
+      if (button.dataset.coverAction === 'choose') chooseCoverImage(button.dataset.coverType,button.dataset.coverId);
+      if (button.dataset.coverAction === 'remove') removeCover(button.dataset.coverType,button.dataset.coverId);
+    });
+    $('editorView').addEventListener('click',event => {
+      const button = event.target.closest('[data-cover-action]');
+      if (!button) return;
+      if (button.dataset.coverAction === 'choose') chooseCoverImage(button.dataset.coverType,button.dataset.coverId);
+      if (button.dataset.coverAction === 'remove') removeCover(button.dataset.coverType,button.dataset.coverId);
+    });
   }
 
   return {
     bindEvents,
     cancelAndroidImage,
+    chooseCoverImage,
     chooseCharacterPortrait,
-    importAndroidImage
+    coverControls,
+    coverMarkup,
+    cancelCoverCrop,
+    importAndroidImage,
+    renderCoverPreviews,
+    refreshCoverControls
   };
 })(Enredo);

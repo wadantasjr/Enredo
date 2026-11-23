@@ -5,13 +5,27 @@ Enredo.storyData = ((app) => {
 
   const storageKey = 'enredo.story-planner.v1';
 
+  const validCover = cover => cover == null || (cover && typeof cover === 'object' && !Array.isArray(cover) &&
+    app.imageStore.validOriginalImageId(cover.assetId) &&
+    (cover.focusX === undefined || (Number.isFinite(cover.focusX) && cover.focusX >= 0 && cover.focusX <= 1)) &&
+    (cover.focusY === undefined || (Number.isFinite(cover.focusY) && cover.focusY >= 0 && cover.focusY <= 1)));
+
   function validProject(p) {
     const string = value => typeof value === 'string';
     if (!p || !string(p.id) || !string(p.title) || !Array.isArray(p.chapters) ||
         !Array.isArray(p.nodes) || !Array.isArray(p.edges)) return false;
-    if (!p.chapters.every(c => c && string(c.id) && string(c.title))) return false;
+    if (!validCover(p.cover)) return false;
+    if (!p.chapters.every(c => c && string(c.id) && string(c.title) && validCover(c.cover))) return false;
     const chapterIds = new Set(p.chapters.map(c => c.id));
     if (chapterIds.size !== p.chapters.length) return false;
+    const groups = p.chapterGroups ?? [];
+    if (!Array.isArray(groups) || !groups.every(group => group && string(group.id) && group.id.trim().length > 0 &&
+        typeof group.title === 'string' && group.title.trim().length > 0 &&
+        (group.description === undefined || string(group.description)) && validCover(group.cover))) return false;
+    const groupIds = new Set(groups.map(group => group.id));
+    if (groupIds.size !== groups.length) return false;
+    if (!p.chapters.every(chapter => (chapter.groupId == null || groupIds.has(chapter.groupId)) &&
+        (chapter.groupOrder === undefined || (Number.isInteger(chapter.groupOrder) && chapter.groupOrder >= 0)))) return false;
     if (!p.nodes.every(n => n && string(n.id) && chapterIds.has(n.chapter) &&
         kinds.includes(n.kind) && string(n.title) && string(n.notes) &&
         Number.isFinite(n.x) && Number.isFinite(n.y))) return false;
@@ -25,9 +39,27 @@ Enredo.storyData = ((app) => {
   const hasId = value => typeof value === 'string' && value.trim().length > 0;
 
   function normalizeProject(project) {
+    const nextGroupOrder = new Map();
     const normalized = {
       ...project,
       narrativeModel: hasId(project.narrativeModel) ? project.narrativeModel : app.narrative.defaultModelId,
+      ...(project.cover ? {cover:{focusX:0.5,focusY:0.5,...project.cover}} : {}),
+      ...(Array.isArray(project.chapterGroups) ? {chapterGroups:project.chapterGroups.map(group => ({
+        ...group,
+        description:group.description ?? '',
+        ...(group.cover ? {cover:{focusX:0.5,focusY:0.5,...group.cover}} : {})
+      }))} : {}),
+      chapters:project.chapters.map(chapter => {
+        const cover = chapter.cover ? {cover:{focusX:0.5,focusY:0.5,...chapter.cover}} : {};
+        if (!chapter.groupId) {
+          const {groupOrder,...fields} = chapter;
+          return {...fields,...cover};
+        }
+        const next = nextGroupOrder.get(chapter.groupId) ?? 0;
+        const groupOrder = Number.isInteger(chapter.groupOrder) ? chapter.groupOrder : next;
+        nextGroupOrder.set(chapter.groupId,Math.max(next,groupOrder + 1));
+        return {...chapter,...cover,groupOrder};
+      }),
       nodes: project.nodes.map(node => {
         const {image,originalImageId,...fields} = node;
         const stage = node.narrativeStage;

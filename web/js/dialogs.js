@@ -43,7 +43,7 @@ Enredo.dialogs = ((app) => {
   }
 
   function showHelp() {
-    const helpItems = ['helpHome','helpChapter','helpPath','helpStory','helpStructure','helpCharacters','helpManagement',
+    const helpItems = ['helpHome','helpChapter','helpCovers','helpPath','helpStory','helpStructure','helpCharacters','helpManagement',
       app.platform.android ? 'touchHelpZoom' : 'helpZoom',app.platform.android ? 'deviceHelpFiles' : 'helpFiles'];
     const body = '<ul>' + helpItems.map(key => '<li>' + t(key) + '</li>').join('') + '</ul>';
     showDialog({title:t('helpTitle'),body});

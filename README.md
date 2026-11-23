@@ -14,8 +14,8 @@ Use Enredo [in your browser](#getting-started) or install the [Android app](#and
 ### Getting started
 
 1. Download or clone this repository and open [`index.html`](index.html) in your browser. Keep the [`web/`](web/) folder beside it. Enredo runs offline without installation.
-2. In **My space**, open **After the Signal** or click **New project**. Use **Add sample** to open a fresh copy in the current language.
-3. Use the **+** button next to **Chapters** to organize your story into parts. Within a chapter, click **Add story beat**.
+2. In **My space**, select **After the Signal** to see its cover and chapter groups. Click **Open editor** to continue writing, or click **New project**. Use **Add sample** to open a fresh copy in the current language.
+3. Use the **+** button next to **Groups** to organize chapters into parts. You can also keep chapters ungrouped. Within a chapter, click **Add story beat**.
 4. Select a story beat to write notes, then click **Add path**. You can create a destination or link to an existing beat, even in another chapter.
 
 ### Explore the sample project
@@ -31,6 +31,8 @@ Use Enredo [in your browser](#getting-started) or install the [Android app](#and
 - Use the image button next to **Aa** to set diagram thumbnails to **1x** (default), **2x**, or **3x**, or hide them. The details panel still shows the image.
 - Label connections to show which choice leads to each path.
 - Drag cards to rearrange the map and switch between **Timeline** and **Whole story**.
+- Create free-form chapter groups such as acts or parts. Expand them in the navigation, move chapters between groups with **Move chapter to group** or drag and drop, and reorder them with the chapter menu.
+- Add optional covers to projects, groups, and chapters in **Project details**, **Edit group**, and **Edit chapter**. Choose a JPG, PNG, or WebP image, adjust its 16:9 crop, and replace or remove it at any time. Chapter covers appear in navigation and chapter lists. Items without covers use a default image.
 - Choose a **Narrative Model** when you create a project. Use **Structure** to explore the model and find associated beats across chapters. Set a beat’s optional **Narrative Stage** in its details panel. See the [narrative models guide](docs/narrative-models.md).
 - Use **Characters** to create one central profile with separate life phases. Add an optional portrait to each phase; phases without one use the central portrait. Use **Merge another profile** to combine duplicate entries and transfer arcs, map links, relationships, and portraits. Resolve relationships between the two profiles and duplicate links to the same story beat before merging.
 - Record a character’s arcs and events by story path. Link an event to a map connection to use that connection’s name; later edits to the map label update the path name.
@@ -49,7 +51,7 @@ Use Enredo [in your browser](#getting-started) or install the [Android app](#and
 
 Enredo starts in English. Use the language selector at the top to choose **Português**. The browser remembers your choice the next time you open the editor.
 
-Projects and original images are saved automatically in your browser. To back up or transfer a story with its original images and thumbnails, open it and choose **Files → Export project (.json)**. In the destination browser or computer, choose **Files → Import project (.json)**.
+Projects, groups, and original images are saved automatically in your browser. To back up or transfer a story with its covers, original images, and thumbnails, open it and choose **Files → Export project (.json)**. In the destination browser or computer, choose **Files → Import project (.json)**.
 
 Projects without a saved model open in **Free Structure**. Backups include the selected model and beat associations, including associations preserved after a model change.
 
@@ -62,6 +64,8 @@ If you already use `Enredo.html`, export your projects there and import the JSON
 ### Android app
 
 The [Enredo APK](https://github.com/wadantasjr/Enredo/releases/latest/download/Enredo.apk) runs offline on Android 8.0 or later with an up-to-date Android System WebView. The app saves projects on your device and starts in Portuguese if your device is set to Portuguese. To transfer a project between Android and the browser, use **Files → Export project (.json)** in one version and **Files → Import project (.json)** in the other.
+
+Use **Project details**, **Edit group**, or **Edit chapter** to choose a JPG, PNG, or WebP cover. Android opens its image picker for the selection.
 
 - Tap **Aa** at the top to set the text size between 75% and 130%. The Android app starts at 85% and remembers your choice.
 - Pinch with two fingers to zoom the diagram. Drag the background with one finger to move the map, or drag a card in **Timeline** to reposition it.
@@ -88,8 +92,8 @@ Use o Enredo [no navegador](#como-começar) ou instale o [aplicativo Android](#a
 ### Como começar
 
 1. Baixe ou clone o repositório e abra o [`index.html`](index.html) no navegador. Mantenha a pasta [`web/`](web/) ao lado do arquivo. O Enredo funciona offline, sem instalação.
-2. Em **Meu espaço**, abra **Depois do sinal** ou clique em **Novo projeto**. Use **Adicionar exemplo** para abrir uma nova cópia no idioma selecionado.
-3. Use o botão **+** ao lado de **Capítulos** para organizar a história em partes. Dentro de um capítulo, clique em **Adicionar situação**.
+2. Em **Meu espaço**, selecione **Depois do sinal** para ver a capa e os grupos de capítulos. Clique em **Abrir editor** para continuar escrevendo ou em **Novo projeto**. Use **Adicionar exemplo** para abrir uma nova cópia no idioma selecionado.
+3. Use o botão **+** ao lado de **Grupos** para organizar os capítulos em partes. Você também pode manter capítulos sem grupo. Dentro de um capítulo, clique em **Adicionar situação**.
 4. Selecione uma situação para escrever notas e clique em **Adicionar caminho**. Você pode criar uma situação de destino ou ligar a uma que já existe, inclusive em outro capítulo.
 
 ### Explore o projeto de exemplo
@@ -105,6 +109,8 @@ Use o Enredo [no navegador](#como-começar) ou instale o [aplicativo Android](#a
 - Usar o botão de imagem ao lado de **Aa** para ajustar as miniaturas do diagrama para **1x** (padrão), **2x** ou **3x**, ou ocultá-las. A imagem continua disponível no painel de detalhes.
 - Nomear as conexões para indicar qual escolha leva a cada caminho.
 - Arrastar cartões para reorganizar o mapa e alternar entre **Timeline** e **História inteira**.
+- Criar grupos de capítulos com nomes livres, como atos ou partes. Expanda cada grupo na navegação, mova capítulos entre grupos com **Mover capítulo para grupo** ou arrastar e soltar, e reordene pelo menu do capítulo.
+- Adicionar capas opcionais ao projeto, aos grupos e aos capítulos em **Detalhes do projeto**, **Editar grupo** e **Editar capítulo**. Escolha uma imagem JPG, PNG ou WebP, ajuste o recorte 16:9 e substitua ou remova a capa quando quiser. As capas dos capítulos aparecem na navegação e nas listas. Itens sem capa usam uma imagem padrão.
 - Escolher um **Modelo Narrativo** ao criar um projeto. Use **Estrutura** para consultar o modelo e localizar situações de vários capítulos. No painel de detalhes, escolha a **Etapa Narrativa** de cada situação. Veja o [guia de modelos narrativos](docs/narrative-models.md).
 - Use **Personagens** para criar uma ficha central com fases diferentes. Adicione um retrato opcional a cada fase; as fases sem imagem usam o retrato central. Use **Unir outra ficha** para combinar cadastros duplicados e transferir arcos, vínculos com o mapa, relacionamentos e retratos. Resolva relacionamentos entre as duas fichas e vínculos duplicados com a mesma situação antes de uni-las.
 - Registre arcos e acontecimentos por caminho. Ao ligar um acontecimento a uma conexão do mapa, o caminho usa o nome dessa conexão. Se o rótulo mudar no mapa, o nome também muda.
@@ -123,7 +129,7 @@ Use o Enredo [no navegador](#como-começar) ou instale o [aplicativo Android](#a
 
 O Enredo abre em inglês por padrão. No seletor de idioma no topo da tela, escolha **Português**. O navegador guarda essa preferência para a próxima vez que você abrir o editor.
 
-O Enredo salva os projetos e as imagens originais automaticamente no navegador. Para guardar uma cópia ou transferir a história com as imagens originais e miniaturas, abra o projeto e escolha **Arquivos → Exportar projeto (.json)**. No navegador ou computador de destino, use **Arquivos → Importar projeto (.json)**.
+O Enredo salva projetos, grupos e imagens originais automaticamente no navegador. Para guardar uma cópia ou transferir a história com capas, imagens originais e miniaturas, abra o projeto e escolha **Arquivos → Exportar projeto (.json)**. No navegador ou computador de destino, use **Arquivos → Importar projeto (.json)**.
 
 Projetos sem modelo salvo abrem em **Estrutura Livre**. O JSON inclui o modelo e as associações das situações, inclusive as que ficam guardadas após a troca de modelo.
 
@@ -136,6 +142,8 @@ Se já estiver usando o `Enredo.html`, exporte seus projetos por lá e importe o
 ### Aplicativo Android
 
 O [APK do Enredo](https://github.com/wadantasjr/Enredo/releases/latest/download/Enredo.apk) funciona offline em aparelhos com Android 8.0 ou superior e o Android System WebView atualizado. O editor usa armazenamento local do aplicativo e, na primeira abertura, usa português se esse for o idioma do aparelho. Para transferir um projeto entre o Android e a versão de navegador, use **Arquivos → Exportar projeto (.json)** em uma versão e **Arquivos → Importar projeto (.json)** na outra.
+
+Use **Detalhes do projeto**, **Editar grupo** ou **Editar capítulo** para escolher uma capa JPG, PNG ou WebP. O Android abre o seletor de imagens.
 
 - Toque em **Aa** no topo para ajustar o tamanho da fonte entre 75% e 130%. O Android começa em 85% e guarda a sua escolha.
 - No diagrama, faça o gesto de pinça com dois dedos para mudar o zoom. Com um dedo, arraste o fundo para mover o mapa ou arraste um cartão na **Timeline** para mudar sua posição.

@@ -8,6 +8,7 @@ Enredo.workspace = ((app) => {
     app.session.viewMode = 'timeline';
     app.session.charactersOpen = false;
     app.session.managementOpen = false;
+    app.session.presentation = null;
     app.projectManagement.resetView();
     app.characters?.clearOrigin();
     app.session.lastMapMode = app.session.viewMode;
@@ -48,6 +49,7 @@ Enredo.workspace = ((app) => {
     if (app.session.diagramFullscreen) setDiagramFullscreen(false);
     app.session.charactersOpen = true;
     app.session.managementOpen = false;
+    app.session.presentation = null;
     app.diagram.stopConnect();
     closeMenus();
     render();
@@ -60,6 +62,7 @@ Enredo.workspace = ((app) => {
     app.session.charactersOpen = false;
     app.characters.clearOrigin();
     app.session.managementOpen = true;
+    app.session.presentation = null;
     app.diagram.stopConnect();
     closeMenus();
     render();
@@ -72,7 +75,8 @@ Enredo.workspace = ((app) => {
   }
 
   function chapterButton(c,index,active) {
-    return '<button class="chapter-link' + (active ? ' active" aria-current="true' : '') + '" data-chapter="' + esc(c.id) + '"><span class="chapter-no">' +
+    const cover = c.cover?.assetId ? app.imageEditor.coverMarkup(c.cover,'chapter-nav-cover') : '';
+    return '<button class="chapter-link' + (active ? ' active" aria-current="true' : '') + '" data-chapter="' + esc(c.id) + '">' + cover + '<span class="chapter-no">' +
       number(index) + '</span><span class="clip" title="' + esc(c.title) + '">' + esc(c.title) + '</span></button>';
   }
 
@@ -88,12 +92,14 @@ Enredo.workspace = ((app) => {
       const id = esc(p.id), title = p.title || t('untitled');
       const summary = countText(p.chapters.length,'countChapter') + ' · ' + countText(p.nodes.length,'countNode');
       return '<article class="project-card">' +
-        '<button type="button" class="project-open" data-project="' + id + '" aria-label="' + tx('openProject',{name:title}) + '">' +
-        '<span class="project-glyph">' + icon('book') + '</span><span><strong class="project-card-name">' + esc(title) +
+        '<button type="button" class="project-open" data-project="' + id + '" aria-label="' + esc(tx('openProject',{name:title})) + '">' +
+        app.imageEditor.coverMarkup(p.cover,'project-card-cover') + '<span class="project-card-copy"><strong class="project-card-name">' + esc(title) +
         '</strong><span class="project-card-summary">' + esc(summary) + '</span></span></button>' +
-        '<div class="project-card-actions"><button type="button" class="btn ghost" data-delete-project="' + id +
+        '<div class="project-card-actions"><button type="button" class="btn ghost" data-project-overview="' + id + '">' + icon('book') + ' ' + tx('projectOverview') + '</button>' +
+        '<button type="button" class="btn ghost" data-delete-project="' + id +
         '" aria-label="' + tx('deleteNamedProject',{name:title}) + '">' + icon('trash') + ' ' + tx('delete') + '</button></div></article>';
     }).join('');
+    app.imageEditor.renderCoverPreviews($('projectGrid'));
   }
 
   function renderHeader() {
@@ -101,23 +107,25 @@ Enredo.workspace = ((app) => {
     const chapterIndex = p.chapters.indexOf(c);
     const characters = app.session.charactersOpen;
     const management = app.session.managementOpen;
+    const presentation = app.session.presentation;
     const structure = app.session.isStructureView() && !characters && !management;
     const timeline = app.session.hasMapView() && !app.session.isWholeStory();
     const showMap = !!c && app.session.hasMapView();
     $('projectName').textContent = p.title;
     $('breadcrumb').textContent = p.title;
-    $('chapters').innerHTML = p.chapters.map((item,index) =>
-      '<div class="chapter-row">' + chapterButton(item,index,timeline && item.id === c?.id) +
-      '<button type="button" class="icon-btn small remove-button" data-delete-chapter="' + esc(item.id) +
-      '" title="' + tx('deleteChapter') + '" aria-label="' + tx('deleteNamedChapter',{name:item.title}) + '">' + icon('trash') + '</button></div>').join('');
+    app.chapterGroups.renderNavigation();
     const projectButtons = app.store.state.projects.map(item => '<button class="' + (item.id === p.id ? 'current' : '') +
       '" data-project="' + esc(item.id) + '">' + icon('book') + '<span class="clip">' + esc(item.title) + '</span></button>').join('');
     $('projectMenu').innerHTML = projectButtons + '<hr><button id="newProject">' + icon('plus') + ' ' + tx('newProject') + '</button>' +
-      '<button id="renameProject">' + icon('edit') + ' ' + tx('renameProject') + '</button>' +
+      '<button id="renameProject">' + icon('edit') + ' ' + tx('projectDetails') + '</button>' +
+      '<button data-project-overview="' + esc(p.id) + '">' + icon('book') + ' ' + tx('projectOverview') + '</button>' +
       '<button data-delete-project="' + esc(p.id) + '">' + icon('trash') + ' ' + tx('deleteProject') + '</button>';
-    $('chapterLabel').textContent = management ? t('project') : characters ? t('characters') : structure ? t('structure') : app.session.isWholeStory() ? t('overview') :
+    $('chapterLabel').textContent = presentation ? t(presentation.type === 'project' ? 'projectOverview' :
+      presentation.type === 'ungrouped' ? 'ungrouped' : 'group') :
+      management ? t('project') : characters ? t('characters') : structure ? t('structure') : app.session.isWholeStory() ? t('overview') :
       c ? t('chapterNumber',{number:number(chapterIndex)}) : t('project');
-    $('chapterTitle').textContent = timeline && c ? c.title : p.title;
+    const shownGroup = presentation?.type === 'group' ? p.chapterGroups?.find(group => group.id === presentation.id) : null;
+    $('chapterTitle').textContent = presentation?.type === 'ungrouped' ? t('ungrouped') : shownGroup?.title ?? (timeline && c ? c.title : p.title);
     $('renameChapter').hidden = !timeline || !c;
     $('addNode').hidden = !showMap;
     $('emptyChapters').hidden = !!c || !app.session.hasMapView();
@@ -126,12 +134,16 @@ Enredo.workspace = ((app) => {
     $('structureView').hidden = !structure;
     $('charactersView').hidden = !characters;
     $('projectManagementView').hidden = !management;
+    $('chapterPresentation').hidden = !presentation;
+    $('graphBar').hidden = !!presentation;
     $('editorFooter').hidden = !showMap;
     $('editorWorkspace').classList.toggle('structure-mode',structure);
     $('editorWorkspace').classList.toggle('characters-mode',characters);
     $('editorWorkspace').classList.toggle('management-mode',management);
+    $('editorWorkspace').classList.toggle('presentation-mode',!!presentation);
     $('editorWorkspace').classList.toggle('no-map',!c);
-    $('editorWorkspace').setAttribute('aria-label',t(management ? 'projectManagement' : characters ? 'characters' : structure ? 'structure' : 'storyMap'));
+    $('editorWorkspace').setAttribute('aria-label',t(presentation ? (presentation.type === 'project' ? 'projectOverview' : 'group') :
+      management ? 'projectManagement' : characters ? 'characters' : structure ? 'structure' : 'storyMap'));
     $('graphActions').setAttribute('aria-label',t(app.session.hasMapView() ? 'mapTools' : 'historyTools'));
     $('overviewTab').disabled = !c;
     for (const [id,active] of [['currentTab',timeline],['overviewTab',showMap && app.session.isWholeStory()],
@@ -141,7 +153,12 @@ Enredo.workspace = ((app) => {
     }
     const chapters = countText(p.chapters.length,'countChapter');
     let stats = chapters;
-    if (management) {
+    if (presentation?.type === 'group') {
+      const amount = p.chapters.filter(item => item.groupId === presentation.id).length;
+      stats = countText(amount,'countChapter');
+    } else if (presentation?.type === 'ungrouped') {
+      stats = countText(p.chapters.filter(item => !item.groupId).length,'countChapter');
+    } else if (management) {
       stats = countText(p.tasks.length,'countTask') + ' · ' + countText(p.sprints.length,'countSprint');
     } else if (characters) {
       const people = Array.isArray(p.characters) ? p.characters.length : 0;
@@ -164,7 +181,7 @@ Enredo.workspace = ((app) => {
     fullscreenButton.title = fullscreenLabel;
     fullscreenButton.setAttribute('aria-label',fullscreenLabel);
     fullscreenButton.innerHTML = icon(app.session.diagramFullscreen ? 'contract' : 'expand');
-    fullscreenButton.hidden = app.session.charactersOpen || app.session.managementOpen;
+    fullscreenButton.hidden = app.session.charactersOpen || app.session.managementOpen || !!app.session.presentation;
 
     const detailsButton = $('toggleDetails');
     const detailsLabel = t(app.session.detailsCollapsed ? 'showDetails' : 'hideDetails');
@@ -212,8 +229,12 @@ Enredo.workspace = ((app) => {
       renderHome();
       return;
     }
+    if (app.session.presentation?.type === 'group' &&
+        !app.store.project().chapterGroups?.some(group => group.id === app.session.presentation.id)) {
+      app.session.presentation = {type:'project'};
+    }
     const currentChapter = app.store.chapter(), currentNode = app.store.selectedNode();
-    if (!currentChapter && app.session.isWholeStory()) app.session.viewMode = 'timeline';
+    if (!app.session.presentation && !currentChapter && app.session.isWholeStory()) app.session.viewMode = 'timeline';
     if (app.session.selection && (!currentNode || (app.session.viewMode === 'timeline' && currentNode.chapter !== currentChapter?.id))) app.session.selection = null;
     renderHeader();
     if (app.session.managementOpen) {
@@ -226,6 +247,10 @@ Enredo.workspace = ((app) => {
     }
     if (app.session.isStructureView()) {
       app.structure.renderStructure();
+      return;
+    }
+    if (app.session.presentation) {
+      app.chapterGroups.renderPresentation();
       return;
     }
     if (!currentChapter) return;
@@ -246,11 +271,12 @@ Enredo.workspace = ((app) => {
   }
 
   function switchView(next) {
-    if (app.session.atHome || (!app.session.charactersOpen && !app.session.managementOpen && app.session.viewMode === next) ||
+    if (app.session.atHome || (!app.session.charactersOpen && !app.session.managementOpen && !app.session.presentation && app.session.viewMode === next) ||
         (next === 'whole-story' && !app.store.chapter())) return;
     const previousMapMode = app.session.isStructureView() ? app.session.lastMapMode : app.session.viewMode;
     app.session.charactersOpen = false;
     app.session.managementOpen = false;
+    app.session.presentation = null;
     app.characters.clearOrigin();
     app.session.viewMode = next;
     app.session.lastMapMode = previousMapMode;
@@ -287,7 +313,7 @@ Enredo.workspace = ((app) => {
   }
 
   function handleEditorShortcut(event) {
-    if ($('dialog').open || $('imageViewer').open) return;
+    if ($('dialog').open || $('imageViewer').open || $('coverCropDialog').open) return;
     if (event.key === 'Escape') {
       closeMenus();
       if (app.session.charactersOpen) app.characters.goBack();
