@@ -264,6 +264,16 @@ Enredo.projectPdf = ((app) => {
     const overview = section('overview',t('projectOverview')).group;
     const model = app.narrative.getNarrativeModel(project.narrativeModel);
     addFields(overview,[[t('narrativeModel'),model ? app.structure.narrativeText(model.name) : project.narrativeModel]]);
+    if (project.summary) {
+      const destinations = new Map();
+      for (const [kind,items] of [['group',groups],['chapter',chapters],['beat',nodes]]) {
+        for (const [id,item] of items) destinations.set(app.projectSummary.linkHref(kind,id),'#' + item.anchor);
+      }
+      const summary = app.projectSummary.render(project.summary,href => destinations.get(href));
+      if (summary.textContent.trim()) {
+        overview.append(element('h3','',t('storySummary')),element('div','pdf-story-summary',summary));
+      }
+    }
     if (project.mapBackgroundId) {
       overview.append(element('h3','',t('mapBackground')));
       image(overview,t('mapBackground'),{id:project.mapBackgroundId});

@@ -156,6 +156,10 @@
 .pdf-field { margin-bottom: 2mm; }
 .pdf-label { color: var(--pdf-secondary); font-size: 9pt; font-weight: 700; }
 .pdf-text { white-space: pre-wrap; }
+.pdf-story-summary { margin: 0 0 4mm; white-space: pre-wrap; }
+.pdf-story-summary :is(p,ul,ol) { margin: 0 0 2mm; }
+.pdf-story-summary :is(ul,ol) { padding-inline-start: 6mm; }
+.pdf-story-summary :last-child { margin-bottom: 0; }
 .pdf-field-inline {
   display: grid;
   grid-template-columns: minmax(27mm,28%) minmax(0,1fr);

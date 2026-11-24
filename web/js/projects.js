@@ -6,14 +6,19 @@ Enredo.projects = ((app) => {
 
   function editProject() {
     const p = app.store.project();
-    app.dialogs.showDialog({title:t('projectDetails'),body:'<div class="fields">' +
+    let editor;
+    app.dialogs.showDialog({title:t('projectDetails'),className:'story-summary-dialog',body:'<div class="fields">' +
       field(t('name'),input('title',p.title,'',true)) + app.imageEditor.coverControls('project',p.id,p.cover) +
       '<div>' + app.imageGallery.launcher('project',p) + '</div></div>',submitKey:'save',
+      extra:form => { editor = app.projectSummary.mountEditor(form.querySelector('.fields'),p); },
       onSubmit: data => {
         const title = data.get('title').trim();
         if (!title) return;
         app.dialogs.closeDialog();
-        app.store.edit(() => { p.title = title; });
+        app.store.edit(() => {
+          p.title = title;
+          app.projectSummary.save(p,editor);
+        });
       },remove:() => removeProject(p)});
   }
 
@@ -202,7 +207,7 @@ Enredo.projects = ((app) => {
         removeChapter(p,p?.chapters.find(c => c.id === chapterToDelete));
       }
       if (button.id === 'newProject') createProject();
-      if (button.id === 'renameProject') editProject();
+      if (button.id === 'renameProject' || button.hasAttribute('data-edit-project')) editProject();
     });
   }
 

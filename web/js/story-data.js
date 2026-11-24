@@ -43,12 +43,14 @@ Enredo.storyData = ((app) => {
     return position ? {...record,mapPosition:{x:position.x,y:position.y}} : record;
   }
 
-  function normalizeProject({mapBackgroundSize,...project}) {
+  function normalizeProject({mapBackgroundSize,summary,...project}) {
     const nextGroupOrder = new Map();
     const {width,height} = mapBackgroundSize ?? {};
     const hasMapSize = project.mapBackgroundId && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0;
+    const cleanSummary = app.projectSummary.normalize(summary);
     const normalized = {
       ...project,
+      ...(cleanSummary ? {summary:cleanSummary} : {}),
       ...(hasMapSize ? {mapBackgroundSize:{width,height}} : {}),
       narrativeModel: hasId(project.narrativeModel) ? project.narrativeModel : app.narrative.defaultModelId,
       ...(project.cover ? {cover:{focusX:0.5,focusY:0.5,...project.cover}} : {}),

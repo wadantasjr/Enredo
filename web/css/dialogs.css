@@ -36,4 +36,12 @@ dialog::backdrop{background:var(--backdrop)}
 .dialog-form p{margin:0 0 10px}
 .dialog-form ul{padding-left:20px;margin:0;color:var(--muted);font-size:.9rem}
 .dialog-form li+li{margin-top:6px}
+.story-summary-dialog{width:min(740px,calc(100vw - 28px))}
+.story-summary-editor{display:grid;gap:8px;min-width:0}
+.story-summary-toolbar{display:flex;flex-wrap:wrap;gap:5px}
+.story-summary-toolbar .btn{padding-inline:8px;white-space:normal}
+.story-summary-input{min-height:10em;max-height:42dvh;overflow:auto;padding:9px 11px;border:1px solid var(--control-line);border-radius:8px;background:var(--input-bg)}
+.story-summary-link-picker{display:grid;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-subtle)}
+.story-summary-link-picker .story-summary-toolbar{justify-content:flex-end}
+.android .story-summary-toolbar .btn{min-height:44px}
 .toast{z-index:20;position:fixed;right:24px;bottom:24px;max-width:calc(100vw - 48px);padding:10px 14px;border-radius:9px;background:var(--toast-bg);color:var(--inverse-ink);box-shadow:0 6px 25px var(--danger-shadow);font-size:.875rem}

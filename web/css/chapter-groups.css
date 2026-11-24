@@ -57,6 +57,17 @@
 .project-presentation-cover,.group-presentation-cover{width:100%;box-shadow:var(--shadow)}
 .chapter-presentation h2{margin:0 0 7px;font-size:clamp(1.45rem,3vw,2rem);line-height:1.2;overflow-wrap:anywhere}
 .chapter-presentation p{color:var(--muted);margin:5px 0 12px;overflow-wrap:anywhere}
+.project-summary{max-width:1120px;margin:0 auto 24px;padding:clamp(12px,2vw,20px);border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.project-summary>header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.project-summary h3{margin:0;font-size:1.05rem}
+.project-summary .hint{margin-bottom:0}
+.story-summary-content{overflow-wrap:anywhere;white-space:pre-wrap}
+.story-summary-content :is(p,ul,ol){color:inherit;font-size:inherit;margin:0 0 .65em}
+.story-summary-content :is(ul,ol){padding-inline-start:1.5em}
+.story-summary-content li+li{margin-top:.15em}
+.story-summary-content :last-child{margin-bottom:0}
+.story-summary-content a{color:var(--accent-dark);text-underline-offset:.14em}
+.story-summary-content a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .group-description{white-space:pre-wrap}
 .presentation-section-title{max-width:1120px;margin:0 auto 10px;font-size:1.05rem}
 .presentation-group-list{display:grid;gap:6px;max-width:900px;margin:0 auto;padding:0;list-style:none}

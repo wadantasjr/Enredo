@@ -212,6 +212,37 @@
 <input type="file" id="nodeImageFile" accept="image/*" hidden>
 <input type="file" id="coverImageFile" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden>
 <dialog id="dialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle"></h2><button class="icon-btn" id="dialogClose" aria-label="Close" data-i18n-label="close" data-icon="close"></button></div><form class="dialog-form" id="dialogForm"></form></dialog>
+<template id="projectSummaryOverviewTemplate">
+  <section class="project-summary" aria-labelledby="projectSummaryTitle">
+    <header><h3 id="projectSummaryTitle" data-i18n="storySummary">Story summary</h3>
+      <button type="button" class="btn" data-edit-project-summary><span data-icon="edit"></span><span data-i18n="editStorySummary">Edit story summary</span></button>
+    </header>
+    <div class="story-summary-content"></div>
+    <p class="hint" data-i18n="emptyStorySummary" hidden>No story summary yet.</p>
+  </section>
+</template>
+<template id="projectSummaryEditorTemplate">
+  <div class="story-summary-editor">
+    <strong id="storySummaryEditorLabel" data-i18n="storySummary">Story summary</strong>
+    <div class="story-summary-toolbar" role="group" data-i18n-label="summaryFormatting" aria-label="Text formatting">
+      <button type="button" class="btn" data-summary-command="bold"><strong data-i18n="summaryBold">Bold</strong></button>
+      <button type="button" class="btn" data-summary-command="italic"><em data-i18n="summaryItalic">Italic</em></button>
+      <button type="button" class="btn" data-summary-command="underline"><u data-i18n="summaryUnderline">Underline</u></button>
+      <button type="button" class="btn" data-summary-command="insertUnorderedList" data-i18n="summaryBulletedList">Bulleted list</button>
+      <button type="button" class="btn" data-summary-command="insertOrderedList" data-i18n="summaryNumberedList">Numbered list</button>
+      <button type="button" class="btn" data-summary-choose-link aria-expanded="false" aria-controls="storySummaryLinkPicker"><span data-icon="link"></span><span data-i18n="summaryLink">Link to story</span></button>
+      <button type="button" class="btn" data-summary-command="unlink" data-i18n="summaryUnlink">Remove link</button>
+    </div>
+    <div class="story-summary-content story-summary-input" contenteditable="true" tabindex="0" role="textbox" aria-multiline="true" aria-labelledby="storySummaryEditorLabel"></div>
+    <div class="story-summary-link-picker" id="storySummaryLinkPicker" hidden>
+      <label class="field"><span data-i18n="summaryLinkTarget">Link destination</span><select></select></label>
+      <div class="story-summary-toolbar">
+        <button type="button" class="btn" data-summary-cancel-link data-i18n="cancel">Cancel</button>
+        <button type="button" class="btn primary" data-summary-insert-link data-i18n="summaryInsertLink">Apply link</button>
+      </div>
+    </div>
+  </div>
+</template>
 <dialog class="gallery-dialog" id="imageGallery" aria-labelledby="imageGalleryTitle">
   <div class="dialog-head">
     <div><h2 id="imageGalleryTitle" data-i18n="imageGallery">Image gallery</h2><p id="galleryOwnerName"></p></div>
@@ -258,6 +289,7 @@
 <script src="web/js/narrative-models.js"></script>
 <script src="web/js/character-data.js"></script>
 <script src="web/js/project-management-data.js"></script>
+<script src="web/js/project-summary.js"></script>
 <script src="web/js/story-data.js"></script>
 <script src="web/js/session.js"></script>
 <script src="web/js/image-store.js"></script>

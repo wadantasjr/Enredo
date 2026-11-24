@@ -226,8 +226,10 @@ Enredo.chapterGroups = ((app) => {
         (p.chapters.length
           ? '<button type="button" class="btn primary" data-chapter="' + esc(app.store.chapter()?.id ?? p.chapters[0].id) + '">' + tx('openEditor') + '</button>'
           : '<button type="button" class="btn primary" data-create-project-chapter="true">' + tx('createChapter') + '</button>') +
+        '<button type="button" class="btn" data-edit-project>' + icon('edit') + ' ' + tx('projectDetails') + '</button>' +
         app.imageGallery.launcher('project',p) + '</div></div></div><h3 class="presentation-section-title">' + tx('groups') + '</h3>' +
         (projectGroups.length ? '<ul class="presentation-group-list">' + projectGroups.join('') + '</ul>' : '');
+      $('presentationContent').firstElementChild.after(app.projectSummary.overviewSection(p));
     } else {
       const group = view.type === 'group' ? groups(p).find(item => item.id === view.id) : null;
       if (view.type === 'group' && !group) return;
