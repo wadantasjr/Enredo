@@ -92,18 +92,25 @@ Enredo.projectPdf = ((app) => {
         sources.set(id,source);
       }
       const source = sources.get(id) || preview;
+      const svgImage = image instanceof SVGImageElement;
       if (source) {
-        image.src = source;
+        const decodedImage = svgImage ? new Image() : image;
+        decodedImage.src = source;
         try {
-          await image.decode();
+          await decodedImage.decode();
+          if (svgImage) image.setAttribute('href',source);
           continue;
         } catch {}
       }
-      image.replaceWith(element('p','pdf-image-missing',t('pdfImageUnavailable')));
+      const missing = element('p','pdf-image-missing',t('pdfImageUnavailable'));
+      if (svgImage) {
+        image.closest('figure').append(missing);
+        image.remove();
+      } else image.replaceWith(missing);
     }
   }
 
-  function buildReport(project, locale) {
+  function buildReport(project, locale, characterDataIssue) {
     const images = [];
     const nodes = indexed(project.nodes,'beat'), people = indexed(project.characters,'character');
     const chapters = indexed(project.chapters,'chapter'), groups = indexed(project.chapterGroups,'group');
@@ -128,6 +135,14 @@ Enredo.projectPdf = ((app) => {
 
     function coverImage(parent, cover, key) {
       if (cover?.assetId) image(parent,t(key),{id:cover.assetId,cover});
+    }
+
+    function diagram(parent, title, markup) {
+      const block = titled(parent,'section','pdf-diagram','h3',title);
+      const figure = element('figure');
+      figure.innerHTML = markup;
+      block.append(figure);
+      return figure;
     }
 
     function gallery(parent, owner, label = 'mediaGallery') {
@@ -281,9 +296,9 @@ Enredo.projectPdf = ((app) => {
         overview.append(element('h3','',t('storySummary')),element('div','pdf-story-summary',summary));
       }
     }
-    if (project.mapBackgroundId) {
-      overview.append(element('h3','',t('mapBackground')));
-      image(overview,t('mapBackground'),{id:project.mapBackgroundId});
+    if (nodes.size || project.mapBackgroundId) {
+      const map = diagram(overview,t('pdfWholeStoryDiagram'),app.diagram.printableWholeStory(project));
+      if (project.mapBackgroundId) images.push({image:map.querySelector('.pdf-map-background'),id:project.mapBackgroundId});
     }
     gallery(overview,project);
 
@@ -309,6 +324,10 @@ Enredo.projectPdf = ((app) => {
 
     if (people.size || roles.size || arcs.size || routes.size || relations.size || kinds.size) {
       const characters = section('characters',t('characters'));
+      if (people.size && !characterDataIssue) {
+        const graph = diagram(characters.group,t('relationshipGraph'),app.characters.relationshipGraphMarkup(project,{interactive:false}));
+        graph.append(element('figcaption','',t(relations.size ? 'pdfRelationshipDirection' : 'relationshipGraphEmpty')));
+      }
       for (const person of people.values()) {
         const block = titled(characters.group,'article','pdf-record','h3',person.name,person.anchor);
         addFields(block,[[t('primaryRole'),roleName(person.primaryRoleId)],
@@ -396,7 +415,7 @@ Enredo.projectPdf = ((app) => {
     try {
       const snapshot = JSON.parse(JSON.stringify(project));
       const locale = document.documentElement.lang;
-      const {fragment,images} = buildReport(snapshot,locale);
+      const {fragment,images} = buildReport(snapshot,locale,app.characterData.issue(project));
       await loadImages(images);
       const report = $('projectPdf');
       report.replaceChildren(fragment);

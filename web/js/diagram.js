@@ -147,41 +147,42 @@ Enredo.diagram = ((app) => {
 
   function buildScene() {
     const p = app.store.project();
-    let positionScale = defaultPositionScale;
-    let layout;
-    if (app.session.isWholeStory()) {
-      layout = wholeStoryLayout(p);
-    } else {
-      const chapterNodes = p.nodes.filter(n => n.chapter === app.store.chapter().id);
-      positionScale = chapterPositionScale(chapterNodes);
-      layout = {nodes:positionCards(chapterNodes,positionScale),sections:[],groupRules:[],representatives:new Map()};
-    }
-    const {nodes,sections,groupRules,representatives,backgroundSize} = layout;
-    const byId = new Map(nodes.map(n => [n.id,n]));
-    return {nodes,sections,groupRules,byId,positionScale,backgroundSize,edges:visibleEdges(p.edges,byId,representatives)};
+    if (app.session.isWholeStory()) return sceneFromLayout(p.edges,wholeStoryLayout(p));
+    const chapterNodes = p.nodes.filter(n => n.chapter === app.store.chapter().id);
+    const positionScale = chapterPositionScale(chapterNodes);
+    return sceneFromLayout(p.edges,{nodes:positionCards(chapterNodes,positionScale)},positionScale);
   }
 
-  function renderSection(section) {
+  function sceneFromLayout(edges,layout,positionScale = defaultPositionScale) {
+    const {nodes,sections = [],groupRules = [],representatives = new Map(),backgroundSize} = layout;
+    const byId = new Map(nodes.map(n => [n.id,n]));
+    return {nodes,sections,groupRules,byId,positionScale,backgroundSize,edges:visibleEdges(edges,byId,representatives)};
+  }
+
+  function renderSection(section,interactive) {
     const {type,id,title,details,x,y,width,height,collapsed} = section;
     const name = t(type === 'group' ? 'mapGroupLabel' : 'mapChapterLabel',{name:title});
     const label = collapsed ? name + ' · ' + details : name;
-    return '<button type="button" class="map-section ' + (collapsed ? 'node map-summary' : 'map-heading') +
-      '" data-map-section="' + type + '" data-map-id="' + esc(id) + '" aria-expanded="' + !collapsed +
-      '" aria-label="' + esc(label) + '" title="' + esc(name) + '" style="left:' + x + 'px;top:' + y +
+    const tag = interactive ? 'button' : 'div';
+    const controls = interactive ? ' type="button" data-map-section="' + type + '" data-map-id="' + esc(id) +
+      '" aria-expanded="' + !collapsed + '" aria-label="' + esc(label) + '"' : '';
+    return '<' + tag + controls + ' class="map-section ' + (collapsed ? 'node map-summary' : 'map-heading') +
+      '" title="' + esc(name) + '" style="left:' + x + 'px;top:' + y +
       'px;width:' + width + 'px;height:' + height + 'px">' +
       '<span class="map-section-label">' + icon(type === 'group' ? 'folder' : 'book') + '<span class="' +
-      (collapsed ? 'node-title' : 'clip') + '">' + esc(title) + '</span>' + icon(collapsed ? 'right' : 'chevron') + '</span>' +
+      (collapsed ? 'node-title' : 'clip') + '">' + esc(title) + '</span>' +
+      (interactive ? icon(collapsed ? 'right' : 'chevron') : '') + '</span>' +
       (collapsed ? '<span class="map-section-count">' + esc(details) + '</span><span class="port" aria-hidden="true"></span>' +
-        '<span class="port out" aria-hidden="true"></span>' : '') + '</button>';
+        '<span class="port out" aria-hidden="true"></span>' : '') + '</' + tag + '>';
   }
 
-  function renderCards() {
-    const model = app.narrative.activeNarrativeModel(app.store.project());
-    $('cards').innerHTML =
-      scene.groupRules.map(rule => '<span class="map-group-rule" data-map-rule="' + esc(rule.id) + '" aria-hidden="true" style="left:' + rule.x + 'px;top:' + rule.y +
+  function cardsMarkup(project,layout,{interactive = true,selection,source} = {}) {
+    const model = app.narrative.activeNarrativeModel(project);
+    const tag = interactive ? 'button' : 'div';
+    return layout.groupRules.map(rule => '<span class="map-group-rule" data-map-rule="' + esc(rule.id) + '" aria-hidden="true" style="left:' + rule.x + 'px;top:' + rule.y +
         'px;width:' + rule.width + 'px"></span>').join('') +
-      scene.sections.map(renderSection).join('') +
-      scene.nodes.map(n => {
+      layout.sections.map(section => renderSection(section,interactive)).join('') +
+      layout.nodes.map(n => {
         const title = esc(n.title || t('untitled'));
         const active = app.structure.activeNarrativeStage(n,model);
         const preserved = n.narrativeStage && !active;
@@ -189,26 +190,32 @@ Enredo.diagram = ((app) => {
           preserved ? t('preservedStage',{stage:app.structure.narrativeStageName(n.narrativeStage)}) : '';
         const badge = stageName ? '<span class="node-stage clip' + (preserved ? ' preserved' : '') + '">' + esc(stageName) + '</span>' : '';
         const scale = nodeThumbnailScale(n);
-        const thumb = scale ? '<img class="node-thumb" src="' + esc(n.image) + '" height="' + (thumbnailHeight * scale) + '" alt="" draggable="false">' : '';
-        return '<button class="node' + (n.id === app.session.selection ? ' selected' : '') + (badge ? ' has-narrative-stage' : '') +
-          (thumb ? ' has-image' : '') +
-          (n.id === app.session.source ? ' connection-source' : '') + '" data-node="' + esc(n.id) + '" aria-pressed="' + (n.id === app.session.selection) +
+        const thumb = scale ? '<img class="node-thumb" src="' + esc(n.image) + '" style="height:' + (thumbnailHeight * scale) + 'px" alt="" draggable="false">' : '';
+        const selected = n.id === selection;
+        const controls = interactive ? ' data-node="' + esc(n.id) + '" aria-pressed="' + selected + '"' : '';
+        return '<' + tag + controls + ' class="node' + (selected ? ' selected' : '') + (badge ? ' has-narrative-stage' : '') +
+          (thumb ? ' has-image' : '') + (n.id === source ? ' connection-source' : '') +
           '" style="left:' + n.x + 'px;top:' + n.y + 'px;width:' + n.width + 'px;height:' + n.height + 'px" title="' + title +
           (badge ? ' · ' + esc(stageName) : '') + '">' + thumb + '<span class="tag" data-kind="' +
           n.kind + '">' + icon(n.kind) + tx(n.kind) + '</span><span class="node-title">' + title +
-          '</span>' + badge + '<span class="port" aria-hidden="true"></span><span class="port out" aria-hidden="true"></span></button>';
+          '</span>' + badge + '<span class="port" aria-hidden="true"></span><span class="port out" aria-hidden="true"></span></' + tag + '>';
       }).join('');
+  }
+
+  function renderCards() {
+    const {selection,source} = app.session;
+    $('cards').innerHTML = cardsMarkup(app.store.project(),scene,{selection,source});
   }
 
   function sameRow(a,b) {
     return a.y < b.y + b.height + 10 && b.y < a.y + a.height + 10;
   }
 
-  function renderWires() {
+  function wiresMarkup(layout,{interactive = true,selection,showLabels = true,marker = 'tip'} = {}) {
     const labels = [];
-    const selected = scene.byId.get(app.session.selection);
+    const selected = layout.byId.get(selection);
     const fontScale = app.preferences.fontSize/100;
-    const lines = scene.edges.map(({from,to,edge,label:originalLabel,count,index,bend}) => {
+    const lines = layout.edges.map(({from,to,edge,label:originalLabel,count,index,bend}) => {
       const x1 = from.x + from.width + 4, x2 = to.x - 5, y1 = from.y + from.height / 2, y2 = to.y + to.height / 2;
       const adjacent = x2 - x1 > 16;
       const reach = Math.max(20,Math.min(130,(x2 - x1) * .55));
@@ -220,10 +227,10 @@ Enredo.diagram = ((app) => {
         'M ' + x1 + ' ' + y1 + ' C ' + (x1 + 30) + ' ' + y1 + ' ' + (x1 + 30) + ' ' + startBend + ' ' + (x1 + 14) + ' ' + startBend +
         ' L ' + (x2 - 14) + ' ' + endBend + ' C ' + (x2 - 30) + ' ' + endBend + ' ' + (x2-30) + ' ' + y2 + ' ' + x2 + ' ' + y2;
       const active = from === selected || to === selected;
-      const id = edge ? ' data-edge="' + esc(edge.id) + '"' : '';
-      const tip = active ? 'tip-active' : 'tip';
+      const id = interactive && edge ? ' data-edge="' + esc(edge.id) + '"' : '';
+      const tip = active ? marker + '-active' : marker;
       const fullLabel = count > 1 ? app.workspace.countText(count,'countConnection') : originalLabel;
-      if (fullLabel && (view.zoom >= .43 || active)) {
+      if (fullLabel && (showLabels || active)) {
         const chars = [...fullLabel];
         const label = chars.length > 24 ? chars.slice(0,23).join('') + '…' : fullLabel;
         const width = Math.max(34,[...label].length * 7.3 + 13);
@@ -235,8 +242,12 @@ Enredo.diagram = ((app) => {
           esc(label) + '</text></g>');
       }
       return '<path class="wire' + (active ? ' active' : '') + (edge ? '' : ' wire-summary') + '" d="' + d + '" marker-end="url(#' + tip + ')"/>' +
-        (edge ? '<path class="wire-hit"' + id + ' d="' + d + '"><title>' + tx('editConnection') + '</title></path>' : '');
+        (id ? '<path class="wire-hit"' + id + ' d="' + d + '"><title>' + tx('editConnection') + '</title></path>' : '');
     });
+    return lines.join('') + labels.join('');
+  }
+
+  function renderWires() {
     // Give the paths a real SVG viewport so repaints do not depend on overflow from a 1px layer.
     const box = mapBounds(), padding = 140;
     const left = box.left - padding, top = box.top - padding;
@@ -250,23 +261,46 @@ Enredo.diagram = ((app) => {
     layer.setAttribute('width',width);
     layer.setAttribute('height',height);
     layer.setAttribute('viewBox',[left,top,width,height].join(' '));
-    $('wirePaths').innerHTML = lines.join('') + labels.join('');
+    $('wirePaths').innerHTML = wiresMarkup(scene,{selection:app.session.selection,showLabels:view.zoom >= .43});
   }
 
-  function mapBounds() {
-    const b = bounds([...scene.nodes,...scene.sections]);
-    if (scene.backgroundSize) {
+  function mapBounds(layout = scene) {
+    const b = bounds([...layout.nodes,...layout.sections]);
+    if (layout.backgroundSize) {
       b.left = Math.min(b.left,0);
       b.top = Math.min(b.top,0);
-      b.right = Math.max(b.right,scene.backgroundSize.width);
-      b.bottom = Math.max(b.bottom,scene.backgroundSize.height);
+      b.right = Math.max(b.right,layout.backgroundSize.width);
+      b.bottom = Math.max(b.bottom,layout.backgroundSize.height);
     }
-    for (const {from,to,index} of scene.edges) {
+    for (const {from,to,index} of layout.edges) {
       if (to.x - from.x <= from.width + 25 && sameRow(from,to)) {
         b.top = Math.min(b.top,Math.min(from.y,to.y) - 35 - index*24);
       }
     }
     return b;
+  }
+
+  function printableWholeStory(project) {
+    const layout = sceneFromLayout(project.edges,wholeStoryLayout(project));
+    const {left,top,right,bottom} = mapBounds(layout), padding = 42;
+    const x = left - padding, y = top - padding;
+    const width = right - left + 2 * padding, height = bottom - top + 2 * padding;
+    const background = layout.backgroundSize ? {x:0,y:0,...layout.backgroundSize} : {x,y,width,height};
+    const marker = $('tip').cloneNode(true);
+    marker.id = 'pdf-story-arrow';
+    const wireStyle = app.preferences.diagramWires('whole-story');
+    const style = (wireStyle.color ? '--pdf-wire-color:' + wireStyle.color + ';' : '') +
+      (wireStyle.width === null ? '' : '--pdf-wire-width:' + wireStyle.width + 'px');
+    return '<svg class="pdf-story-map" width="' + width + '" height="' + height + '" viewBox="' + [x,y,width,height].join(' ') +
+      '" role="img" aria-label="' + tx('pdfWholeStoryDiagram') + '" style="' + style + '">' +
+      '<defs>' + marker.outerHTML + '</defs>' +
+      (project.mapBackgroundId ? '<image class="pdf-map-background" x="' + background.x + '" y="' + background.y +
+        '" width="' + background.width + '" height="' + background.height + '" preserveAspectRatio="' +
+        (layout.backgroundSize ? 'none' : 'xMidYMid slice') + '"/>' : '') +
+      wiresMarkup(layout,{interactive:false,marker:marker.id}) +
+      '<foreignObject x="' + x + '" y="' + y + '" width="' + width + '" height="' + height + '">' +
+      '<div class="pdf-map-cards" style="left:' + -x + 'px;top:' + -y + 'px">' +
+      cardsMarkup(project,layout,{interactive:false}) + '</div></foreignObject></svg>';
   }
 
   function renderMinimap() {
@@ -441,6 +475,7 @@ Enredo.diagram = ((app) => {
     fitMap,
     keepPosition,
     layoutNodeHeight,
+    printableWholeStory,
     rebuildScene,
     refreshThumbnailSize,
     renderCards,

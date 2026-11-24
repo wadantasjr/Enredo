@@ -83,6 +83,8 @@ Enredo.messages = {
   exportPdf: ['Export project (.pdf)','Exportar projeto (.pdf)'],
   pdfProjectReport: ['Project report','Relatório de projeto'],
   pdfContents: ['Contents','Índice'],
+  pdfWholeStoryDiagram: ['Whole story diagram','Diagrama da história inteira'],
+  pdfRelationshipDirection: ['Arrows show the direction of each relationship.','As setas indicam a direção de cada relacionamento.'],
   pdfStoryPaths: ['Story paths','Caminhos da história'],
   pdfCharacterDefinitions: ['Custom roles and relationship types','Papéis e tipos de relacionamento personalizados'],
   pdfNoBeats: ['This chapter has no story beats.','Este capítulo ainda não tem situações.'],

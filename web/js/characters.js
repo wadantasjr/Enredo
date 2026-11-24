@@ -357,35 +357,48 @@ Enredo.characters = ((app) => {
     return {positions,width,height,centerX,centerY};
   }
 
-  function graphNode(character,p,position,index) {
+  function graphNode(character,p,position,index,idPrefix,interactive,nameAbove) {
     const image = portraitFor(character,p);
-    const clip = 'character-clip-' + index;
+    const clip = idPrefix + 'character-clip-' + index;
     const words = character.name.trim().split(/\s+/u);
     const first = words.shift() ?? '';
     const rest = words.join(' ');
+    const labelY = nameAbove ? (rest ? -66 : -50) : 58;
     const label = [character.name,...(character.roleIds ?? []).map(id => roleLabel(id,p))].join(', ');
-    return '<g class="relationship-graph-node" role="button" tabindex="0" data-graph-character="' + esc(character.id) + '" aria-label="' + esc(label) + '" transform="translate(' +
+    const control = interactive ? ' role="button" tabindex="0" data-graph-character="' + esc(character.id) + '" aria-label="' + esc(label) + '"' : '';
+    return '<g class="relationship-graph-node"' + control + ' transform="translate(' +
       position.x + ' ' + position.y + ')"><title>' + esc(label) + '</title><circle class="relationship-node-ring" r="42"></circle>' +
       (image ? '<defs><clipPath id="' + clip + '"><circle r="38"></circle></clipPath></defs><image href="' + esc(image) + '" x="-38" y="-38" width="76" height="76" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + clip + ')"></image>' :
         '<circle class="relationship-node-avatar" r="38"></circle><text class="relationship-node-initials" text-anchor="middle" y="6">' + esc(data.initials(character.name)) + '</text>') +
-      '<text class="relationship-node-name" text-anchor="middle" y="58"><tspan x="0">' + esc(first) + '</tspan>' + (rest ? '<tspan x="0" dy="16">' + esc(rest) + '</tspan>' : '') +
+      '<text class="relationship-node-name" text-anchor="middle" y="' + labelY + '"><tspan x="0">' + esc(first) + '</tspan>' + (rest ? '<tspan x="0" dy="16">' + esc(rest) + '</tspan>' : '') +
       '</text></g>';
   }
 
-  function graphRelation(relation,index,positions,p) {
+  function graphRelation(relation,index,count,positions,p,marker,interactive) {
     const from = positions.get(relation.fromCharacterId), to = positions.get(relation.toCharacterId);
     if (!from || !to) return '';
     const dx = to.x - from.x, dy = to.y - from.y, length = Math.max(1,Math.hypot(dx,dy));
     const nx = -dy / length, ny = dx / length;
-    const offset = (index % 2 ? 1 : -1) * (10 + Math.floor(index / 2) * 4);
+    const vertical = Math.abs(dy) > Math.abs(dx);
+    const direction = relation.fromCharacterId < relation.toCharacterId ? 1 : -1;
+    const offset = (index - (count - 1) / 2) * (vertical ? 110 : 72) * direction;
     const middleX = (from.x + to.x) / 2 + nx * offset;
     const middleY = (from.y + to.y) / 2 + ny * offset;
-    const label = relationTypeLabel(relation,p) + ' · ' + stateName(relation.initialState);
-    const detail = label + ' · ' + relationshipAttributesText(relation.initialAttributes);
-    return '<g class="relationship-graph-edge" role="button" tabindex="0" data-graph-relationship="' + esc(relation.id) + '" aria-label="' + esc(detail) + '"><title>' +
+    const endDistance = Math.hypot(middleX - to.x,middleY - to.y);
+    const inset = Math.min(46 / endDistance,.9);
+    const endX = to.x + (middleX - to.x) * inset;
+    const endY = to.y + (middleY - to.y) * inset;
+    const side = vertical ? Math.sign(nx * offset) : 0;
+    const labelX = (from.x + 2 * middleX + endX) / 4 + side * 6;
+    const labelY = (from.y + 2 * middleY + endY) / 4 - 5;
+    const anchor = side < 0 ? 'end' : side > 0 ? 'start' : 'middle';
+    const label = relationTypeLabel(relation,p);
+    const detail = label + ' · ' + stateName(relation.initialState) + ' · ' + relationshipAttributesText(relation.initialAttributes);
+    const control = interactive ? ' role="button" tabindex="0" data-graph-relationship="' + esc(relation.id) + '" aria-label="' + esc(detail) + '"' : '';
+    return '<g class="relationship-graph-edge"' + control + '><title>' +
       esc(characterById(relation.fromCharacterId,p)?.name + ' → ' + characterById(relation.toCharacterId,p)?.name + ' · ' + detail) + '</title>' +
-      '<path d="M ' + from.x + ' ' + from.y + ' Q ' + middleX + ' ' + middleY + ' ' + to.x + ' ' + to.y + '" marker-end="url(#relationship-arrow)"></path>' +
-      '<text x="' + middleX + '" y="' + (middleY - 5) + '" text-anchor="middle">' + esc(relationTypeLabel(relation,p)) + '</text></g>';
+      '<path d="M ' + from.x + ' ' + from.y + ' Q ' + middleX + ' ' + middleY + ' ' + endX + ' ' + endY + '" marker-end="url(#' + marker + ')"></path>' +
+      '<text x="' + labelX + '" y="' + labelY + '" text-anchor="' + anchor + '">' + esc(label) + '</text></g>';
   }
 
   function relationshipAttributesText(attributes) {
@@ -393,17 +406,35 @@ Enredo.characters = ((app) => {
   }
 
   function renderRelationshipGraph(p) {
-    const characters = p.characters;
-    if (!characters.length) return '<section class="relationship-graph-view"><h3>' + tx('relationshipGraph') + '</h3><p class="hint">' + tx('noCharacters') + '</p></section>';
-    const graph = graphPositions(characters);
-    const edges = p.relationships.map((relation,index) => graphRelation(relation,index,graph.positions,p)).join('');
-    const nodes = characters.map((character,index) => graphNode(character,p,graph.positions.get(character.id),index)).join('');
+    if (!p.characters.length) return '<section class="relationship-graph-view"><h3>' + tx('relationshipGraph') + '</h3><p class="hint">' + tx('noCharacters') + '</p></section>';
     return '<section class="relationship-graph-view"><header class="character-section-heading"><div><h3>' + tx('relationshipGraph') + '</h3><p class="hint">' +
       tx('relationshipGraphHint') + '</p></div><button type="button" class="btn" data-open-character-list>' + icon('right') + ' ' + tx('characterList') + '</button></header>' +
-      '<div class="relationship-graph-scroll"><svg class="relationship-graph" viewBox="0 0 ' + graph.width + ' ' + graph.height + '" role="group" aria-label="' +
-      tx('relationshipGraph') + '"><defs><marker id="relationship-arrow" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 10 4 L 0 8 z"></path></marker></defs>' +
-      '<g class="relationship-graph-edges">' + edges + '</g><g class="relationship-graph-nodes">' + nodes + '</g></svg></div>' +
+      '<div class="relationship-graph-scroll">' + relationshipGraphMarkup(p) + '</div>' +
       (p.relationships.length ? '<p class="hint">' + tx('relationshipGraphDirectionHint') + '</p>' : '<p class="hint">' + tx('relationshipGraphEmpty') + '</p>') + '</section>';
+  }
+
+  function relationshipGraphMarkup(p,{interactive = true} = {}) {
+    const {positions,width,height,centerY} = graphPositions(p.characters);
+    const idPrefix = interactive ? '' : 'pdf-';
+    const marker = idPrefix + 'relationship-arrow';
+    const pairs = new Map();
+    for (const relation of p.relationships) {
+      const key = JSON.stringify([relation.fromCharacterId,relation.toCharacterId].sort());
+      if (!pairs.has(key)) pairs.set(key,[]);
+      pairs.get(key).push(relation);
+    }
+    const edges = [...pairs.values()].map(relations => relations.map((relation,index) =>
+      graphRelation(relation,index,relations.length,positions,p,marker,interactive)).join('')).join('');
+    const nodes = p.characters.map((character,index) => {
+      const position = positions.get(character.id);
+      return graphNode(character,p,position,index,idPrefix,interactive,p.characters.length > 1 && position.y < centerY);
+    }).join('');
+    const size = interactive ? '' : ' width="' + width + '" height="' + height + '"';
+    return '<svg class="relationship-graph"' + size + ' viewBox="0 0 ' + width + ' ' + height + '" role="' +
+      (interactive ? 'group' : 'img') + '" aria-label="' + tx('relationshipGraph') + '"><defs><marker id="' + marker +
+      '" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="strokeWidth">' +
+      '<path d="M 0 0 L 10 4 L 0 8 z"></path></marker></defs>' +
+      '<g class="relationship-graph-edges">' + edges + '</g><g class="relationship-graph-nodes">' + nodes + '</g></svg>';
   }
 
   function bindGraphKeyboard(root) {
@@ -1138,6 +1169,7 @@ Enredo.characters = ((app) => {
     clearOrigin,
     goBack,
     openCharacter,
+    relationshipGraphMarkup,
     render,
     renderNodeParticipants
   };

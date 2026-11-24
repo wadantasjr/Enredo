@@ -195,3 +195,77 @@
 .pdf-figure figcaption { color: var(--pdf-secondary); font-size: 9pt; break-inside: avoid; break-after: avoid; }
 .pdf-figure img { margin-bottom: 1mm; break-after: avoid; }
 .pdf-image-missing { color: var(--pdf-secondary); font-style: italic; }
+
+.pdf-diagram { margin: 4mm 0; break-inside: avoid; }
+.pdf-diagram svg:is(.pdf-story-map,.relationship-graph) {
+  display: block;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  max-width: 100%;
+  max-height: 150mm;
+  margin: 0 auto;
+  border: 0.5pt solid var(--pdf-line);
+  border-radius: 1mm;
+  background: white;
+  box-sizing: border-box;
+}
+.pdf-report .pdf-diagram figcaption { margin-top: 1mm; }
+
+.pdf-diagram .relationship-graph marker path { fill: var(--pdf-accent); }
+.pdf-diagram .relationship-graph-edge > path { fill: none; stroke: var(--pdf-accent); stroke-width: 2.4; }
+.pdf-diagram .relationship-graph-edge > text { fill: var(--pdf-secondary); font-size: 14px; }
+.pdf-diagram :is(.relationship-graph-edge > text,.relationship-node-name) {
+  paint-order: stroke; stroke: white; stroke-width: 4px; stroke-linejoin: round;
+}
+.pdf-diagram .relationship-node-ring { fill: white; stroke: var(--pdf-accent); stroke-width: 2.5; }
+.pdf-diagram .relationship-node-avatar { fill: var(--pdf-tint); stroke: var(--pdf-line); }
+.pdf-diagram .relationship-node-initials { fill: var(--pdf-accent); font-size: 19px; font-weight: 750; }
+.pdf-diagram .relationship-node-name { fill: var(--pdf-ink); font-size: 15px; font-weight: 700; }
+
+.pdf-map-background { opacity: .74; }
+.pdf-story-map :is(.wire,.wire-tip) { fill: none; stroke: var(--pdf-wire-color,var(--pdf-secondary)); }
+.pdf-story-map .wire { stroke-width: var(--pdf-wire-width,2px); }
+.pdf-story-map .wire-summary { stroke-dasharray: 6 3; }
+.pdf-story-map .wire-label rect { fill: white; stroke: var(--pdf-line); }
+.pdf-story-map .wire-label text { fill: var(--pdf-ink); font: 650 12px var(--pdf-font); }
+.pdf-map-cards { position: absolute; font: 16px/1.15 var(--pdf-font); }
+.pdf-map-cards :is(.node,.map-heading,.map-group-rule,.port) { position: absolute; box-sizing: border-box; }
+.pdf-map-cards .node {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px;
+  padding: 8px 12px; border: 1px solid var(--pdf-line); border-radius: 10px;
+  background: white; color: var(--pdf-ink); box-shadow: none;
+}
+.pdf-map-cards .node-title {
+  font: 750 16px/1.15 var(--pdf-font); letter-spacing: -.02em; max-width: 100%; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;
+}
+.pdf-map-cards .node.has-image { justify-content: flex-start; gap: 5px; }
+.pdf-map-cards .node-thumb { flex: none; width: 100%; max-height: none; margin: 0; border-radius: 5px; object-fit: contain; }
+.pdf-map-cards .tag {
+  --tag-bg: #e9eefc; --tag-ink: #415389;
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 5px;
+  background: var(--tag-bg); color: var(--tag-ink); font: 700 12px/1.15 var(--pdf-font); white-space: nowrap;
+}
+.pdf-map-cards [data-kind="decision"] { --tag-bg: #eee3ff; --tag-ink: #6533a8; }
+.pdf-map-cards [data-kind="outcome"] { --tag-bg: #f9eddb; --tag-ink: #8f511f; }
+.pdf-map-cards [data-kind="merge"] { --tag-bg: #dff4ea; --tag-ink: #24674e; }
+.pdf-map-cards [data-kind="ending"] { --tag-bg: #f9e3ec; --tag-ink: #963d60; }
+.pdf-map-cards .tag svg { width: 13px; height: 13px; flex: none; }
+.pdf-map-cards .node-stage { display: block; flex: none; max-width: 100%; color: var(--pdf-accent); font: 650 11.5px/1.1 var(--pdf-font); }
+.pdf-map-cards .node-stage.preserved { color: var(--pdf-secondary); }
+.pdf-map-cards .clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.pdf-map-cards .map-heading {
+  display: flex; align-items: center; padding: 5px 9px; border: 1px solid var(--pdf-line);
+  border-radius: 7px; font: 750 15px/1.15 var(--pdf-font);
+}
+.pdf-map-cards :is(.map-heading,.node.map-summary) { background: var(--pdf-tint); border-color: var(--pdf-line); color: var(--pdf-ink); }
+.pdf-map-cards .map-section-label { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 7px; align-items: center; width: 100%; }
+.pdf-map-cards .map-section-label svg { width: 16px; height: 16px; }
+.pdf-map-cards .map-section-count { color: var(--pdf-secondary); font: 13px/1.2 var(--pdf-font); }
+.pdf-map-cards .map-group-rule { height: 10px; border: 1px solid var(--pdf-line); border-bottom: 0; border-radius: 6px 6px 0 0; }
+.pdf-map-cards .port {
+  width: 9px; height: 9px; top: calc(50% - 4.5px); left: -5px;
+  border: 1.5px solid var(--pdf-secondary); border-radius: 50%; background: white;
+}
+.pdf-map-cards .port.out { left: auto; right: -5px; }
