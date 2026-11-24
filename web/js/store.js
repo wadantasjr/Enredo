@@ -111,24 +111,33 @@ Enredo.store = ((app) => {
   }
 
   function mapLayoutChanged(before,after) {
-    const mapPositionChanged = (record,next) => record.mapPosition?.x !== next.mapPosition?.x || record.mapPosition?.y !== next.mapPosition?.y;
-    const wholeStory = app.session.lastMapMode === 'whole-story';
+    const mode = app.session.lastMapMode;
+    const field = app.session.positionField(mode);
+    const positionChanged = (record,next) => {
+      const a = field ? record[field] : record;
+      const b = field ? next[field] : next;
+      return a?.x !== b?.x || a?.y !== b?.y;
+    };
     if (before.chapters.length !== after.chapters.length ||
         before.chapters.some((c,i) => c.id !== after.chapters[i].id)) return true;
-    if (wholeStory) {
+    if (mode === 'story-map' && (before.mapBackgroundId !== after.mapBackgroundId ||
+        before.mapBackgroundSize?.width !== after.mapBackgroundSize?.width ||
+        before.mapBackgroundSize?.height !== after.mapBackgroundSize?.height)) return true;
+    if (field) {
       const groups = before.chapterGroups ?? [], nextGroups = after.chapterGroups ?? [];
+      const collapsed = app.mapGrouping.collapsedSections(before,mode);
+      const nextCollapsed = app.mapGrouping.collapsedSections(after,mode);
       if (groups.length !== nextGroups.length || groups.some((group,i) => group.id !== nextGroups[i].id ||
-          group.mapCollapsed !== nextGroups[i].mapCollapsed || mapPositionChanged(group,nextGroups[i])) ||
+          collapsed.groups.has(group.id) !== nextCollapsed.groups.has(group.id) || positionChanged(group,nextGroups[i])) ||
           before.chapters.some((chapter,i) => {
             const next = after.chapters[i];
             return chapter.groupId !== next.groupId || chapter.groupOrder !== next.groupOrder ||
-              chapter.mapCollapsed !== next.mapCollapsed || mapPositionChanged(chapter,next);
+              collapsed.chapters.has(chapter.id) !== nextCollapsed.chapters.has(chapter.id) || positionChanged(chapter,next);
           })) return true;
     }
     if (before.nodes.length !== after.nodes.length || before.nodes.some((n,i) => {
       const next = after.nodes[i];
-      const moved = wholeStory ? mapPositionChanged(n,next) : n.x !== next.x || n.y !== next.y;
-      return n.id !== next.id || n.chapter !== next.chapter || moved ||
+      return n.id !== next.id || n.chapter !== next.chapter || positionChanged(n,next) ||
         app.diagram.layoutNodeHeight(n) !== app.diagram.layoutNodeHeight(next);
     })) return true;
     return before.edges.length !== after.edges.length ||

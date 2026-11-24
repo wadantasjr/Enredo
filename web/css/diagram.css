@@ -16,6 +16,7 @@
 .graph.connecting,.graph.connecting .node{cursor:crosshair}
 .world{position:absolute;inset:0;transform-origin:0 0;pointer-events:none}
 .world>.map-background{inset:0 auto auto 0;object-fit:fill;opacity:.74}
+.graph.map-image-only .map-background{opacity:1;object-fit:contain}
 .wires{position:absolute;pointer-events:none}
 .map-background:not([hidden])~.wires{--wire:var(--world-label-ink)}
 .wire,.wire-tip{fill:none;stroke:var(--diagram-wire-color,var(--wire));pointer-events:none}
@@ -38,8 +39,8 @@
 .node.map-summary{background:var(--world-label-bg);border-color:var(--world-label-line);color:var(--world-label-ink)}
 .node.map-summary:hover{border-color:var(--node-hover-line)}
 .map-section-count{color:var(--muted);font-size:.8125rem;line-height:1.2}
-#mapGrouping{min-height:33px;padding:4px 7px;gap:5px}
-.android #mapGrouping{min-height:44px}
+#mapGrouping,#toggleMapDiagram{min-height:33px;padding:4px 7px;gap:5px}
+.android :is(#mapGrouping,#toggleMapDiagram){min-height:44px}
 .map-grouping-choices{display:grid;gap:6px;margin-bottom:15px}
 .map-grouping-choices .btn{justify-content:flex-start;white-space:normal;text-align:left}
 .map-grouping-save{display:flex;align-items:center;gap:7px;font-weight:650}

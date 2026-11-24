@@ -35,21 +35,21 @@ Enredo.sampleProject = ((app) => {
       {id:'rescue',title:local('The rescue','O resgate'),description:local(
         'Inside the lighthouse, Mara and Bento look for a way to guide the boats home.',
         'Dentro do farol, Mara e Bento procuram uma forma de trazer os barcos de volta ao porto.')}
-    ].map(group => ({...group,mapPosition:mapOffset(mapGroups[group.id])}));
+    ].map(group => ({...group,storyMapPosition:mapOffset(mapGroups[group.id])}));
     const chapters = [
       {id:'sinal',title:local('The last signal','O último sinal'),groupId:'warning',groupOrder:0},
       {id:'farol',title:local('Inside the lighthouse','Dentro do farol'),groupId:'rescue',groupOrder:0},
       {id:'mare',title:local('The tide rises','A maré sobe'),groupId:'rescue',groupOrder:1}
-    ].map(chapter => ({...chapter,mapPosition:mapOffset(mapChapters[chapter.id],mapGroups[chapter.groupId])}));
+    ].map(chapter => ({...chapter,storyMapPosition:mapOffset(mapChapters[chapter.id],mapGroups[chapter.groupId])}));
     const mara = (en,br,phaseId = 'mara-watch') => ({characterId:'mara',phaseId,dramaticFunction:local(en,br)});
     const bento = (en,br) => ({characterId:'bento',phaseId:null,dramaticFunction:local(en,br)});
     const nodes = [];
     function beat(id,chapter,kind,stepId,x,y,title,notes,participants) {
       const image = illustrations[id]?.preview;
-      const mapPosition = mapOffset(mapBeatCenters[id],mapChapters[chapter]);
-      mapPosition.x -= W / 2;
-      mapPosition.y -= chapterContentOffset + layoutNodeHeight({image}) / 2;
-      nodes.push({id,chapter,kind,title:local(...title),notes:local(...notes),x,y,mapPosition,participants,
+      const storyMapPosition = mapOffset(mapBeatCenters[id],mapChapters[chapter]);
+      storyMapPosition.x -= W / 2;
+      storyMapPosition.y -= chapterContentOffset + layoutNodeHeight({image}) / 2;
+      nodes.push({id,chapter,kind,title:local(...title),notes:local(...notes),x,y,wholeStoryPosition:{x,y},storyMapPosition,participants,
         ...(image ? {image} : {}),
         focalCharacterId:participants[0].characterId,narrativeStage:{modelId:narrativeModel,stepId}});
     }

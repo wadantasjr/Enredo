@@ -1006,7 +1006,7 @@ Enredo.characters = ((app) => {
     view.originNodeId = null;
     app.session.charactersOpen = false;
     app.workspace.render();
-    $(app.session.isStructureView() ? 'structureTab' : app.session.isWholeStory() ? 'overviewTab' : 'currentTab').focus({preventScroll:true});
+    app.workspace.focusDiagramTab({preventScroll:true});
   }
 
   function moveEvent(eventId,step) {

@@ -13,7 +13,7 @@ Enredo.storyBeats = ((app) => {
     $('inspectorTitle').innerHTML = icon(n ? 'panel' : 'book') + ' ' + tx(n ? 'nodeDetails' : 'navigation');
     $('clearSelection').hidden = !n;
     if (!n) {
-      const items = app.session.isWholeStory() ? '<div class="overview-chapters">' +
+      const items = app.session.isStoryOverview() ? '<div class="overview-chapters">' +
         p.chapters.map((c,i) => app.workspace.chapterButton(c,i,false)).join('') + '</div>' : '';
       inspector.innerHTML = '<p class="hint">' + tx('selectNodeHint') + '</p>' + items;
       return;
@@ -69,21 +69,22 @@ Enredo.storyBeats = ((app) => {
     const graph = $('graph');
     const image = copy ? origin.image : undefined;
     const height = copy ? app.diagram.layoutNodeHeight(origin) : app.diagram.H;
-    function placement(wholeStory) {
-      const position = node => wholeStory ? node.mapPosition : node;
+    function placement(field) {
+      const position = node => field ? node[field] : node;
       let x = 0, y = 0;
       if (origin?.chapter === chapterId) {
         const start = position(origin);
         x = start.x + (copy ? 24 : app.diagram.W + 64);
         y = start.y + (copy ? height + 28 : 0);
-      } else if (!wholeStory && app.session.viewMode === 'timeline' && chapterId === app.store.chapter()?.id && app.diagram.scene.nodes.length) {
+      } else if (!field && app.session.viewMode === 'timeline' && chapterId === app.store.chapter()?.id && app.diagram.scene.nodes.length) {
         const {positionScale} = app.diagram.scene;
         x = ((graph.clientWidth/2 - app.diagram.view.x)/app.diagram.view.zoom - app.diagram.W/2)/positionScale.x;
         y = ((graph.clientHeight/2 - app.diagram.view.y)/app.diagram.view.zoom - height/2)/positionScale.y;
       }
       return openSpot(chapterId,x,y,height,position);
     }
-    const n = {id:uid(),chapter:chapterId,kind,title,notes:copy ? origin.notes : '',...placement(false),mapPosition:placement(true),
+    const n = {id:uid(),chapter:chapterId,kind,title,notes:copy ? origin.notes : '',...placement(),
+      wholeStoryPosition:placement('wholeStoryPosition'),storyMapPosition:placement('storyMapPosition'),
       narrativeStage:copy && origin.narrativeStage ? {...origin.narrativeStage} : null,
       participants:copy ? app.characterData.participantsOf(origin).map(person => ({...person})) : [],
       ...(copy && origin.focalCharacterId ? {focalCharacterId:origin.focalCharacterId} : {}),
@@ -100,7 +101,7 @@ Enredo.storyBeats = ((app) => {
     app.dialogs.showDialog({title:t('addNode'),body:'<div class="fields">' +
       field(t('title'),input('title','',t('nodeExample'),true)) +
       field(t('nodeType'),'<select name="kind">' + kindOptions('scene') + '</select>') +
-      (app.session.isWholeStory() ? field(t('chapter'),'<select name="chapter">' + app.paths.chapterOptions(chapterId) + '</select>') : '') +
+      (app.session.isStoryOverview() ? field(t('chapter'),'<select name="chapter">' + app.paths.chapterOptions(chapterId) + '</select>') : '') +
       '</div>',submitKey:'add',onSubmit:data => {
         const title = data.get('title').trim();
         if (!title) return;

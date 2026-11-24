@@ -100,11 +100,12 @@
         <div><div class="eyebrow" id="chapterLabel"></div><div class="heading-title"><h1 id="chapterTitle" tabindex="-1"></h1><button class="icon-btn small" id="renameChapter" title="Edit chapter" aria-label="Edit chapter" data-i18n-label="editChapter" data-i18n-title="editChapter" data-icon="edit"></button></div><p id="stats"></p></div>
         <div class="heading-actions"><div id="chapterGallery" hidden></div><button class="btn primary" id="addNode"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
       </section>
-      <section class="workspace" id="editorWorkspace" aria-label="Story map" data-i18n-label="storyMap">
+      <section class="workspace" id="editorWorkspace" aria-label="Timeline">
         <div class="graph-bar" id="graphBar">
           <div class="tabs" role="group" aria-label="View" data-i18n-label="view">
             <button type="button" class="tab" id="currentTab" aria-controls="graph"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
             <button type="button" class="tab" id="overviewTab" aria-controls="graph"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
+            <button type="button" class="tab" id="storyMapTab" aria-controls="graph"><span data-icon="image"></span> <span data-i18n="storyMap">Map</span></button>
             <button type="button" class="tab" id="structureTab" aria-controls="structureView"><span data-icon="panel"></span> <span data-i18n="structure">Structure</span></button>
             <button type="button" class="tab" id="charactersTab" aria-controls="charactersView"><span data-icon="people"></span> <span data-i18n="characters">Characters</span></button>
             <button type="button" class="tab" id="projectManagementTab" aria-controls="projectManagementView"><span data-icon="tasks"></span> <span data-i18n="projectManagement">Project Management</span></button>
@@ -117,6 +118,7 @@
             <button class="icon-btn map-tool" id="layout" title="Auto-arrange" aria-label="Auto-arrange" data-i18n-label="autoLayout" data-i18n-title="autoLayout" data-icon="layout"></button>
             <button type="button" class="btn map-tool" id="mapGrouping" aria-haspopup="dialog" hidden><span data-icon="folder"></span><span data-i18n="mapGrouping">Grouping</span></button>
             <button type="button" class="icon-btn map-tool" id="mapBackgroundButton" aria-haspopup="dialog" aria-label="Background image" title="Background image" data-i18n-label="mapBackground" data-i18n-title="mapBackground" data-icon="image" hidden></button>
+            <button type="button" class="btn map-tool" id="toggleMapDiagram" aria-controls="cards wires" aria-pressed="true" hidden><span data-icon="branch"></span><span data-i18n="showMapDiagram">Show diagram</span></button>
             <button type="button" class="icon-btn map-tool" id="addNodeFullscreen" title="Add story beat" aria-label="Add story beat" data-i18n-label="addNode" data-i18n-title="addNode" data-icon="plus" hidden></button>
             <div class="workspace-actions">
               <button type="button" class="icon-btn" id="toggleNavigation" title="Hide project navigation" aria-label="Hide project navigation" aria-controls="navigationPanel" aria-expanded="true" data-icon="leftPanel"></button>

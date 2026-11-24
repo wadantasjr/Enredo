@@ -47,37 +47,40 @@ Enredo.imageEditor = ((app) => {
       if (hasImage) form.querySelector('#removeMapBackground').onclick = () => {
         app.dialogs.closeDialog();
         if (imagePick?.type === 'background' && imagePick.project === project) imagePick = null;
+        const fit = app.workspace.mapImageOnly();
         app.store.edit(() => {
           delete project.mapBackgroundId;
           delete project.mapBackgroundSize;
-        },{saveError:'imageSaveFailed'});
+        },{fit,saveError:'imageSaveFailed'});
         button.focus({preventScroll:true});
       };
     }});
     $('chooseMapBackground').focus();
   }
 
-  function renderMapBackground(id,size) {
+  function renderMapBackground(id,size,imageOnly) {
     const image = $('mapBackgroundImage');
     const assetId = id ?? '';
-    const onMap = assetId && size;
-    const layer = $(onMap ? 'world' : 'graph');
-    if (image.parentElement !== layer) layer.prepend(image);
-    image.style.width = onMap ? size.width + 'px' : '';
-    image.style.height = onMap ? size.height + 'px' : '';
     $('mapBackgroundButton').classList.toggle('on',!!assetId);
-    if (image.dataset.assetId === assetId) return;
-    image.dataset.assetId = assetId;
-    image.hidden = true;
-    image.removeAttribute('src');
-    if (!assetId) return;
-    app.imageStore.thumbnailUrl(assetId).then(url => {
-      if (image.dataset.assetId !== assetId) return;
-      image.src = url;
-      image.hidden = false;
-    }).catch(() => {
-      if (image.dataset.assetId === assetId) delete image.dataset.assetId;
-    });
+    if (image.dataset.assetId !== assetId) {
+      image.dataset.assetId = assetId;
+      image.hidden = true;
+      image.removeAttribute('src');
+      if (assetId) app.imageStore.thumbnailUrl(assetId).then(url => {
+        if (image.dataset.assetId !== assetId) return;
+        image.src = url;
+        image.hidden = false;
+      }).catch(() => {
+        if (image.dataset.assetId === assetId) delete image.dataset.assetId;
+      });
+    }
+    const dimensions = assetId && (size ?? (imageOnly && image.naturalWidth ?
+      {width:image.naturalWidth,height:image.naturalHeight} : null));
+    const layer = $(dimensions ? 'world' : 'graph');
+    if (image.parentElement !== layer) layer.prepend(image);
+    image.style.width = dimensions ? dimensions.width + 'px' : '';
+    image.style.height = dimensions ? dimensions.height + 'px' : '';
+    return dimensions || null;
   }
 
   function coverMarkup(cover,className = '') {
@@ -353,6 +356,9 @@ Enredo.imageEditor = ((app) => {
 
   function bindEvents() {
     bindActions({mapBackgroundButton:showMapBackgroundOptions});
+    $('mapBackgroundImage').addEventListener('load',() => {
+      if (app.workspace.mapImageOnly() && !app.store.project().mapBackgroundSize) app.workspace.render(true);
+    });
     $('inspector').addEventListener('click',event => {
       const button = event.target.closest('button');
       if (button?.id === 'chooseNodeImage') chooseNodeImage();

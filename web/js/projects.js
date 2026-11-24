@@ -163,7 +163,7 @@ Enredo.projects = ((app) => {
     if (!c) return;
     app.dialogs.confirmation(t('confirmChapter'),t('confirmChapterMessage',{name:c.title}),() => {
         const wasCurrent = app.store.chapter()?.id === c.id;
-        const showsWholeMap = app.session.isWholeStory() || (app.session.isStructureView() && app.session.lastMapMode === 'whole-story');
+        const showsOverview = app.session.isStoryOverview(app.session.isStructureView() ? app.session.lastMapMode : app.session.viewMode);
         app.store.edit(() => {
           const index = p.chapters.indexOf(c);
           p.chapters.splice(index,1);
@@ -181,7 +181,7 @@ Enredo.projects = ((app) => {
             if (!app.session.isStructureView()) app.session.viewMode = 'timeline';
           }
           app.diagram.stopConnect();
-        },{fit:wasCurrent || showsWholeMap});
+        },{fit:wasCurrent || showsOverview});
         $('chapterTitle').focus();
         app.preferences.flash('chapterDeleted');
       });

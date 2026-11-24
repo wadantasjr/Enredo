@@ -11,8 +11,9 @@ Enredo.preferences = ((app) => {
   const thumbnailSizeKey = 'enredo.thumbnail-size';
   const thumbnailSizes = ['1','2','3','hidden'];
   const diagramWiresKey = 'enredo.diagram-wires';
-  const diagramViews = [['timeline','timeline'],['whole-story','wholeStory']];
+  const diagramViews = [['timeline','timeline'],['whole-story','wholeStory'],['story-map','storyMap']];
   const wireWidths = [1,1.5,2,3,4,5,6];
+  const mapDiagramKey = 'enredo.map-diagram';
 
   const themeKey = 'enredo.theme';
 
@@ -64,6 +65,13 @@ Enredo.preferences = ((app) => {
   let fontSize = readFontSize();
   let thumbnailSize = readThumbnailSize();
   let wireStyles = readWireStyles();
+  let showMapDiagram = true;
+  try { showMapDiagram = localStorage.getItem(mapDiagramKey) !== 'hidden'; } catch {}
+
+  function toggleMapDiagram() {
+    showMapDiagram = !showMapDiagram;
+    try { localStorage.setItem(mapDiagramKey,showMapDiagram ? 'shown' : 'hidden'); } catch {}
+  }
 
   function readFontSize() {
     try {
@@ -91,8 +99,10 @@ Enredo.preferences = ((app) => {
   function readWireStyles() {
     let saved;
     try { saved = JSON.parse(localStorage.getItem(diagramWiresKey)); } catch {}
-    return Object.fromEntries(diagramViews.map(([view]) =>
-      [view,wireStyle(saved?.[view]?.color,saved?.[view]?.width)]));
+    return Object.fromEntries(diagramViews.map(([view]) => {
+      const style = saved?.[view] ?? (view === 'story-map' ? saved?.['whole-story'] : null);
+      return [view,wireStyle(style?.color,style?.width)];
+    }));
   }
 
   function readLanguage() {
@@ -252,10 +262,12 @@ Enredo.preferences = ((app) => {
     flash,
     get fontSize() { return fontSize; },
     get language() { return language; },
+    get showMapDiagram() { return showMapDiagram; },
     get thumbnailScale() { return thumbnailSize === 'hidden' ? 0 : Number(thumbnailSize); },
     renderLanguage,
     setupThemeListener,
     t,
+    toggleMapDiagram,
     tx
   };
 })(Enredo);

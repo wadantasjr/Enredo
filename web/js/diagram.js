@@ -43,26 +43,27 @@ Enredo.diagram = ((app) => {
     return defaultPositionScale;
   }
 
-  function positionCards(nodes,scale,wholeStory = false) {
+  function positionCards(nodes,scale,field) {
     return nodes.map(record => {
-      const position = wholeStory ? record.mapPosition : record;
+      const position = field ? record[field] : record;
       return {...record,record,position,x:position.x * scale.x,y:position.y * scale.y,
         width:nodeWidth(record),height:nodeHeight(record),positionScale:scale};
     });
   }
 
-  function wholeStoryLayout(project) {
+  function overviewLayout(project,mode) {
     const nodes = [], sections = [], groupRules = [], representatives = new Map();
-    const backgroundSize = project.mapBackgroundId ? project.mapBackgroundSize : null;
+    const field = app.session.positionField(mode);
+    const backgroundSize = mode === 'story-map' && project.mapBackgroundId ? project.mapBackgroundSize : null;
     const byChapter = new Map(project.chapters.map(c => [c.id,[]]));
     const chapterIndex = new Map(project.chapters.map((c,i) => [c.id,i]));
-    const collapsed = app.mapGrouping.collapsedSections(project);
+    const collapsed = app.mapGrouping.collapsedSections(project,mode);
     for (const node of project.nodes) byChapter.get(node.chapter).push(node);
     const countText = app.workspace.countText;
     let offset = 0;
 
     function addSection(type,record,title,details,collapsed,suggested,parent) {
-      const position = record.mapPosition ?? suggested;
+      const position = record[field] ?? suggested;
       const section = {type,id:record.id,record,title,details,collapsed,position,positionScale:defaultPositionScale,
         x:(parent?.x ?? 0) + position.x,y:(parent?.y ?? 0) + position.y,width:250,height:collapsed ? H : 42,children:[]};
       parent?.children.push(section);
@@ -79,7 +80,7 @@ Enredo.diagram = ((app) => {
         for (const beat of beats) representatives.set(beat.id,section);
         return section.width + 82;
       }
-      const cards = positionCards(beats,backgroundSize ? defaultPositionScale : chapterPositionScale(beats),true);
+      const cards = positionCards(beats,backgroundSize ? defaultPositionScale : chapterPositionScale(beats),field);
       if (backgroundSize) {
         // Keep locations centered on the artwork as thumbnail sizes change.
         for (const card of cards) {
@@ -145,12 +146,16 @@ Enredo.diagram = ((app) => {
     return visible;
   }
 
-  function buildScene() {
+  function timelineScene(project,nodes) {
+    const positionScale = chapterPositionScale(nodes);
+    return sceneFromLayout(project.edges,{nodes:positionCards(nodes,positionScale)},positionScale);
+  }
+
+  function buildScene(backgroundSize) {
     const p = app.store.project();
-    if (app.session.isWholeStory()) return sceneFromLayout(p.edges,wholeStoryLayout(p));
-    const chapterNodes = p.nodes.filter(n => n.chapter === app.store.chapter().id);
-    const positionScale = chapterPositionScale(chapterNodes);
-    return sceneFromLayout(p.edges,{nodes:positionCards(chapterNodes,positionScale)},positionScale);
+    if (app.workspace.mapImageOnly()) return sceneFromLayout([],{nodes:[],backgroundSize});
+    if (app.session.isStoryOverview()) return sceneFromLayout(p.edges,overviewLayout(p,app.session.viewMode));
+    return timelineScene(p,p.nodes.filter(n => n.chapter === app.store.chapter().id));
   }
 
   function sceneFromLayout(edges,layout,positionScale = defaultPositionScale) {
@@ -253,7 +258,7 @@ Enredo.diagram = ((app) => {
     const left = box.left - padding, top = box.top - padding;
     const width = box.right - box.left + 2 * padding, height = box.bottom - box.top + 2 * padding;
     const layer = $('wires');
-    const wireStyle = app.preferences.diagramWires(app.session.isWholeStory() ? 'whole-story' : 'timeline');
+    const wireStyle = app.preferences.diagramWires(app.session.viewMode);
     layer.style.setProperty('--diagram-wire-color',wireStyle.color ?? '');
     layer.style.setProperty('--diagram-wire-width',wireStyle.width === null ? '' : wireStyle.width + 'px');
     layer.style.left = left + 'px';
@@ -265,6 +270,9 @@ Enredo.diagram = ((app) => {
   }
 
   function mapBounds(layout = scene) {
+    if (layout.backgroundSize && !layout.nodes.length && !layout.sections.length) {
+      return {left:0,top:0,right:layout.backgroundSize.width,bottom:layout.backgroundSize.height};
+    }
     const b = bounds([...layout.nodes,...layout.sections]);
     if (layout.backgroundSize) {
       b.left = Math.min(b.left,0);
@@ -280,21 +288,31 @@ Enredo.diagram = ((app) => {
     return b;
   }
 
-  function printableWholeStory(project) {
-    const layout = sceneFromLayout(project.edges,wholeStoryLayout(project));
+  function printableOverview(project,mode,label) {
+    const layout = sceneFromLayout(project.edges,overviewLayout(project,mode));
+    const showBackground = mode === 'story-map' && !!project.mapBackgroundId;
+    return printableDiagram(project,layout,mode,label,'pdf-' + mode + '-arrow',showBackground);
+  }
+
+  function printableTimeline(project,beats,anchor) {
+    const layout = timelineScene(project,beats);
+    return printableDiagram(project,layout,'timeline','timeline',anchor + '-timeline-arrow',false);
+  }
+
+  function printableDiagram(project,layout,mode,label,markerId,showBackground) {
     const {left,top,right,bottom} = mapBounds(layout), padding = 42;
     const x = left - padding, y = top - padding;
     const width = right - left + 2 * padding, height = bottom - top + 2 * padding;
     const background = layout.backgroundSize ? {x:0,y:0,...layout.backgroundSize} : {x,y,width,height};
     const marker = $('tip').cloneNode(true);
-    marker.id = 'pdf-story-arrow';
-    const wireStyle = app.preferences.diagramWires('whole-story');
+    marker.id = markerId;
+    const wireStyle = app.preferences.diagramWires(mode);
     const style = (wireStyle.color ? '--pdf-wire-color:' + wireStyle.color + ';' : '') +
       (wireStyle.width === null ? '' : '--pdf-wire-width:' + wireStyle.width + 'px');
     return '<svg class="pdf-story-map" width="' + width + '" height="' + height + '" viewBox="' + [x,y,width,height].join(' ') +
-      '" role="img" aria-label="' + tx('pdfWholeStoryDiagram') + '" style="' + style + '">' +
+      '" role="img" aria-label="' + tx(label) + '" style="' + style + '">' +
       '<defs>' + marker.outerHTML + '</defs>' +
-      (project.mapBackgroundId ? '<image class="pdf-map-background" x="' + background.x + '" y="' + background.y +
+      (showBackground ? '<image class="pdf-map-background" x="' + background.x + '" y="' + background.y +
         '" width="' + background.width + '" height="' + background.height + '" preserveAspectRatio="' +
         (layout.backgroundSize ? 'none' : 'xMidYMid slice') + '"/>' : '') +
       wiresMarkup(layout,{interactive:false,marker:marker.id}) +
@@ -426,8 +444,8 @@ Enredo.diagram = ((app) => {
     return parts;
   }
 
-  function rebuildScene() {
-    scene = buildScene();
+  function rebuildScene(backgroundSize) {
+    scene = buildScene(backgroundSize);
   }
 
   function refreshThumbnailSize() {
@@ -436,6 +454,7 @@ Enredo.diagram = ((app) => {
       app.session.mapNeedsFit = true;
       return;
     }
+    if (app.workspace.mapImageOnly()) return;
     const graph = $('graph');
     const x = (graph.clientWidth/2 - view.x)/view.zoom;
     const y = (graph.clientHeight/2 - view.y)/view.zoom;
@@ -475,7 +494,8 @@ Enredo.diagram = ((app) => {
     fitMap,
     keepPosition,
     layoutNodeHeight,
-    printableWholeStory,
+    printableOverview,
+    printableTimeline,
     rebuildScene,
     refreshThumbnailSize,
     renderCards,

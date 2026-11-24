@@ -3,24 +3,25 @@ Enredo.mapGrouping = ((app) => {
 
   const { $, icon, bindActions } = app.dom;
   const { t, tx } = app.preferences;
-  const temporary = new Map();
+  const temporary = { 'whole-story':new Map(), 'story-map':new Map() };
 
-  function collapsedIds(records) {
-    return new Set(records.filter(record => record.mapCollapsed === true).map(record => record.id));
-  }
+  const collapsedField = mode => mode === 'story-map' ? 'storyMapCollapsed' : 'wholeStoryCollapsed';
 
-  function collapsedSections(project) {
-    return temporary.get(project.id) ?? {
+  function collapsedSections(project,mode = app.session.viewMode) {
+    const field = collapsedField(mode);
+    const collapsedIds = records => new Set(records.filter(record => record[field] === true).map(record => record.id));
+    return temporary[mode].get(project.id) ?? {
       groups:collapsedIds(project.chapterGroups ?? []),
       chapters:collapsedIds(project.chapters)
     };
   }
 
-  function saveCollapsedSections(project,grouping) {
+  function saveCollapsedSections(project,grouping,mode) {
+    const field = collapsedField(mode);
     function update(records,ids) {
       for (const record of records) {
-        if (ids.has(record.id)) record.mapCollapsed = true;
-        else delete record.mapCollapsed;
+        if (ids.has(record.id)) record[field] = true;
+        else delete record[field];
       }
     }
     update(project.chapterGroups ?? [],grouping.groups);
@@ -28,34 +29,38 @@ Enredo.mapGrouping = ((app) => {
   }
 
   function apply(project,grouping,fit) {
+    const mode = app.session.viewMode;
+    const previews = temporary[mode];
     app.diagram.stopConnect();
-    if (temporary.has(project.id)) {
-      temporary.set(project.id,grouping);
+    if (previews.has(project.id)) {
+      previews.set(project.id,grouping);
       app.workspace.render(fit);
     } else {
-      app.store.edit(() => saveCollapsedSections(project,grouping),{fit,saveError:'projectSaveFailed'});
+      app.store.edit(() => saveCollapsedSections(project,grouping,mode),{fit,saveError:'projectSaveFailed'});
     }
   }
 
   function expandChapter(project,chapterId) {
-    if (!app.session.isWholeStory()) return false;
+    if (!app.session.isStoryOverview()) return false;
     const chapter = project.chapters.find(item => item.id === chapterId);
     if (!chapter) return false;
     const group = project.chapterGroups?.find(item => item.id === chapter.groupId);
-    const preview = temporary.get(project.id);
+    const mode = app.session.viewMode;
+    const preview = temporary[mode].get(project.id);
     if (preview) {
       const changed = preview.chapters.delete(chapter.id);
       return (group && preview.groups.delete(group.id)) || changed;
     }
-    const changed = chapter.mapCollapsed === true || group?.mapCollapsed === true;
-    delete chapter.mapCollapsed;
-    if (group) delete group.mapCollapsed;
+    const field = collapsedField(mode);
+    const changed = chapter[field] === true || group?.[field] === true;
+    delete chapter[field];
+    if (group) delete group[field];
     return changed;
   }
 
   function toggle(type,id) {
     const previous = app.diagram.sectionFor(type,id);
-    if (!previous || !app.session.isWholeStory()) return;
+    if (!previous || !app.session.isStoryOverview()) return;
     const project = app.store.project();
     const grouping = collapsedSections(project);
     const ids = type === 'group' ? grouping.groups : grouping.chapters;
@@ -68,6 +73,8 @@ Enredo.mapGrouping = ((app) => {
 
   function showOptions() {
     const project = app.store.project();
+    const mode = app.session.viewMode;
+    const previews = temporary[mode];
     const groups = project.chapterGroups ?? [];
     const grouping = collapsedSections(project);
     const allChapters = project.chapters.every(chapter => grouping.chapters.has(chapter.id));
@@ -86,7 +93,7 @@ Enredo.mapGrouping = ((app) => {
         '" data-map-preset="' + value + '" aria-pressed="' + (active === value) + '"' + (disabled ? ' disabled' : '') +
         '>' + icon(symbol) + ' ' + tx(label) + '</button>').join('') +
       '</div><label class="map-grouping-save"><input type="checkbox" id="saveMapGrouping" aria-describedby="mapGroupingHint"' +
-      (temporary.has(project.id) ? '' : ' checked') + '><span>' + tx('saveMapGrouping') + '</span></label>' +
+      (previews.has(project.id) ? '' : ' checked') + '><span>' + tx('saveMapGrouping') + '</span></label>' +
       '<p class="hint" id="mapGroupingHint">' + tx('mapGroupingHint') + '</p>',extra:form => {
       form.querySelectorAll('[data-map-preset]').forEach(button => button.addEventListener('click',() => {
         const preset = button.dataset.mapPreset;
@@ -102,11 +109,11 @@ Enredo.mapGrouping = ((app) => {
         const current = app.store.project();
         const next = collapsedSections(current);
         if (!checkbox.checked) {
-          temporary.set(current.id,next);
+          previews.set(current.id,next);
           return;
         }
-        checkbox.checked = app.store.edit(() => saveCollapsedSections(current,next),{
-          saveError:'projectSaveFailed',afterSave:() => temporary.delete(current.id)
+        checkbox.checked = app.store.edit(() => saveCollapsedSections(current,next,mode),{
+          saveError:'projectSaveFailed',afterSave:() => previews.delete(current.id)
         });
       });
     }});

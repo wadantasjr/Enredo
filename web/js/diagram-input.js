@@ -58,10 +58,10 @@ Enredo.diagramInput = ((app) => {
       }
       if (position.x === previous.x && position.y === previous.y) return;
       const saved = app.store.edit(() => {
-        if (previous.wholeStory) item.record.mapPosition = position;
+        if (previous.field) item.record[previous.field] = position;
         else Object.assign(item.record,position);
       },{saveError:'projectSaveFailed'});
-      if (saved && previous.wholeStory) {
+      if (saved && previous.field) {
         const next = section ? app.diagram.sectionFor(item.type,item.id) : app.diagram.scene.byId.get(item.id);
         app.diagram.keepPosition(item,next);
         if (section) app.diagram.sectionButton(item.type,item.id)?.focus({preventScroll:true});
@@ -99,7 +99,7 @@ Enredo.diagramInput = ((app) => {
       }
       const {x,y} = item?.position ?? app.diagram.view;
       drag = {pointer:event.pointerId,startX:event.clientX,startY:event.clientY,item,button,section,scene,
-        wholeStory:app.session.isWholeStory(),x,y,started:false};
+        field:app.session.positionField(),x,y,started:false};
       if (item) button.setPointerCapture(event.pointerId);
       if (event.button === 1) event.preventDefault();
     });
@@ -194,7 +194,7 @@ Enredo.diagramInput = ((app) => {
       if (section) app.mapGrouping.toggle(section.dataset.mapSection,section.dataset.mapId);
       else if (card) activateCard(card.dataset.node,event.detail === 0);
       else if (edge && !app.session.connectMode) app.paths.edgeDialog(edge.dataset.edge);
-      else if (event.target === graph && app.session.selection && !app.session.connectMode) {
+      else if (event.target === graph && app.session.selection && !app.session.connectMode && !app.workspace.mapImageOnly()) {
         app.session.selection = null;
         app.workspace.render();
       }

@@ -17,7 +17,7 @@ Enredo.platform = ((app) => {
     else if (!app.session.atHome && app.session.managementOpen) app.workspace.closeProjectManagement();
     else if (!app.session.atHome && app.session.isStructureView()) {
       app.workspace.switchView(app.store.chapter() ? app.session.lastMapMode : 'timeline');
-      $(app.session.isWholeStory() ? 'overviewTab' : 'currentTab').focus();
+      app.workspace.focusDiagramTab();
     }
     else if (!app.session.atHome) app.workspace.openHome();
     else return false;

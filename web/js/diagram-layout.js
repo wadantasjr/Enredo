@@ -4,9 +4,9 @@ Enredo.diagramLayout = ((app) => {
   function autoLayout() {
     const p = app.store.project();
     if (app.session.isStructureView() || !app.store.chapter()) return;
-    const wholeStory = app.session.isWholeStory();
-    const targets = wholeStory ? p.chapters : [app.store.chapter()];
-    const position = node => wholeStory ? node.mapPosition : node;
+    const field = app.session.positionField();
+    const targets = field ? p.chapters : [app.store.chapter()];
+    const position = node => field ? node[field] : node;
     app.store.edit(() => {
       for (const c of targets) layoutChapter(p,c.id,position);
     },{fit:true});

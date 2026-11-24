@@ -15,7 +15,12 @@ Enredo.session = {
   selection: null,
   connectMode: false,
   source: null,
-  isWholeStory() { return this.viewMode === 'whole-story'; },
+  positionField(mode = this.viewMode) {
+    if (mode === 'whole-story') return 'wholeStoryPosition';
+    if (mode === 'story-map') return 'storyMapPosition';
+    return null;
+  },
+  isStoryOverview(mode = this.viewMode) { return this.positionField(mode) !== null; },
   isStructureView() { return this.viewMode === 'structure'; },
   hasMapView() { return !this.isStructureView() && !this.charactersOpen && !this.managementOpen && !this.presentation; }
 };

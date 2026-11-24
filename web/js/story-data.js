@@ -38,16 +38,29 @@ Enredo.storyData = ((app) => {
 
   const hasId = value => typeof value === 'string' && value.trim().length > 0;
 
-  function normalizeMapPosition({mapPosition,...record},fallback) {
-    const position = Number.isFinite(mapPosition?.x) && Number.isFinite(mapPosition?.y) ? mapPosition : fallback;
-    return position ? {...record,mapPosition:{x:position.x,y:position.y}} : record;
-  }
+  const validPosition = position => Number.isFinite(position?.x) && Number.isFinite(position?.y);
 
   function normalizeProject({mapBackgroundSize,summary,...project}) {
     const nextGroupOrder = new Map();
     const {width,height} = mapBackgroundSize ?? {};
     const hasMapSize = project.mapBackgroundId && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0;
     const cleanSummary = app.projectSummary.normalize(summary);
+    // Older projects had one overview layout. Keep it with its background when present.
+    const legacyHasBackground = !!project.mapBackgroundId;
+
+    function diagramLayout({mapPosition,mapCollapsed,wholeStoryPosition,storyMapPosition,wholeStoryCollapsed,storyMapCollapsed,...record},fallback) {
+      const legacyPosition = validPosition(mapPosition) ? mapPosition : fallback;
+      const whole = validPosition(wholeStoryPosition) ? wholeStoryPosition : legacyHasBackground ? fallback : legacyPosition;
+      const map = validPosition(storyMapPosition) ? storyMapPosition : legacyHasBackground ? legacyPosition : fallback;
+      return {
+        ...record,
+        ...(whole ? {wholeStoryPosition:{x:whole.x,y:whole.y}} : {}),
+        ...(map ? {storyMapPosition:{x:map.x,y:map.y}} : {}),
+        ...((wholeStoryCollapsed ?? (!legacyHasBackground && mapCollapsed)) === true ? {wholeStoryCollapsed:true} : {}),
+        ...((storyMapCollapsed ?? (legacyHasBackground && mapCollapsed)) === true ? {storyMapCollapsed:true} : {})
+      };
+    }
+
     const normalized = {
       ...project,
       ...(cleanSummary ? {summary:cleanSummary} : {}),
@@ -55,12 +68,12 @@ Enredo.storyData = ((app) => {
       narrativeModel: hasId(project.narrativeModel) ? project.narrativeModel : app.narrative.defaultModelId,
       ...(project.cover ? {cover:{focusX:0.5,focusY:0.5,...project.cover}} : {}),
       ...(Array.isArray(project.chapterGroups) ? {chapterGroups:project.chapterGroups.map(group => ({
-        ...normalizeMapPosition(group),
+        ...diagramLayout(group),
         description:group.description ?? '',
         ...(group.cover ? {cover:{focusX:0.5,focusY:0.5,...group.cover}} : {})
       }))} : {}),
       chapters:project.chapters.map(record => {
-        const chapter = normalizeMapPosition(record);
+        const chapter = diagramLayout(record);
         const cover = chapter.cover ? {cover:{focusX:0.5,focusY:0.5,...chapter.cover}} : {};
         if (!chapter.groupId) {
           const {groupOrder,...fields} = chapter;
@@ -74,7 +87,7 @@ Enredo.storyData = ((app) => {
       nodes: project.nodes.map(node => {
         const {image,originalImageId,...fields} = node;
         const stage = node.narrativeStage;
-        return { ...normalizeMapPosition(fields,node), narrativeStage: hasId(stage?.modelId) && hasId(stage?.stepId) ? { ...stage } : null,
+        return { ...diagramLayout(fields,node), narrativeStage: hasId(stage?.modelId) && hasId(stage?.stepId) ? { ...stage } : null,
           ...(app.imageStore.validNodeImage(image) ? {image,...(app.imageStore.validOriginalImageId(originalImageId) ? {originalImageId} : {})} : {}) };
       })
     };

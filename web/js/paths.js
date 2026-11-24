@@ -65,7 +65,7 @@ Enredo.paths = ((app) => {
           else p.edges.push({id:uid(),from:origin.id,to,label});
           app.session.selection = origin.id;
           app.diagram.stopConnect();
-        },{fit:isNew && (app.session.isWholeStory() || data.get('chapter') === app.store.chapter()?.id)});
+        },{fit:isNew && (app.session.isStoryOverview() || data.get('chapter') === app.store.chapter()?.id)});
       },
       remove:existing ? () => app.dialogs.confirmation(t('confirmConnection'),t('confirmConnectionMessage'),() => {
         app.store.edit(() => {

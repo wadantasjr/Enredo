@@ -121,7 +121,17 @@ Enredo.workspace = ((app) => {
 
   function closeProjectManagement() {
     switchView(app.session.viewMode);
-    $(app.session.isStructureView() ? 'structureTab' : app.session.isWholeStory() ? 'overviewTab' : 'currentTab').focus();
+    focusDiagramTab();
+  }
+
+  function focusDiagramTab(options) {
+    const tabs = {timeline:'currentTab','whole-story':'overviewTab','story-map':'storyMapTab',structure:'structureTab'};
+    $(tabs[app.session.viewMode]).focus(options);
+  }
+
+  function mapImageOnly() {
+    return app.session.viewMode === 'story-map' && app.session.hasMapView() &&
+      !app.preferences.showMapDiagram && !!app.store.project()?.mapBackgroundId;
   }
 
   function chapterButton(c,index,active) {
@@ -159,8 +169,11 @@ Enredo.workspace = ((app) => {
     const management = app.session.managementOpen;
     const presentation = app.session.presentation;
     const structure = !presentation && app.session.isStructureView() && !characters && !management;
-    const timeline = app.session.hasMapView() && !app.session.isWholeStory();
+    const mode = app.session.viewMode;
+    const timeline = app.session.hasMapView() && mode === 'timeline';
     const showMap = !!c && app.session.hasMapView();
+    const showStoryMap = showMap && mode === 'story-map';
+    const imageOnly = showStoryMap && mapImageOnly();
     $('projectName').textContent = p.title;
     const breadcrumb = $('breadcrumb');
     const projectTitle = p.title.trim() ? p.title : t('untitled');
@@ -176,21 +189,29 @@ Enredo.workspace = ((app) => {
       '<button data-delete-project="' + esc(p.id) + '">' + icon('trash') + ' ' + tx('deleteProject') + '</button>';
     $('chapterLabel').textContent = presentation ? t(presentation.type === 'project' ? 'projectOverview' :
       presentation.type === 'ungrouped' ? 'ungrouped' : 'group') :
-      management ? t('project') : characters ? t('characters') : structure ? t('structure') : app.session.isWholeStory() ? t('overview') :
+      management ? t('project') : characters ? t('characters') : structure ? t('structure') :
+      showStoryMap ? t('storyMap') : mode === 'whole-story' ? t('wholeStory') :
       c ? t('chapterNumber',{number:number(chapterIndex)}) : t('project');
     const shownGroup = presentation?.type === 'group' ? p.chapterGroups?.find(group => group.id === presentation.id) : null;
     $('chapterTitle').textContent = presentation?.type === 'ungrouped' ? t('ungrouped') : shownGroup?.title ?? (timeline && c ? c.title : p.title);
     $('renameChapter').hidden = !timeline || !c;
     $('chapterGallery').hidden = !timeline || !c;
     $('chapterGallery').innerHTML = timeline && c ? app.mediaGallery.launcher('chapter',c) : '';
-    $('addNode').hidden = !showMap;
-    const showWholeStory = showMap && app.session.isWholeStory();
-    $('mapGrouping').hidden = !showWholeStory;
-    $('mapBackgroundButton').hidden = !showWholeStory;
-    app.imageEditor.renderMapBackground(showWholeStory ? p.mapBackgroundId : null,p.mapBackgroundSize);
+    $('addNode').hidden = !showMap || imageOnly;
+    $('connect').hidden = imageOnly;
+    $('layout').hidden = imageOnly;
+    $('mapGrouping').hidden = !(showMap && app.session.isStoryOverview()) || imageOnly;
+    $('mapBackgroundButton').hidden = !showStoryMap;
+    const diagramToggle = $('toggleMapDiagram');
+    diagramToggle.hidden = !showStoryMap || !p.mapBackgroundId;
+    diagramToggle.setAttribute('aria-pressed',!imageOnly);
+    diagramToggle.classList.toggle('primary',showStoryMap && !imageOnly);
+    $('graph').classList.toggle('map-image-only',imageOnly);
+    $('graph').setAttribute('aria-label',t(imageOnly ? 'storyMap' : 'nodeDiagram'));
+    const backgroundSize = app.imageEditor.renderMapBackground(showStoryMap ? p.mapBackgroundId : null,p.mapBackgroundSize,imageOnly);
     $('emptyChapters').hidden = !!c || !app.session.hasMapView();
     $('graph').hidden = !showMap;
-    $('legend').hidden = !showMap;
+    $('legend').hidden = !showMap || imageOnly;
     $('structureView').hidden = !structure;
     $('charactersView').hidden = !characters;
     $('projectManagementView').hidden = !management;
@@ -203,9 +224,11 @@ Enredo.workspace = ((app) => {
     $('editorWorkspace').classList.toggle('presentation-mode',!!presentation);
     $('editorWorkspace').classList.toggle('no-map',!c);
     $('editorWorkspace').setAttribute('aria-label',t(presentation ? (presentation.type === 'project' ? 'projectOverview' : 'group') :
-      management ? 'projectManagement' : characters ? 'characters' : structure ? 'structure' : 'storyMap'));
+      management ? 'projectManagement' : characters ? 'characters' : structure ? 'structure' :
+      showStoryMap ? 'storyMap' : mode === 'whole-story' ? 'wholeStory' : 'timeline'));
     $('overviewTab').disabled = !c;
-    for (const [id,active] of [['currentTab',timeline],['overviewTab',showMap && app.session.isWholeStory()],
+    $('storyMapTab').disabled = !c;
+    for (const [id,active] of [['currentTab',timeline],['overviewTab',showMap && mode === 'whole-story'],['storyMapTab',showStoryMap],
       ['structureTab',structure],['charactersTab',characters],['projectManagementTab',management]]) {
       $(id).classList.toggle('active',active);
       $(id).setAttribute('aria-pressed',active);
@@ -232,6 +255,7 @@ Enredo.workspace = ((app) => {
     }
     $('stats').textContent = stats;
     renderWorkspaceControls();
+    return backgroundSize;
   }
 
   function renderWorkspaceControls() {
@@ -249,11 +273,13 @@ Enredo.workspace = ((app) => {
     $('navigationPanel').hidden = !navigationVisible;
     $('app').classList.toggle('navigation-collapsed',!navigationVisible);
 
-    $('toggleDetails').hidden = !hasDiagram;
-    renderPanelToggle('toggleDetails',hasDiagram && !detailsCollapsed,'showDetails','hideDetails');
-    $('detailPanel').hidden = !hasDiagram || detailsCollapsed;
-    $('editorWorkspace').classList.toggle('details-collapsed',detailsCollapsed);
-    $('addNodeFullscreen').hidden = !diagramFullscreen;
+    const imageOnly = hasDiagram && mapImageOnly();
+    const showDetails = hasDiagram && !imageOnly && !detailsCollapsed;
+    $('toggleDetails').hidden = !hasDiagram || imageOnly;
+    renderPanelToggle('toggleDetails',showDetails,'showDetails','hideDetails');
+    $('detailPanel').hidden = !showDetails;
+    $('editorWorkspace').classList.toggle('details-collapsed',detailsCollapsed || imageOnly);
+    $('addNodeFullscreen').hidden = !diagramFullscreen || imageOnly;
   }
 
   function renderPanelToggle(id,expanded,show,hide) {
@@ -306,9 +332,9 @@ Enredo.workspace = ((app) => {
       app.session.presentation = {type:'project'};
     }
     const currentChapter = app.store.chapter(), currentNode = app.store.selectedNode();
-    if (!app.session.presentation && !currentChapter && app.session.isWholeStory()) app.session.viewMode = 'timeline';
+    if (!app.session.presentation && !currentChapter && app.session.isStoryOverview()) app.session.viewMode = 'timeline';
     if (app.session.selection && (!currentNode || (app.session.viewMode === 'timeline' && currentNode.chapter !== currentChapter?.id))) app.session.selection = null;
-    renderHeader();
+    const backgroundSize = renderHeader();
     if (app.session.managementOpen) {
       app.projectManagement.render();
       return;
@@ -326,15 +352,16 @@ Enredo.workspace = ((app) => {
       return;
     }
     if (!currentChapter) return;
-    app.diagram.rebuildScene();
+    app.diagram.rebuildScene(backgroundSize);
     const {nodes,sections,byId} = app.diagram.scene;
-    if (app.session.selection && !byId.has(app.session.selection)) app.session.selection = null;
+    const imageOnly = mapImageOnly();
+    if (!imageOnly && app.session.selection && !byId.has(app.session.selection)) app.session.selection = null;
     app.diagram.renderCards();
-    app.storyBeats.renderInspector();
+    if (!imageOnly) app.storyBeats.renderInspector();
     app.diagram.renderMode();
-    $('emptyCanvas').hidden = nodes.length > 0 || sections.length > 0;
+    $('emptyCanvas').hidden = imageOnly || nodes.length > 0 || sections.length > 0;
     $('connect').disabled = nodes.length < 2;
-    $('layout').disabled = (app.session.isWholeStory() ? app.store.project().nodes.length : nodes.length) < 2;
+    $('layout').disabled = (app.session.isStoryOverview() ? app.store.project().nodes.length : nodes.length) < 2;
     if (app.session.mapNeedsFit) {
       app.diagram.fitMap();
       app.session.mapNeedsFit = false;
@@ -346,7 +373,7 @@ Enredo.workspace = ((app) => {
 
   function switchView(next,{revealSelection = false} = {}) {
     if (app.session.atHome || (!app.session.charactersOpen && !app.session.managementOpen && !app.session.presentation && app.session.viewMode === next) ||
-        (next === 'whole-story' && !app.store.chapter())) return;
+        (app.session.isStoryOverview(next) && !app.store.chapter())) return;
     const previousMapMode = app.session.isStructureView() ? app.session.lastMapMode : app.session.viewMode;
     app.session.charactersOpen = false;
     app.session.managementOpen = false;
@@ -358,7 +385,7 @@ Enredo.workspace = ((app) => {
     if (next !== 'structure') {
       const selected = app.store.selectedNode();
       if (next === 'timeline' && selected) app.store.state.chapter = selected.chapter;
-      if (next === 'whole-story' && revealSelection && selected) app.mapGrouping.expandChapter(app.store.project(),selected.chapter);
+      if (app.session.isStoryOverview() && revealSelection && selected) app.mapGrouping.expandChapter(app.store.project(),selected.chapter);
       app.store.save();
     }
     render(next !== 'structure' && next !== previousMapMode);
@@ -411,9 +438,10 @@ Enredo.workspace = ((app) => {
     }
     if (editingStage) return;
     if (event.ctrlKey || event.metaKey || event.altKey || app.session.atHome || !app.session.hasMapView() || !app.store.chapter()) return;
+    if (key === 'f') app.diagram.fitMap();
+    if (mapImageOnly()) return;
     if (key === 'n') app.storyBeats.addNodeDialog();
     if (key === 'c') app.diagramInput.toggleConnect();
-    if (key === 'f') app.diagram.fitMap();
     if (key === 'delete' && app.session.selection) app.storyBeats.removeSelected();
   }
 
@@ -425,8 +453,14 @@ Enredo.workspace = ((app) => {
       toggleFullscreen:() => setDiagramFullscreen(!app.session.diagramFullscreen),
       toggleNavigation:() => togglePanel(app.session.diagramFullscreen ? 'fullscreenNavigationCollapsed' : 'navigationCollapsed'),
       toggleDetails:() => togglePanel('detailsCollapsed'),
+      toggleMapDiagram:() => {
+        app.preferences.toggleMapDiagram();
+        app.diagram.stopConnect();
+        render(true);
+      },
       currentTab:() => switchView('timeline'),
       overviewTab:() => switchView('whole-story'),
+      storyMapTab:() => switchView('story-map'),
       structureTab:() => switchView('structure'),
       charactersTab:openCharacters,
       projectManagementTab:openProjectManagement,
@@ -453,7 +487,9 @@ Enredo.workspace = ((app) => {
     closeProjectManagement,
     countText,
     enterProject,
+    focusDiagramTab,
     inspect,
+    mapImageOnly,
     navigate,
     openCharacters,
     openHome,

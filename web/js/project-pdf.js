@@ -137,8 +137,8 @@ Enredo.projectPdf = ((app) => {
       if (cover?.assetId) image(parent,t(key),{id:cover.assetId,cover});
     }
 
-    function diagram(parent, title, markup) {
-      const block = titled(parent,'section','pdf-diagram','h3',title);
+    function diagram(parent, title, markup, heading = 'h3') {
+      const block = titled(parent,'section','pdf-diagram',heading,title);
       const figure = element('figure');
       figure.innerHTML = markup;
       block.append(figure);
@@ -230,10 +230,15 @@ Enredo.projectPdf = ((app) => {
       const title = chapter.title || t('untitled');
       const block = titled(parent,'section','pdf-chapter','h3',title,chapter.anchor);
       addToIndex(list,block,title);
+      const beats = beatsByChapter.get(chapter.id) ?? [];
+      if (beats.length) {
+        diagram(block,t('timeline'),app.diagram.printableTimeline(project,beats,chapter.anchor),'h4');
+      } else {
+        const timeline = titled(block,'section','pdf-diagram','h4',t('timeline'));
+        timeline.append(element('p','pdf-text',t('pdfNoBeats')));
+      }
       coverImage(block,chapter.cover,'chapterCover');
       gallery(block,chapter);
-      const beats = beatsByChapter.get(chapter.id) ?? [];
-      if (!beats.length) block.append(element('p','pdf-text',t('pdfNoBeats')));
       for (const node of beats) renderBeat(block,node);
     }
 
@@ -296,9 +301,15 @@ Enredo.projectPdf = ((app) => {
         overview.append(element('h3','',t('storySummary')),element('div','pdf-story-summary',summary));
       }
     }
-    if (nodes.size || project.mapBackgroundId) {
-      const map = diagram(overview,t('pdfWholeStoryDiagram'),app.diagram.printableWholeStory(project));
-      if (project.mapBackgroundId) images.push({image:map.querySelector('.pdf-map-background'),id:project.mapBackgroundId});
+    if (chapters.size || groups.size) {
+      diagram(overview,t('pdfWholeStoryDiagram'),app.diagram.printableOverview(project,'whole-story','pdfWholeStoryDiagram'));
+    }
+    if (project.mapBackgroundId) {
+      const showDiagram = app.preferences.showMapDiagram;
+      const title = t('storyMap');
+      const map = diagram(overview,title,showDiagram ? app.diagram.printableOverview(project,'story-map','storyMap') : '');
+      if (showDiagram) images.push({image:map.querySelector('.pdf-map-background'),id:project.mapBackgroundId});
+      else image(map,title,{id:project.mapBackgroundId,className:'pdf-map-image'});
     }
     gallery(overview,project);
 

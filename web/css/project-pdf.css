@@ -197,7 +197,7 @@
 .pdf-image-missing { color: var(--pdf-secondary); font-style: italic; }
 
 .pdf-diagram { margin: 4mm 0; break-inside: avoid; }
-.pdf-diagram svg:is(.pdf-story-map,.relationship-graph) {
+.pdf-diagram :is(svg.pdf-story-map,svg.relationship-graph,.pdf-map-image) {
   display: block;
   width: auto;
   min-width: 0;
