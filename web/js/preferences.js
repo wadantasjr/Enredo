@@ -1,7 +1,7 @@
 Enredo.preferences = ((app) => {
   'use strict';
 
-  const { esc, $, icon, option, bindActions } = app.dom;
+  const { esc, $, field, icon, option, bindActions } = app.dom;
 
   const languageKey = 'enredo.language';
 
@@ -10,6 +10,9 @@ Enredo.preferences = ((app) => {
   const fontSizes = [75,85,100,115,130];
   const thumbnailSizeKey = 'enredo.thumbnail-size';
   const thumbnailSizes = ['1','2','3','hidden'];
+  const diagramWiresKey = 'enredo.diagram-wires';
+  const diagramViews = [['timeline','timeline'],['whole-story','wholeStory']];
+  const wireWidths = [1,1.5,2,3,4,5,6];
 
   const themeKey = 'enredo.theme';
 
@@ -60,6 +63,7 @@ Enredo.preferences = ((app) => {
 
   let fontSize = readFontSize();
   let thumbnailSize = readThumbnailSize();
+  let wireStyles = readWireStyles();
 
   function readFontSize() {
     try {
@@ -75,6 +79,20 @@ Enredo.preferences = ((app) => {
       if (thumbnailSizes.includes(saved)) return saved;
     } catch {}
     return '1';
+  }
+
+  function wireStyle(color,width) {
+    return {
+      color:typeof color === 'string' && /^#[\da-f]{6}$/i.test(color) ? color : null,
+      width:wireWidths.includes(width) ? width : null
+    };
+  }
+
+  function readWireStyles() {
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem(diagramWiresKey)); } catch {}
+    return Object.fromEntries(diagramViews.map(([view]) =>
+      [view,wireStyle(saved?.[view]?.color,saved?.[view]?.width)]));
   }
 
   function readLanguage() {
@@ -158,41 +176,67 @@ Enredo.preferences = ((app) => {
 
   function applyFontSize() {
     document.documentElement.style.fontSize = fontSize + '%';
-    if (!app.session.atHome && app.session.hasMapView() && app.store.chapter()) app.diagram.renderWires();
   }
 
-  function editFontSize() {
-    const choices = fontSizes.map(size => option(size,size + '%',size === fontSize)).join('');
-    app.dialogs.showDialog({title:t('fontSize'),body:'<select name="fontSize" aria-label="' + tx('fontSize') + '">' + choices + '</select>',
-      submitKey:'save',onSubmit:data => {
-        const size = Number(data.get('fontSize'));
-        if (!fontSizes.includes(size)) return;
-        fontSize = size;
-        try { localStorage.setItem(fontSizeKey,String(size)); } catch {}
-        applyFontSize();
-        app.dialogs.closeDialog();
-      }});
+  function wireSettings(view,label) {
+    const {color,width} = wireStyles[view];
+    const defaultColor = getComputedStyle(document.documentElement).getPropertyValue('--wire').trim();
+    const colorInput = '<input type="color" name="' + view + '-color" value="' + esc(color ?? defaultColor) +
+      '"' + (color === null ? ' disabled' : '') + '>';
+    const widths = option('',t('arrowWidthDefault'),width === null) +
+      wireWidths.map(size => option(size,size.toLocaleString(language) + ' px',size === width)).join('');
+    return '<fieldset class="display-wire-settings"><legend>' + tx(label) + '</legend>' +
+      '<div class="display-settings-grid">' +
+      field(t('arrowColor'),colorInput) +
+      field(t('arrowWidth'),'<select name="' + view + '-width">' + widths + '</select>') + '</div>' +
+      '<label class="display-theme-color"><input type="checkbox" name="' + view + '-theme"' +
+      (color === null ? ' checked' : '') + '> ' + tx('useThemeColor') + '</label></fieldset>';
   }
 
-  function editThumbnailSize() {
-    const choices = thumbnailSizes.map(size =>
+  function saveDisplaySettings(data) {
+    const nextFontSize = Number(data.get('fontSize'));
+    const nextThumbnailSize = data.get('thumbnailSize');
+    if (!fontSizes.includes(nextFontSize) || !thumbnailSizes.includes(nextThumbnailSize)) return;
+
+    const thumbnailsChanged = nextThumbnailSize !== thumbnailSize;
+    fontSize = nextFontSize;
+    thumbnailSize = nextThumbnailSize;
+    wireStyles = Object.fromEntries(diagramViews.map(([view]) => [
+      view,wireStyle(data.get(view + '-color'),Number(data.get(view + '-width')))
+    ]));
+    try {
+      localStorage.setItem(fontSizeKey,String(fontSize));
+      localStorage.setItem(thumbnailSizeKey,thumbnailSize);
+      localStorage.setItem(diagramWiresKey,JSON.stringify(wireStyles));
+    } catch {}
+    applyFontSize();
+    if (thumbnailsChanged) app.diagram.refreshThumbnailSize();
+    else if (!app.session.atHome && app.session.hasMapView() && app.store.chapter()) app.diagram.renderWires();
+    app.dialogs.closeDialog();
+  }
+
+  function editDisplaySettings() {
+    const fonts = fontSizes.map(size => option(size,size + '%',size === fontSize)).join('');
+    const thumbnails = thumbnailSizes.map(size =>
       option(size,size === 'hidden' ? t('hideThumbnails') : size + 'x',size === thumbnailSize)).join('');
-    app.dialogs.showDialog({title:t('thumbnailSize'),
-      body:'<select name="thumbnailSize" aria-label="' + tx('thumbnailSize') + '">' + choices + '</select>',
-      submitKey:'save',onSubmit:data => {
-        const size = data.get('thumbnailSize');
-        if (!thumbnailSizes.includes(size)) return;
-        if (size !== thumbnailSize) {
-          thumbnailSize = size;
-          try { localStorage.setItem(thumbnailSizeKey,size); } catch {}
-          app.diagram.refreshThumbnailSize();
+    const body = '<div class="display-settings-grid">' +
+      field(t('fontSize'),'<select name="fontSize">' + fonts + '</select>') +
+      field(t('thumbnailSize'),'<select name="thumbnailSize">' + thumbnails + '</select>') + '</div>' +
+      diagramViews.map(([view,label]) => wireSettings(view,label)).join('');
+    app.dialogs.showDialog({
+      title:t('displaySettings'),body,submitKey:'save',onSubmit:saveDisplaySettings,
+      extra:form => {
+        for (const [view] of diagramViews) {
+          const useTheme = form.elements.namedItem(view + '-theme');
+          const color = form.elements.namedItem(view + '-color');
+          useTheme.addEventListener('change',() => { color.disabled = useTheme.checked; });
         }
-        app.dialogs.closeDialog();
-      }});
+      }
+    });
   }
 
   function bindEvents() {
-    bindActions({fontButton:editFontSize,thumbnailButton:editThumbnailSize});
+    bindActions({displaySettingsButton:editDisplaySettings});
     $('languageSelect').addEventListener('change',event => changeLanguage(event.target.value));
     document.addEventListener('click',event => {
       const choice = event.target.closest('button[data-theme-choice]');
@@ -204,6 +248,7 @@ Enredo.preferences = ((app) => {
     applyFontSize,
     applyTheme,
     bindEvents,
+    diagramWires: view => wireStyles[view],
     flash,
     get fontSize() { return fontSize; },
     get language() { return language; },

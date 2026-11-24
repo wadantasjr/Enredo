@@ -268,6 +268,9 @@ Enredo.workspace = ((app) => {
     app.session.diagramFullscreen = active;
     closeMenus();
     document.documentElement.classList.toggle('diagram-fullscreen',active);
+    const displayButton = $('displaySettingsButton');
+    if (active) $('toggleFullscreen').before(displayButton);
+    else $('displayActions').append(displayButton);
     renderWorkspaceControls();
     app.platform.android?.setDiagramFullscreen?.(active);
     if (!active) window.scrollTo(0,app.session.diagramScroll);
@@ -289,6 +292,7 @@ Enredo.workspace = ((app) => {
     $('projectNavigation').hidden = app.session.atHome;
     $('projectCrumb').hidden = app.session.atHome;
     $('exportProject').hidden = app.session.atHome;
+    $('exportPdf').hidden = app.session.atHome;
     app.store.renderHistory();
     if (app.session.atHome) {
       renderWorkspaceControls();

@@ -21,6 +21,14 @@ dialog::backdrop{background:var(--backdrop)}
 .gallery-notes{grid-column:1/-1}
 .gallery-notes textarea{width:100%;min-height:4em;resize:vertical}
 .dialog-form{padding:17px 18px}
+.display-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.display-settings-grid .field{align-content:end}
+.display-wire-settings{min-width:0;margin:12px 0 0;padding:8px 10px 10px;border:1px solid var(--line);border-radius:8px}
+.display-wire-settings legend{padding:0 4px;font-size:.875rem;font-weight:700}
+.display-wire-settings input[type="color"]{height:100%;min-height:36px;padding:4px;cursor:pointer}
+.display-wire-settings input[type="color"]:disabled{opacity:.45;cursor:default}
+.display-theme-color{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.875rem}
+.display-theme-color input{width:auto;margin:0;accent-color:var(--accent)}
 .dialog-actions{margin-top:18px;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:7px}
 .dialog-actions .danger{margin-right:auto}
 .dialog-actions button[type="submit"].danger{margin-right:0;background:var(--danger-bg);color:var(--inverse-ink);border-color:var(--danger-bg)}

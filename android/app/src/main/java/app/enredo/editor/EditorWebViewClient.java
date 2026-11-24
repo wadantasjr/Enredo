@@ -21,6 +21,7 @@ final class EditorWebViewClient extends WebViewClient {
     private static final String TAG = "Enredo";
     private static final String ORIGIN = "https://appassets.androidplatform.net";
     static final String EDITOR_URL = ORIGIN + "/index.html";
+    static final String PDF_URL = ORIGIN + "/project-pdf.html";
 
     private static final String IMPORT_URL = ORIGIN + "/project-import.json";
     private static final String IMAGE_URL = ORIGIN + "/node-image";

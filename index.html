@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="web/css/characters.css">
 <link rel="stylesheet" href="web/css/project-management.css">
 <link rel="stylesheet" href="web/css/chapter-groups.css">
+<link rel="stylesheet" href="web/css/project-pdf.css">
 </head>
 <body>
 <div class="app" id="app">
@@ -64,13 +65,13 @@
             <button type="button" role="menuitemradio" data-theme-choice="system" aria-checked="false"><span data-icon="monitor"></span><span data-i18n="themeSystem">System</span></button>
           </div>
         </div>
-        <div class="display-actions">
-          <button type="button" class="btn display-button" id="fontButton" aria-haspopup="dialog" aria-label="Text size" title="Text size" data-i18n-label="fontSize" data-i18n-title="fontSize">Aa</button>
-          <button type="button" class="btn display-button" id="thumbnailButton" aria-haspopup="dialog" aria-label="Thumbnail size in the diagram" title="Thumbnail size in the diagram" data-i18n-label="thumbnailSize" data-i18n-title="thumbnailSize" data-icon="image"></button>
+        <div class="display-actions" id="displayActions">
+          <button type="button" class="btn display-button" id="displaySettingsButton" aria-haspopup="dialog" aria-label="Display settings" title="Display settings" data-i18n-label="displaySettings" data-i18n-title="displaySettings" data-icon="settings"></button>
         </div>
         <div class="menu-wrap"><button class="btn" data-menu="fileMenu" aria-expanded="false"><span data-icon="folder"></span> <span data-i18n="files">Files</span> <span data-icon="chevron"></span></button>
           <div class="menu align-right" id="fileMenu" hidden>
             <button id="exportProject"><span data-icon="download"></span> <span data-i18n="exportJson">Export project (.json)</span></button>
+            <button id="exportPdf" hidden><span data-icon="download"></span> <span data-i18n="exportPdf">Export project (.pdf)</span></button>
             <button id="importProject"><span data-icon="upload"></span> <span data-i18n="importJson">Import project (.json)</span></button>
             <hr><button id="fileHelp"><span data-icon="help"></span> <span data-i18n="help">How to use</span></button>
           </div>
@@ -163,8 +164,8 @@
             <div class="world" id="world">
               <svg class="wires" id="wires" aria-hidden="true">
                 <defs>
-                  <marker id="tip" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1l6 3-6 3" fill="none" stroke="var(--wire)" stroke-width="1.1"/></marker>
-                  <marker id="tip-active" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1l6 3-6 3" fill="none" stroke="var(--wire-active)" stroke-width="1.1"/></marker>
+                  <marker id="tip" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="wire-tip" d="M1 1l6 3-6 3" stroke-width="1.1"/></marker>
+                  <marker id="tip-active" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="wire-tip active" d="M1 1l6 3-6 3" stroke-width="1.1"/></marker>
                 </defs>
                 <g id="wirePaths"></g>
               </svg>
@@ -249,6 +250,7 @@
   </div>
 </dialog>
 <div class="toast" id="toast" role="status" hidden></div>
+<article id="projectPdf" class="pdf-report" hidden></article>
 <script src="web/js/dom.js"></script>
 <script src="web/js/messages.js"></script>
 <script src="web/js/platform.js"></script>
@@ -278,6 +280,7 @@
 <script src="web/js/project-management.js"></script>
 <script src="web/js/project-files.js"></script>
 <script src="web/js/chapter-groups.js"></script>
+<script src="web/js/project-pdf.js"></script>
 <script src="web/js/main.js"></script>
 </body>
 </html>

@@ -6,10 +6,12 @@ import android.webkit.JavascriptInterface;
 public final class EditorBridge {
     private final Activity activity;
     private final EditorDocuments documents;
+    private final EditorPdfPrint pdfPrint;
 
-    EditorBridge(Activity activity, EditorDocuments documents) {
+    EditorBridge(Activity activity, EditorDocuments documents, EditorPdfPrint pdfPrint) {
         this.activity = activity;
         this.documents = documents;
+        this.pdfPrint = pdfPrint;
     }
 
     @JavascriptInterface
@@ -35,5 +37,10 @@ public final class EditorBridge {
     @JavascriptInterface
     public void exportProject(String filename, String json) {
         activity.runOnUiThread(() -> documents.exportProject(filename, json));
+    }
+
+    @JavascriptInterface
+    public void printProject(String title, String locale, String report) {
+        activity.runOnUiThread(() -> pdfPrint.printProject(title, locale, report));
     }
 }

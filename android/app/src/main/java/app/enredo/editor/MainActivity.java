@@ -10,12 +10,14 @@ import android.window.OnBackInvokedDispatcher;
 public final class MainActivity extends Activity {
     private EditorWebView editor;
     private EditorDocuments documents;
+    private EditorPdfPrint pdfPrint;
 
     @Override
     protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
         editor = new EditorWebView(this);
         documents = new EditorDocuments(this, savedState, editor::evaluateWhenReady);
+        pdfPrint = new EditorPdfPrint(this, editor::evaluateWhenReady);
 
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundResource(R.color.window_background);
@@ -23,7 +25,7 @@ public final class MainActivity extends Activity {
         EditorWindow.configureInsets(this, root);
         setContentView(root);
 
-        editor.open(documents, new EditorBridge(this, documents));
+        editor.open(documents, new EditorBridge(this, documents, pdfPrint));
         if (Build.VERSION.SDK_INT >= 33) {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::onBackPressed);
@@ -51,6 +53,7 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        pdfPrint.close();
         documents.close();
         editor.close();
         super.onDestroy();

@@ -32,7 +32,8 @@ In the top bar, select **My space** to return to your project library or select 
 
 - Mark each beat as a **Scene**, **Decision**, **Consequence**, **Convergence**, or **Ending**.
 - Attach one image to each beat. Its thumbnail appears at the top of the diagram card and in the details panel, where you can open the original at full size.
-- Use the image button next to **Aa** to set diagram thumbnails to **1x** (default), **2x**, or **3x**, or hide them. The details panel still shows the image.
+- Open **Display settings** to set text size and diagram thumbnails. Choose **1x** (default), **2x**, **3x**, or **Hide thumbnails**. The details panel still shows the image.
+- In the same dialog, set the arrow color and line thickness separately for **Timeline** and **Whole story**. **Use theme color** restores the automatic color, and **Default** restores the original thickness. These preferences are saved on the device. In full screen, find **Display settings** beside the exit button.
 - Label connections to show which choice leads to each path.
 - Drag story beat cards in **Timeline** or **Whole story**. Each view saves its own positions. Older projects start with their existing beat positions in both views.
 - Use the left and right panel icons in the diagram toolbar to show or hide project navigation and the details panel independently. Both controls are also available in full screen.
@@ -63,6 +64,8 @@ Enredo starts in English. Use the language selector at the top to choose **Portu
 
 Projects, groups, and original images are saved automatically in your browser. To back up or transfer a story with its covers, original images, galleries, and image notes, open it and choose **Files → Export project (.json)**. In the destination browser or computer, choose **Files → Import project (.json)**.
 
+To save a readable copy of the project, choose **Files → Export project (.pdf)** and select **Save as PDF** in the print dialog. The A4 report includes a cover, a linked table of contents, chapters and story paths, character profiles, images and their notes, tasks, and sprints. This works offline in the browser and in the Android app.
+
 Projects without a saved model open in **Free Structure**. Backups include the selected model and beat associations, including associations preserved after a model change.
 
 Character profiles, phases, participant links, arcs, paths, relationships, and portraits are also saved in the project and included in JSON backups.
@@ -78,7 +81,7 @@ The [Enredo APK](https://github.com/wadantasjr/Enredo/releases/latest/download/E
 Use **Project details**, **Edit group**, or **Edit chapter** to choose a JPG, PNG, or WebP cover. Android opens its image picker for the selection.
 In **Image gallery**, use **Add images** to select several files in the Android picker.
 
-- Tap **Aa** at the top to set the text size between 75% and 130%. The Android app starts at 85% and remembers your choice.
+- Tap **Display settings** at the top to set the text size between 75% and 130%. The Android app starts at 85% and remembers your choice.
 - Pinch with two fingers to zoom the diagram. Drag the background with one finger to move the map, or drag a card in **Timeline** or **Whole story** to reposition it.
 - Tap **Full screen diagram** in the diagram toolbar to expand the workspace. To return to the editor, tap **Exit full screen** or use Android's **Back** action.
 
@@ -121,7 +124,8 @@ Na barra superior, selecione **Meu espaço** para voltar à lista de projetos ou
 
 - Identificar cada situação como **Cena**, **Decisão**, **Consequência**, **Convergência** ou **Desfecho**.
 - Anexar uma imagem a cada situação. A miniatura aparece no topo do cartão e no painel de detalhes, onde você pode abrir a imagem no tamanho original.
-- Usar o botão de imagem ao lado de **Aa** para ajustar as miniaturas do diagrama para **1x** (padrão), **2x** ou **3x**, ou ocultá-las. A imagem continua disponível no painel de detalhes.
+- Abra **Configurações de aparência** para ajustar o tamanho da fonte e das miniaturas do diagrama. Escolha **1x** (padrão), **2x**, **3x** ou **Ocultar miniaturas**. A imagem continua disponível no painel de detalhes.
+- Na mesma janela, defina a cor e a espessura das setas separadamente para a **Timeline** e a **História inteira**. **Usar a cor do tema** restaura a cor automática e **Padrão** restaura a espessura original. Essas preferências ficam salvas no dispositivo. Em tela cheia, o botão **Configurações de aparência** fica ao lado do botão de sair.
 - Nomear as conexões para indicar qual escolha leva a cada caminho.
 - Arraste os cartões das situações na **Timeline** ou em **História inteira**. Cada visualização salva suas próprias posições. Projetos antigos começam com as posições existentes em ambas.
 - Use os ícones de painel esquerdo e direito na barra do diagrama para mostrar ou ocultar a navegação do projeto e o painel de detalhes de forma independente. Os dois controles também estão disponíveis em tela cheia.
@@ -152,6 +156,8 @@ O Enredo abre em inglês por padrão. No seletor de idioma no topo da tela, esco
 
 O Enredo salva projetos, grupos e imagens originais automaticamente no navegador. Para guardar uma cópia ou transferir a história com capas, imagens originais, galerias e observações das imagens, abra o projeto e escolha **Arquivos → Exportar projeto (.json)**. No navegador ou computador de destino, use **Arquivos → Importar projeto (.json)**.
 
+Para salvar uma versão do projeto para leitura, escolha **Arquivos → Exportar projeto (.pdf)** e selecione **Salvar como PDF** na janela de impressão. O relatório em A4 inclui capa, índice com links, capítulos e caminhos da história, fichas de personagens, imagens e suas observações, tarefas e sprints. A exportação funciona offline no navegador e no aplicativo Android.
+
 Projetos sem modelo salvo abrem em **Estrutura Livre**. O JSON inclui o modelo e as associações das situações, inclusive as que ficam guardadas após a troca de modelo.
 
 As fichas, fases, participações, arcos, caminhos, relacionamentos e retratos também ficam salvos no projeto e são incluídos no backup JSON.
@@ -167,7 +173,7 @@ O [APK do Enredo](https://github.com/wadantasjr/Enredo/releases/latest/download/
 Use **Detalhes do projeto**, **Editar grupo** ou **Editar capítulo** para escolher uma capa JPG, PNG ou WebP. O Android abre o seletor de imagens.
 Na **Galeria de imagens**, use **Adicionar imagens** para selecionar vários arquivos no seletor do Android.
 
-- Toque em **Aa** no topo para ajustar o tamanho da fonte entre 75% e 130%. O Android começa em 85% e guarda a sua escolha.
+- Toque em **Configurações de aparência** no topo para ajustar o tamanho da fonte entre 75% e 130%. O Android começa em 85% e guarda a sua escolha.
 - No diagrama, faça o gesto de pinça com dois dedos para mudar o zoom. Com um dedo, arraste o fundo para mover o mapa ou arraste um cartão na **Timeline** ou em **História inteira** para mudar sua posição.
 - Toque em **Diagrama em tela cheia** na barra do diagrama para expandir o espaço de trabalho. Para voltar ao editor, toque em **Sair da tela cheia** ou use **Voltar** no Android.
 

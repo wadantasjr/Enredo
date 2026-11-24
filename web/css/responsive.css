@@ -7,7 +7,7 @@
 @media(max-width:600px){.side-home{margin-bottom:3px}.chapter-row{flex:none;max-width:180px}.chapter-row .chapter-link{width:auto}.space-heading{align-items:flex-start;gap:8px}.space-heading .heading-actions{gap:2px}.space-heading .primary{margin-left:2px}.space-heading .icon-btn{width:24px}.empty-library-actions .btn{white-space:normal}}
 @media(max-width:600px){.save:not(.failed) .save-copy{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.save.failed .save-copy{max-width:75px;white-space:normal;line-height:1.2}.top-actions{gap:6px}}
 .android .top-actions .btn,.android .dialog-actions .btn,.android .crumb button{min-height:44px}
-.android .display-button{min-width:44px}
+.android .display-button{min-width:44px;min-height:44px}
 .android .menu button,.android .project-button{min-height:44px}
 .android .tabs{min-height:44px}
 .android .workspace-tools{min-height:44px}

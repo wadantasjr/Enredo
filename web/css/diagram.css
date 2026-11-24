@@ -18,8 +18,10 @@
 .world>.map-background{inset:0 auto auto 0;object-fit:fill;opacity:.74}
 .wires{position:absolute;pointer-events:none}
 .map-background:not([hidden])~.wires{--wire:var(--world-label-ink)}
-.wire{fill:none;stroke:var(--wire);stroke-width:1.65;pointer-events:none}
-.wire.active{stroke:var(--wire-active);stroke-width:2}
+.wire,.wire-tip{fill:none;stroke:var(--diagram-wire-color,var(--wire));pointer-events:none}
+.wire.active,.wire-tip.active{stroke:var(--diagram-wire-color,var(--wire-active))}
+.wire{stroke-width:var(--diagram-wire-width,1.65px)}
+.wire.active{stroke-width:calc(var(--diagram-wire-width,1.65px) + .35px)}
 .wire-summary{stroke-dasharray:6 3}
 .wire-hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer}
 .wire-label{pointer-events:auto;cursor:pointer}

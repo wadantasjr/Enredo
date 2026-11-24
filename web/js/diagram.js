@@ -242,6 +242,9 @@ Enredo.diagram = ((app) => {
     const left = box.left - padding, top = box.top - padding;
     const width = box.right - box.left + 2 * padding, height = box.bottom - box.top + 2 * padding;
     const layer = $('wires');
+    const wireStyle = app.preferences.diagramWires(app.session.isWholeStory() ? 'whole-story' : 'timeline');
+    layer.style.setProperty('--diagram-wire-color',wireStyle.color ?? '');
+    layer.style.setProperty('--diagram-wire-width',wireStyle.width === null ? '' : wireStyle.width + 'px');
     layer.style.left = left + 'px';
     layer.style.top = top + 'px';
     layer.setAttribute('width',width);
