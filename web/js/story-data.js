@@ -79,18 +79,20 @@ Enredo.storyData = ((app) => {
       })
     };
     const result = app.characterData.normalizeProject(app.projectManagementData.normalizeProject(normalized));
-    for (const owner of app.imageStore.galleryImageOwners(result)) {
-      if (!Object.hasOwn(owner,'galleryImages')) continue;
-      const galleryImages = new Map();
-      for (const image of Array.isArray(owner.galleryImages) ? owner.galleryImages : []) {
-        if (app.imageStore.validOriginalImageId(image?.assetId) && !galleryImages.has(image.assetId)) {
-          galleryImages.set(image.assetId,{assetId:image.assetId,
-            name:typeof image.name === 'string' ? image.name.slice(0,160) : '',
-            notes:typeof image.notes === 'string' ? image.notes : ''});
+    for (const owner of app.imageStore.galleryOwners(result)) {
+      for (const field of ['galleryImages','galleryDocuments']) {
+        if (!Object.hasOwn(owner,field)) continue;
+        const items = new Map();
+        for (const item of Array.isArray(owner[field]) ? owner[field] : []) {
+          if (app.imageStore.validOriginalImageId(item?.assetId) && !items.has(item.assetId)) {
+            items.set(item.assetId,{assetId:item.assetId,
+              name:typeof item.name === 'string' ? item.name.slice(0,160) : '',
+              notes:typeof item.notes === 'string' ? item.notes : ''});
+          }
         }
+        if (items.size) owner[field] = [...items.values()];
+        else delete owner[field];
       }
-      if (galleryImages.size) owner.galleryImages = [...galleryImages.values()];
-      else delete owner.galleryImages;
     }
     return result;
   }

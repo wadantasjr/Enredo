@@ -98,7 +98,7 @@
     <div class="content" id="editorView" hidden>
       <section class="heading">
         <div><div class="eyebrow" id="chapterLabel"></div><div class="heading-title"><h1 id="chapterTitle" tabindex="-1"></h1><button class="icon-btn small" id="renameChapter" title="Edit chapter" aria-label="Edit chapter" data-i18n-label="editChapter" data-i18n-title="editChapter" data-icon="edit"></button></div><p id="stats"></p></div>
-        <div class="heading-actions"><button class="btn primary" id="addNode"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
+        <div class="heading-actions"><div id="chapterGallery" hidden></div><button class="btn primary" id="addNode"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
       </section>
       <section class="workspace" id="editorWorkspace" aria-label="Story map" data-i18n-label="storyMap">
         <div class="graph-bar" id="graphBar">
@@ -243,18 +243,18 @@
     </div>
   </div>
 </template>
-<dialog class="gallery-dialog" id="imageGallery" aria-labelledby="imageGalleryTitle">
+<dialog class="gallery-dialog" id="mediaGallery" aria-labelledby="mediaGalleryTitle">
   <div class="dialog-head">
-    <div><h2 id="imageGalleryTitle" data-i18n="imageGallery">Image gallery</h2><p id="galleryOwnerName"></p></div>
+    <div><h2 id="mediaGalleryTitle"></h2><p id="galleryOwnerName"></p></div>
     <button type="button" class="icon-btn" id="galleryClose" aria-label="Close" data-i18n-label="close" data-icon="close"></button>
   </div>
   <div class="gallery-body">
-    <p class="hint" data-i18n="imageGalleryHint">Use this gallery for references, concept art, and other images.</p>
-    <button type="button" class="btn primary" id="chooseGalleryImages"><span data-icon="upload"></span><span data-i18n="addGalleryImages">Add images</span></button>
-    <input type="file" id="galleryImageFiles" accept="image/*" multiple hidden>
+    <p class="hint" id="galleryHint"></p>
+    <button type="button" class="btn primary" id="chooseGalleryFiles"><span data-icon="upload"></span><span id="galleryChooseLabel"></span></button>
+    <input type="file" id="galleryFiles" multiple hidden>
     <p class="hint" id="galleryStatus" role="status" hidden></p>
-    <p class="hint" id="galleryEmpty" data-i18n="noGalleryImages">No gallery images yet.</p>
-    <ul class="gallery-grid" id="galleryImages" hidden></ul>
+    <p class="hint" id="galleryEmpty"></p>
+    <ul class="gallery-grid" id="galleryItems" hidden></ul>
   </div>
 </dialog>
 <dialog class="original-image-dialog" id="imageViewer" aria-labelledby="imageViewerTitle">
@@ -307,7 +307,7 @@
 <script src="web/js/story-beats.js"></script>
 <script src="web/js/paths.js"></script>
 <script src="web/js/image-editor.js"></script>
-<script src="web/js/image-gallery.js"></script>
+<script src="web/js/media-gallery.js"></script>
 <script src="web/js/characters.js"></script>
 <script src="web/js/project-management.js"></script>
 <script src="web/js/project-files.js"></script>

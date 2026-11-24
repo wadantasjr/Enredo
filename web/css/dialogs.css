@@ -13,11 +13,12 @@ dialog::backdrop{background:var(--backdrop)}
 #galleryOwnerName{margin:4px 0 0;color:var(--muted);overflow-wrap:anywhere}
 .gallery-body{padding:17px 18px;display:grid;gap:12px;justify-items:start}
 .gallery-body p{margin:0}
-.gallery-grid{width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,186px),1fr));gap:10px;list-style:none;padding:0;margin:0}
+.gallery-grid{width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,186px),1fr));align-items:start;gap:10px;list-style:none;padding:0;margin:0}
 .gallery-grid li{min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:6px;padding:7px;border:1px solid var(--line);border-radius:9px}
 .gallery-preview{grid-column:1/-1;width:100%;aspect-ratio:4/3;display:grid;place-items:center;overflow:hidden}
 .gallery-preview img{display:block;width:100%;height:100%;object-fit:contain;min-height:0}
-.gallery-name{overflow-wrap:anywhere;font-size:.875rem}
+.gallery-item-actions{display:flex;align-items:center;gap:3px}
+.gallery-name{align-self:center;overflow-wrap:anywhere;font-size:.875rem}
 .gallery-notes{grid-column:1/-1}
 .gallery-notes textarea{width:100%;min-height:4em;resize:vertical}
 .dialog-form{padding:17px 18px}

@@ -15,23 +15,22 @@ Enredo.projectFiles = ((app) => {
     exportingProject = true;
     try {
       const ids = app.imageStore.originalImageIds(snapshot);
-      const backup = {format:'enredo',version:ids.size ? 2 : 1,project:snapshot};
+      const documentIds = app.imageStore.galleryDocumentIds(snapshot);
+      const backup = {format:'enredo',version:ids.size || documentIds.size ? 2 : 1,project:snapshot};
       if (ids.size) {
         backup.images = Object.create(null);
         for (const id of ids) backup.images[id] = await app.imageStore.originalImageDataUrl(await app.imageStore.readOriginalImage(id));
+      }
+      if (documentIds.size) {
+        backup.documents = Object.create(null);
+        for (const id of documentIds) backup.documents[id] = await app.imageStore.originalImageDataUrl(await app.imageStore.readOriginalImage(id));
       }
       const json = JSON.stringify(backup,null,2);
       if (app.platform.android) {
         app.platform.android.exportProject(filename,json);
         return;
       }
-      const file = new Blob([json],{type:'application/json'});
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(file);
-      link.download = filename;
-      document.body.append(link);
-      link.click();
-      setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); },1000);
+      app.platform.download(new Blob([json],{type:'application/json'}),filename);
       app.preferences.flash('exported');
     } catch {
       app.preferences.flash('exportFailed');
@@ -63,7 +62,7 @@ Enredo.projectFiles = ((app) => {
       }
       const p = app.storyData.normalizeProject({...data.project,id:uid()});
       const files = new Map(), previews = new Map();
-      const galleryOwners = app.imageStore.galleryImageOwners(p);
+      const galleryOwners = app.imageStore.galleryOwners(p);
       if (data.version === 2) {
         const ids = new Map();
         const covers = [p,...(p.chapterGroups ?? []),...p.chapters].map(item => item.cover).filter(Boolean);
@@ -93,8 +92,16 @@ Enredo.projectFiles = ((app) => {
         for (const node of p.nodes) if (node.originalImageId) node.originalImageId = ids.get(node.originalImageId);
         if (p.mapBackgroundId) p.mapBackgroundId = ids.get(p.mapBackgroundId);
         for (const cover of covers) cover.assetId = ids.get(cover.assetId);
+        const documentIds = new Map();
+        for (const key of app.imageStore.galleryDocumentIds(p)) {
+          if (!data.documents || !Object.hasOwn(data.documents,key)) throw new Error('Document is missing from backup');
+          const id = 'document-' + uid();
+          files.set(id,app.imageStore.documentFromBackup(data.documents[key]));
+          documentIds.set(key,id);
+        }
         for (const owner of galleryOwners) {
           for (const image of owner.galleryImages ?? []) image.assetId = ids.get(image.assetId);
+          for (const document of owner.galleryDocuments ?? []) document.assetId = documentIds.get(document.assetId);
         }
       } else {
         for (const node of p.nodes) delete node.originalImageId;
@@ -103,7 +110,10 @@ Enredo.projectFiles = ((app) => {
         delete p.mapBackgroundSize;
         for (const group of p.chapterGroups ?? []) delete group.cover;
         for (const chapter of p.chapters) delete chapter.cover;
-        for (const owner of galleryOwners) delete owner.galleryImages;
+        for (const owner of galleryOwners) {
+          delete owner.galleryImages;
+          delete owner.galleryDocuments;
+        }
       }
       if (files.size || previews.size) {
         try {

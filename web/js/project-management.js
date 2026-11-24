@@ -276,7 +276,7 @@ Enredo.projectManagement = ((app) => {
       selectField('status','taskStatus',choiceList(taskStatuses,statusKeys,existing?.status ?? status)) +
       selectField('priority','taskPriority',choiceList(priorities,priorityKeys,existing?.priority ?? 'normal')) +
       selectField('sprintId','sprint',sprintOptions) + (beat ? '' : selectField('beatId','storyBeat',beatOptions)) +
-      dateFields(existing,false) + (existing ? '<div>' + app.imageGallery.launcher('task',existing) + '</div>' : '') +
+      dateFields(existing,false) + (existing ? '<div>' + app.mediaGallery.launcher('task',existing) + '</div>' : '') +
       '</div>',submitKey:existing ? 'save' : 'add',extra:validateDates,onSubmit:data => {
         const title = data.get('title').trim(), dates = readDates(data,false);
         if (!title || !dates) return;

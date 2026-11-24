@@ -130,16 +130,22 @@ Enredo.projectPdf = ((app) => {
       if (cover?.assetId) image(parent,t(key),{id:cover.assetId,cover});
     }
 
-    function gallery(parent, owner) {
-      if (!owner.galleryImages?.length) return;
-      parent.append(element('h4','pdf-gallery-title',t('imageGallery')));
-      for (const [index,item] of owner.galleryImages.entries()) {
+    function gallery(parent, owner, label = 'mediaGallery') {
+      if (!owner.galleryImages?.length && !owner.galleryDocuments?.length) return;
+      parent.append(element('h4','pdf-gallery-title',t(label)));
+      for (const [index,item] of (owner.galleryImages ?? []).entries()) {
         const name = item.name || t('galleryImageNumber',{number:index + 1});
         const figure = element('figure','pdf-figure');
         image(figure,name,{id:item.assetId});
         figure.append(element('figcaption','',element('strong','',name)));
         if (item.notes) figure.append(element('p','pdf-text',item.notes));
         parent.append(figure);
+      }
+      for (const [index,item] of (owner.galleryDocuments ?? []).entries()) {
+        const name = item.name || t('galleryDocumentNumber',{number:index + 1});
+        const document = element('div','pdf-figure',element('strong','',name));
+        if (item.notes) document.append(element('p','pdf-text',item.notes));
+        parent.append(document);
       }
     }
 
@@ -210,6 +216,7 @@ Enredo.projectPdf = ((app) => {
       const block = titled(parent,'section','pdf-chapter','h3',title,chapter.anchor);
       addToIndex(list,block,title);
       coverImage(block,chapter.cover,'chapterCover');
+      gallery(block,chapter);
       const beats = beatsByChapter.get(chapter.id) ?? [];
       if (!beats.length) block.append(element('p','pdf-text',t('pdfNoBeats')));
       for (const node of beats) renderBeat(block,node);
@@ -307,7 +314,7 @@ Enredo.projectPdf = ((app) => {
         addFields(block,[[t('primaryRole'),roleName(person.primaryRoleId)],
           [t('characterRoles'),listOf(person.roleIds).map(roleName).join(', ')]]);
         renderProfile(block,person,'portrait');
-        gallery(block,person);
+        gallery(block,person,'imageGallery');
         for (const phase of listOf(person.phases).filter(phase => phase?.title)) {
           const profile = titled(block,'section','pdf-details','h4',phase.title);
           renderProfile(profile,phase,'phasePortrait');
@@ -360,7 +367,7 @@ Enredo.projectPdf = ((app) => {
           addFields(block,[[t('taskStatus'),savedValue('task',capitalized(task.status))],
             [t('taskPriority'),savedValue('priority',capitalized(task.priority))],...dateFields(task),
             [t('sprint'),sprint && reference(sprint.anchor,sprint.title)],[t('storyBeat'),beatLink(task.beatId)],[t('notes'),task.notes]]);
-          gallery(block,task);
+          gallery(block,task,'imageGallery');
         }
       }
     }

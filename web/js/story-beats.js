@@ -39,7 +39,7 @@ Enredo.storyBeats = ((app) => {
       '<button type="button" class="btn" id="chooseNodeImage">' + icon('upload') + ' ' +
       tx(n.image ? 'replaceNodeImage' : 'addNodeImage') + '</button>' +
       (n.image ? '<button type="button" class="btn" id="removeNodeImage">' + icon('trash') + ' ' + tx('removeNodeImage') + '</button>' : '') +
-      app.imageGallery.launcher('beat',n) +
+      app.mediaGallery.launcher('beat',n) +
       '</div></div>' +
       '<label class="field"><span>' + tx('notes') + '</span><textarea id="nodeNotes" placeholder="' + tx('notesHint') + '" rows="3">' +
       esc(n.notes[0] === '\n' ? '\n' + n.notes : n.notes) + '</textarea></label></div>' +
@@ -88,6 +88,7 @@ Enredo.storyBeats = ((app) => {
       participants:copy ? app.characterData.participantsOf(origin).map(person => ({...person})) : [],
       ...(copy && origin.focalCharacterId ? {focalCharacterId:origin.focalCharacterId} : {}),
       ...(copy && origin.galleryImages?.length ? {galleryImages:origin.galleryImages.map(image => ({...image}))} : {}),
+      ...(copy && origin.galleryDocuments?.length ? {galleryDocuments:origin.galleryDocuments.map(document => ({...document}))} : {}),
       ...(image ? {image,...(origin.originalImageId ? {originalImageId:origin.originalImageId} : {})} : {})};
     app.store.project().nodes.push(n);
     return n;

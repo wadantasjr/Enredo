@@ -25,7 +25,7 @@ final class EditorWebViewClient extends WebViewClient {
 
     private static final String IMPORT_URL = ORIGIN + "/project-import.json";
     private static final String IMAGE_URL = ORIGIN + "/node-image";
-    private static final String GALLERY_IMAGE_URL = ORIGIN + "/gallery-image";
+    private static final String GALLERY_FILE_URL = ORIGIN + "/gallery-file";
     private static final Pattern WEB_ASSET = Pattern.compile("web/(css|js)/[a-z][a-z0-9-]*\\.(css|js)");
     private static final String POLICY = "default-src 'none'; script-src 'self'; "
             + "style-src 'self' 'unsafe-inline'; img-src data: blob:; connect-src 'self'; "
@@ -62,9 +62,9 @@ final class EditorWebViewClient extends WebViewClient {
             if (IMAGE_URL.equals(url)) {
                 return readPickedDocument(documents.takeImage(), null, null, NO_CACHE);
             }
-            if (GALLERY_IMAGE_URL.equals(url)) {
-                Uri uri = documents.takeGalleryImage();
-                return readPickedDocument(uri, null, null, galleryImageHeaders(uri));
+            if (GALLERY_FILE_URL.equals(url)) {
+                Uri uri = documents.takeGalleryFile();
+                return readPickedDocument(uri, null, null, galleryFileHeaders(uri));
             }
             if (url.startsWith(ORIGIN + "/")) {
                 String asset = url.substring(ORIGIN.length() + 1);
@@ -93,7 +93,7 @@ final class EditorWebViewClient extends WebViewClient {
                 context.getAssets().open("index.html"));
     }
 
-    private Map<String, String> galleryImageHeaders(Uri uri) {
+    private Map<String, String> galleryFileHeaders(Uri uri) {
         if (uri == null) return NO_CACHE;
         try (Cursor cursor = context.getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
             if (cursor != null && cursor.moveToFirst()) {
@@ -101,12 +101,12 @@ final class EditorWebViewClient extends WebViewClient {
                 String name = column < 0 ? null : cursor.getString(column);
                 if (name != null) {
                     Map<String, String> headers = new HashMap<>(NO_CACHE);
-                    headers.put("X-Enredo-Image-Name", Uri.encode(name));
+                    headers.put("X-Enredo-File-Name", Uri.encode(name));
                     return headers;
                 }
             }
         } catch (RuntimeException error) {
-            Log.w(TAG, "Could not read gallery image name", error);
+            Log.w(TAG, "Could not read gallery attachment name", error);
         }
         return NO_CACHE;
     }

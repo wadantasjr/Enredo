@@ -9,7 +9,7 @@ Enredo.projects = ((app) => {
     let editor;
     app.dialogs.showDialog({title:t('projectDetails'),className:'story-summary-dialog',body:'<div class="fields">' +
       field(t('name'),input('title',p.title,'',true)) + app.imageEditor.coverControls('project',p.id,p.cover) +
-      '<div>' + app.imageGallery.launcher('project',p) + '</div></div>',submitKey:'save',
+      '<div>' + app.mediaGallery.launcher('project',p) + '</div></div>',submitKey:'save',
       extra:form => { editor = app.projectSummary.mountEditor(form.querySelector('.fields'),p); },
       onSubmit: data => {
         const title = data.get('title').trim();
@@ -133,8 +133,9 @@ Enredo.projects = ((app) => {
       option('',t('noGroup'),!selectedGroup) + groups.map(group => option(group.id,group.title,group.id === selectedGroup)).join('') +
       '</select>') : '';
     const coverField = existing ? app.imageEditor.coverControls('chapter',existing.id,existing.cover) : '';
+    const gallery = existing ? '<div>' + app.mediaGallery.launcher('chapter',existing) + '</div>' : '';
     app.dialogs.showDialog({title:t(existing ? 'editChapter' : 'newChapter'),body:'<div class="fields">' +
-      field(t('chapterName'),input('title',existing?.title ?? '',t('chapterName'),true)) + groupField + position + coverField + '</div>',
+      field(t('chapterName'),input('title',existing?.title ?? '',t('chapterName'),true)) + groupField + position + coverField + gallery + '</div>',
       submitKey:existing ? 'save' : 'createChapter',onSubmit:data => {
         const title = data.get('title').trim();
         if (!title) return;

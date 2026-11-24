@@ -8,7 +8,7 @@ Enredo.platform = ((app) => {
   function handleAndroidBack() {
     if ($('coverCropDialog').open) app.imageEditor.cancelCoverCrop();
     else if ($('imageViewer').open) $('imageViewer').close();
-    else if ($('imageGallery').open) app.imageGallery.close();
+    else if ($('mediaGallery').open) app.mediaGallery.close();
     else if ($('dialog').open) app.dialogs.closeDialog();
     else if (document.querySelector('[data-menu][aria-expanded="true"]')) app.workspace.closeMenus();
     else if (app.session.connectMode) app.diagramInput.toggleConnect();
@@ -24,6 +24,15 @@ Enredo.platform = ((app) => {
     return true;
   }
 
+  function download(file,filename) {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(file);
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); },1000);
+  }
+
   function initialize() {
     if (!android) return;
     document.documentElement.classList.add('android');
@@ -33,6 +42,7 @@ Enredo.platform = ((app) => {
 
   return {
     android,
+    download,
     handleAndroidBack,
     initialize
   };

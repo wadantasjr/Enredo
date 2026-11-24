@@ -30,8 +30,13 @@ public final class EditorBridge {
     }
 
     @JavascriptInterface
-    public void chooseImages() {
-        activity.runOnUiThread(documents::chooseImages);
+    public void chooseGalleryFiles(boolean includeDocuments) {
+        activity.runOnUiThread(() -> documents.chooseGalleryFiles(includeDocuments));
+    }
+
+    @JavascriptInterface
+    public void saveGalleryFile(String filename, String base64) {
+        activity.runOnUiThread(() -> documents.saveGalleryFile(filename, base64));
     }
 
     @JavascriptInterface

@@ -14,20 +14,23 @@ Enredo.imageStore = (() => {
 
   const validOriginalImageId = value => typeof value === 'string' && /^[a-z0-9-]{1,80}$/i.test(value);
 
-  function galleryImageOwners(project) {
-    const collections = [project.chapterGroups,project.nodes,project.characters,project.tasks];
+  function galleryOwners(project) {
+    const collections = [project.chapterGroups,project.chapters,project.nodes,project.characters,project.tasks];
     return [project,...collections.flatMap(items => Array.isArray(items)
       ? items.filter(item => item && typeof item === 'object' && !Array.isArray(item)) : [])];
   }
 
-  function galleryImageIds(project) {
+  function galleryAssetIds(project,field) {
     const ids = new Set();
-    for (const owner of galleryImageOwners(project)) {
-      if (!Array.isArray(owner.galleryImages)) continue;
-      for (const image of owner.galleryImages) if (validOriginalImageId(image?.assetId)) ids.add(image.assetId);
+    for (const owner of galleryOwners(project)) {
+      if (!Array.isArray(owner[field])) continue;
+      for (const item of owner[field]) if (validOriginalImageId(item?.assetId)) ids.add(item.assetId);
     }
     return ids;
   }
+
+  const galleryImageIds = project => galleryAssetIds(project,'galleryImages');
+  const galleryDocumentIds = project => galleryAssetIds(project,'galleryDocuments');
 
   function originalImageIds(project) {
     const ids = new Set((project.nodes ?? []).map(node => node.originalImageId).filter(Boolean));
@@ -39,15 +42,18 @@ Enredo.imageStore = (() => {
     return ids;
   }
 
-  function imageIdsInState(state) {
+  function assetIdsInState(state) {
     const ids = new Set();
-    for (const project of state?.projects ?? []) for (const id of originalImageIds(project)) ids.add(id);
+    for (const project of state?.projects ?? []) {
+      for (const id of originalImageIds(project)) ids.add(id);
+      for (const id of galleryDocumentIds(project)) ids.add(id);
+    }
     return ids;
   }
 
-  function imageIdsInSnapshot(snapshot) {
+  function assetIdsInSnapshot(snapshot) {
     const state = JSON.parse(typeof snapshot === 'string' ? snapshot : snapshot.json);
-    return imageIdsInState(state);
+    return assetIdsInState(state);
   }
 
   let imageDatabase;
@@ -183,19 +189,22 @@ Enredo.imageStore = (() => {
     });
   }
 
-  function imageFromBackup(data) {
+  function assetFromBackup(data,allowedType) {
     if (typeof data !== 'string' || data.length > 4 * Math.ceil(nodeImageFileLimit / 3) + 256) {
-      throw new Error('Invalid image in backup');
+      throw new Error('Invalid file in backup');
     }
     const separator = data.indexOf(',');
     const header = /^data:([^;,]+);base64$/.exec(data.slice(0,separator));
-    if (separator < 0 || !header || !originalImageType.test(header[1])) throw new Error('Invalid image type');
+    if (separator < 0 || !header || !allowedType.test(header[1])) throw new Error('Invalid file type');
     const binary = atob(data.slice(separator + 1));
-    if (!binary.length || binary.length > nodeImageFileLimit) throw new Error('Invalid image size');
+    if (!binary.length || binary.length > nodeImageFileLimit) throw new Error('Invalid file size');
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return new Blob([bytes],{type:header[1]});
   }
+
+  const imageFromBackup = data => assetFromBackup(data,originalImageType);
+  const documentFromBackup = data => assetFromBackup(data,/^application\/octet-stream$/i);
 
   function canvasBlob(canvas,type,quality) {
     return new Promise((resolve,reject) => {
@@ -396,13 +405,15 @@ Enredo.imageStore = (() => {
   }
 
   return {
-    galleryImageOwners,
+    galleryOwners,
     discardOriginalImages,
+    documentFromBackup,
     imageFromBackup,
-    imageIdsInSnapshot,
-    imageIdsInState,
+    assetIdsInSnapshot,
+    assetIdsInState,
     nodeImageFileLimit,
     galleryImageIds,
+    galleryDocumentIds,
     originalImageDataUrl,
     originalImageIds,
     prepareCoverImage,

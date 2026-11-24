@@ -104,7 +104,7 @@ Enredo.chapterGroups = ((app) => {
     const body = '<div class="fields">' + field(t('groupName'),input('title',group?.title ?? '',t('groupName'),true)) +
       field(t('groupDescription'),'<textarea name="description" maxlength="4000">' + esc(group?.description ?? '') + '</textarea>') +
       (group ? app.imageEditor.coverControls('group',group.id,group.cover) +
-        '<div>' + app.imageGallery.launcher('group',group) + '</div>' : '') + '</div>';
+        '<div>' + app.mediaGallery.launcher('group',group) + '</div>' : '') + '</div>';
     app.dialogs.showDialog({title:t(group ? 'editGroup' : 'newGroup'),body,submitKey:group ? 'save' : 'createGroup',onSubmit:data => {
       const title = data.get('title').trim();
       if (!title) return;
@@ -122,8 +122,12 @@ Enredo.chapterGroups = ((app) => {
         }
       });
       if (created) openGroup(created.id);
-      else if (group) Array.from($('chapters').querySelectorAll('[data-open-group]'))
-        .find(button => button.dataset.openGroup === group.id)?.focus({preventScroll:true});
+      else if (group) {
+        const action = $('presentationContent').querySelector('[data-group-action="edit"]');
+        const navigation = Array.from($('chapters').querySelectorAll('[data-open-group]'))
+          .find(button => button.dataset.openGroup === group.id);
+        (action?.dataset.id === group.id && action.getClientRects().length ? action : navigation)?.focus({preventScroll:true});
+      }
     }});
   }
 
@@ -227,7 +231,7 @@ Enredo.chapterGroups = ((app) => {
           ? '<button type="button" class="btn primary" data-chapter="' + esc(app.store.chapter()?.id ?? p.chapters[0].id) + '">' + tx('openEditor') + '</button>'
           : '<button type="button" class="btn primary" data-create-project-chapter="true">' + tx('createChapter') + '</button>') +
         '<button type="button" class="btn" data-edit-project>' + icon('edit') + ' ' + tx('projectDetails') + '</button>' +
-        app.imageGallery.launcher('project',p) + '</div></div></div><h3 class="presentation-section-title">' + tx('groups') + '</h3>' +
+        app.mediaGallery.launcher('project',p) + '</div></div></div><h3 class="presentation-section-title">' + tx('groups') + '</h3>' +
         (projectGroups.length ? '<ul class="presentation-group-list">' + projectGroups.join('') + '</ul>' : '');
       $('presentationContent').firstElementChild.after(app.projectSummary.overviewSection(p));
     } else {
@@ -240,7 +244,9 @@ Enredo.chapterGroups = ((app) => {
         '<h2>' + esc(title) + '</h2>' + (group?.description ? '<p class="group-description">' + esc(group.description) + '</p>' : '') +
         '<p>' + app.workspace.countText(members.length,'countChapter') + '</p>' +
         (group ? '<div class="presentation-actions"><button type="button" class="btn" data-new-group-chapter="' + esc(group.id) + '">' +
-          icon('plus') + ' ' + tx('newChapter') + '</button>' + app.imageGallery.launcher('group',group) + '</div>' : '') +
+          icon('plus') + ' ' + tx('newChapter') + '</button><button type="button" class="btn" data-group-action="edit" data-id="' +
+          esc(group.id) + '">' + icon('edit') + ' ' + tx('editGroup') + '</button>' +
+          app.mediaGallery.launcher('group',group) + '</div>' : '') +
         '</div></div><h3 class="presentation-section-title">' + tx('chapters') + '</h3>' +
         (members.length ? '<ul class="presentation-chapter-list">' + members.map(chapter => presentationChapter(chapter,p)).join('') +
           '</ul>' : '<p class="hint">' + tx('noGroupChapters') + '</p>');
@@ -434,6 +440,7 @@ Enredo.chapterGroups = ((app) => {
     if (button.dataset.openGroup) openGroup(button.dataset.openGroup);
     else if (button.hasAttribute('data-open-ungrouped')) openUngrouped();
     else if (button.dataset.newGroupChapter) app.projects.chapterDialog(null,button.dataset.newGroupChapter);
+    else if (button.dataset.groupAction) handleGroupAction(button);
     else if (button.hasAttribute('data-create-project-chapter')) app.projects.chapterDialog();
   }
 

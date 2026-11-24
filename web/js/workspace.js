@@ -181,6 +181,8 @@ Enredo.workspace = ((app) => {
     const shownGroup = presentation?.type === 'group' ? p.chapterGroups?.find(group => group.id === presentation.id) : null;
     $('chapterTitle').textContent = presentation?.type === 'ungrouped' ? t('ungrouped') : shownGroup?.title ?? (timeline && c ? c.title : p.title);
     $('renameChapter').hidden = !timeline || !c;
+    $('chapterGallery').hidden = !timeline || !c;
+    $('chapterGallery').innerHTML = timeline && c ? app.mediaGallery.launcher('chapter',c) : '';
     $('addNode').hidden = !showMap;
     const showWholeStory = showMap && app.session.isWholeStory();
     $('mapGrouping').hidden = !showWholeStory;
@@ -388,7 +390,7 @@ Enredo.workspace = ((app) => {
   }
 
   function handleEditorShortcut(event) {
-    if ($('dialog').open || $('imageViewer').open || $('coverCropDialog').open || $('imageGallery').open) return;
+    if ($('dialog').open || $('imageViewer').open || $('coverCropDialog').open || $('mediaGallery').open) return;
     if (event.key === 'Escape') {
       closeMenus();
       if (app.session.charactersOpen) app.characters.goBack();

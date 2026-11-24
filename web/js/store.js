@@ -24,12 +24,12 @@ Enredo.store = ((app) => {
   let storageFailed = false;
 
   function historyEntry(snapshot) {
-    return {snapshot,imageIds:app.imageStore.imageIdsInSnapshot(snapshot)};
+    return {snapshot,assetIds:app.imageStore.assetIdsInSnapshot(snapshot)};
   }
 
   function referencedImageIds() {
-    const ids = app.imageStore.imageIdsInState(state);
-    for (const entry of [...undoStack,...redoStack]) for (const id of entry.imageIds) ids.add(id);
+    const ids = app.imageStore.assetIdsInState(state);
+    for (const entry of [...undoStack,...redoStack]) for (const id of entry.assetIds) ids.add(id);
     return ids;
   }
 

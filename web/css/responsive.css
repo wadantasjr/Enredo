@@ -25,6 +25,7 @@
   .heading>div:first-child,.heading-title h1{min-width:0}
   .heading p{overflow-wrap:anywhere}
   .heading-actions{flex-shrink:0}
+  #editorView>.heading .heading-actions{flex-direction:column;align-items:flex-end;gap:6px}
   .android .graph-bar{gap:0}
   .android .graph{height:48dvh;min-height:245px}
   .android .graph-controls{left:7px;bottom:7px}
