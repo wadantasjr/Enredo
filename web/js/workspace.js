@@ -108,11 +108,15 @@ Enredo.workspace = ((app) => {
     const characters = app.session.charactersOpen;
     const management = app.session.managementOpen;
     const presentation = app.session.presentation;
-    const structure = app.session.isStructureView() && !characters && !management;
+    const structure = !presentation && app.session.isStructureView() && !characters && !management;
     const timeline = app.session.hasMapView() && !app.session.isWholeStory();
     const showMap = !!c && app.session.hasMapView();
     $('projectName').textContent = p.title;
-    $('breadcrumb').textContent = p.title;
+    const breadcrumb = $('breadcrumb');
+    const projectTitle = p.title.trim() ? p.title : t('untitled');
+    breadcrumb.textContent = projectTitle;
+    breadcrumb.title = projectTitle;
+    breadcrumb.setAttribute('aria-current',presentation?.type === 'project' ? 'page' : 'false');
     app.chapterGroups.renderNavigation();
     const projectButtons = app.store.state.projects.map(item => '<button class="' + (item.id === p.id ? 'current' : '') +
       '" data-project="' + esc(item.id) + '">' + icon('book') + '<span class="clip">' + esc(item.title) + '</span></button>').join('');
@@ -245,12 +249,12 @@ Enredo.workspace = ((app) => {
       app.characters.render();
       return;
     }
-    if (app.session.isStructureView()) {
-      app.structure.renderStructure();
-      return;
-    }
     if (app.session.presentation) {
       app.chapterGroups.renderPresentation();
+      return;
+    }
+    if (app.session.isStructureView()) {
+      app.structure.renderStructure();
       return;
     }
     if (!currentChapter) return;
@@ -343,6 +347,7 @@ Enredo.workspace = ((app) => {
   function bindEvents() {
     bindActions({
       goHome:openHome,
+      breadcrumbHome:openHome,
       toggleFullscreen:() => setDiagramFullscreen(!app.session.diagramFullscreen),
       toggleDetails:toggleDiagramDetails,
       currentTab:() => switchView('timeline'),

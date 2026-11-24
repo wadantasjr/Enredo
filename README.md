@@ -14,13 +14,17 @@ Use Enredo [in your browser](#getting-started) or install the [Android app](#and
 ### Getting started
 
 1. Download or clone this repository and open [`index.html`](index.html) in your browser. Keep the [`web/`](web/) folder beside it. Enredo runs offline without installation.
-2. In **My space**, select **After the Signal** to see its cover and chapter groups. Click **Open editor** to continue writing, or click **New project**. Use **Add sample** to open a fresh copy in the current language.
+2. In **My space**, select **After the Signal** to open the sample editor. Use **Add sample** to open a fresh copy in the current language or **New project** to start your own story.
 3. Use the **+** button next to **Groups** to organize chapters into parts. You can also keep chapters ungrouped. Within a chapter, click **Add story beat**.
 4. Select a story beat to write notes, then click **Add path**. You can create a destination or link to an existing beat, even in another chapter.
 
+In the top bar, select **My space** to return to your project library or select the project name to open its overview.
+
 ### Explore the sample project
 
+- Open **Project overview** from **My space** to see the project cover and the two illustrated groups, **The warning** and **The rescue**. Open either group to browse its chapter covers.
 - In **Timeline**, select **The night shift** to see its notes, original image, focal character, narrative stage, connection and linked task. Switch to **Whole story** to trace the two routes into the lighthouse and the two endings.
+- In **Inside the lighthouse**, open **Water at the stairs** or **The keeper’s log** to see more original images.
 - Open **Structure** to find the beats associated with all 12 stages. In **Characters**, explore Mara’s two phases and compare what changes in her arc and relationships on each ending path.
 - In **Project Management**, open **Kanban** to see all four task statuses. Filter by sprint or backlog, then use **Schedule** and **Gantt** to see how the work overlaps.
 
@@ -92,13 +96,17 @@ Use o Enredo [no navegador](#como-começar) ou instale o [aplicativo Android](#a
 ### Como começar
 
 1. Baixe ou clone o repositório e abra o [`index.html`](index.html) no navegador. Mantenha a pasta [`web/`](web/) ao lado do arquivo. O Enredo funciona offline, sem instalação.
-2. Em **Meu espaço**, selecione **Depois do sinal** para ver a capa e os grupos de capítulos. Clique em **Abrir editor** para continuar escrevendo ou em **Novo projeto**. Use **Adicionar exemplo** para abrir uma nova cópia no idioma selecionado.
+2. Em **Meu espaço**, selecione **Depois do sinal** para abrir o editor do exemplo. Use **Adicionar exemplo** para abrir uma nova cópia no idioma selecionado ou **Novo projeto** para começar sua própria história.
 3. Use o botão **+** ao lado de **Grupos** para organizar os capítulos em partes. Você também pode manter capítulos sem grupo. Dentro de um capítulo, clique em **Adicionar situação**.
 4. Selecione uma situação para escrever notas e clique em **Adicionar caminho**. Você pode criar uma situação de destino ou ligar a uma que já existe, inclusive em outro capítulo.
 
+Na barra superior, selecione **Meu espaço** para voltar à lista de projetos ou selecione o nome do projeto para abrir sua página de apresentação.
+
 ### Explore o projeto de exemplo
 
+- Abra **Apresentação do projeto** em **Meu espaço** para ver a capa do projeto e os dois grupos ilustrados, **O aviso** e **O resgate**. Abra um dos grupos para ver as capas dos capítulos.
 - Na **Timeline**, selecione **O turno da noite** para ver as notas, a imagem original, a personagem focal, a etapa narrativa, a conexão e a tarefa vinculada. Alterne para **História inteira** para acompanhar as duas rotas até o farol e os dois desfechos.
+- Em **Dentro do farol**, abra **Água na escada** ou **O caderno do faroleiro** para ver mais imagens originais.
 - Abra **Estrutura** para localizar as situações associadas às 12 etapas. Em **Personagens**, explore as duas fases de Mara e compare como seu arco e seus relacionamentos mudam em cada desfecho.
 - Em **Gestão de projeto**, abra o **Kanban** para ver os quatro status das tarefas. Filtre por sprint ou backlog e use **Cronograma** e **Gantt** para ver quais trabalhos se sobrepõem.
 

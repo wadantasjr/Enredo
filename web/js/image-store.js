@@ -87,13 +87,17 @@ Enredo.imageStore = (() => {
     return url;
   }
 
-  function saveOriginalImages(files) {
+  function saveOriginalImages(files,covers = []) {
     return imageTransaction('readwrite',store => {
       let request;
       for (const [id,file] of files) {
         const original = originalImageType.test(file.type)
           ? file : file.slice(0,file.size,'application/octet-stream');
         request = store.add(original,id);
+      }
+      for (const [id,{source,thumbnail}] of covers) {
+        store.add(source,id);
+        request = store.add(thumbnail,'thumb-' + id);
       }
       return request;
     });
@@ -133,10 +137,10 @@ Enredo.imageStore = (() => {
   }
 
   function pruneUnusedImages(referencedIds) {
-    const keep = new Set(referencedIds);
     imageTransaction('readwrite',store => {
       const request = store.getAllKeys();
       request.onsuccess = () => {
+        const keep = referencedIds();
         for (const key of request.result) {
           const imageId = typeof key === 'string' && key.startsWith('thumb-') ? key.slice(6) : key;
           if (!keep.has(imageId)) {

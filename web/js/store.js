@@ -34,7 +34,7 @@ Enredo.store = ((app) => {
   }
 
   function pruneUnusedImages() {
-    app.imageStore.pruneUnusedImages(referencedImageIds());
+    app.imageStore.pruneUnusedImages(referencedImageIds);
   }
 
   async function initialize() {
@@ -44,14 +44,11 @@ Enredo.store = ((app) => {
       return;
     }
     const p = app.sampleProject.create();
-    // The sample preview remains usable when IndexedDB is unavailable.
-    const beat = await app.sampleProject.saveOriginal(p).catch(() => null);
+    // The sample groups and embedded beat previews remain usable without IndexedDB.
+    const discardImages = await app.sampleProject.saveImages(p).catch(() => null);
     const saved = readState();
     state = saved ?? {active:p.id,chapter:p.chapters[0].id,projects:[p]};
-    if ((saved || !save()) && beat) {
-      app.imageStore.discardOriginalImages([beat.originalImageId]);
-      delete beat.originalImageId;
-    }
+    if (saved || !save()) discardImages?.();
     pruneUnusedImages();
   }
 

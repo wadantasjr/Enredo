@@ -3,25 +3,35 @@ Enredo.sampleProject = ((app) => {
 
   const narrativeModel = 'journey-12';
   const openingBeat = 'radio';
+  const {scene,artwork,portraits} = app.sampleImages;
+  const illustrations = {[openingBeat]:scene,queda:artwork.farol,registro:artwork.log};
 
   function create() {
     const pt = app.preferences.language === 'pt';
     const local = (en,br) => pt ? br : en;
     const textFields = fields => Object.fromEntries(Object.entries(fields).map(([key,values]) => [key,local(...values)]));
-    const {scene,portraits} = app.sampleImages;
     const group = local('Harbor watch','Vigia do porto');
     const volunteers = local('Coastal rescue volunteers','Voluntários do resgate costeiro');
     const beacon = local('Lighthouse service','Serviço do farol');
+    const chapterGroups = [
+      {id:'warning',title:local('The warning','O aviso'),description:local(
+        'A call interrupts Mara’s night shift and sends her toward the lighthouse.',
+        'Uma chamada interrompe o turno de Mara e a leva ao farol.')},
+      {id:'rescue',title:local('The rescue','O resgate'),description:local(
+        'Inside the lighthouse, Mara and Bento look for a way to guide the boats home.',
+        'Dentro do farol, Mara e Bento procuram uma forma de trazer os barcos de volta ao porto.')}
+    ];
     const chapters = [
-      {id:'sinal',title:local('The last signal','O último sinal')},
-      {id:'farol',title:local('Inside the lighthouse','Dentro do farol')},
-      {id:'mare',title:local('The tide rises','A maré sobe')}
+      {id:'sinal',title:local('The last signal','O último sinal'),groupId:'warning',groupOrder:0},
+      {id:'farol',title:local('Inside the lighthouse','Dentro do farol'),groupId:'rescue',groupOrder:0},
+      {id:'mare',title:local('The tide rises','A maré sobe'),groupId:'rescue',groupOrder:1}
     ];
     const mara = (en,br,phaseId = 'mara-watch') => ({characterId:'mara',phaseId,dramaticFunction:local(en,br)});
     const bento = (en,br) => ({characterId:'bento',phaseId:null,dramaticFunction:local(en,br)});
     const nodes = [];
     function beat(id,chapter,kind,stepId,x,y,title,notes,participants) {
       nodes.push({id,chapter,kind,title:local(...title),notes:local(...notes),x,y,participants,
+        ...(illustrations[id] ? {image:illustrations[id].preview} : {}),
         focalCharacterId:participants[0].characterId,narrativeStage:{modelId:narrativeModel,stepId}});
     }
 
@@ -30,7 +40,6 @@ Enredo.sampleProject = ((app) => {
       ['At low tide, Mara logs the fishing boats from a harbor watch room. She keeps the spare radio off to save its battery.',
         'Na maré baixa, Mara registra os barcos de pesca na sala de vigia do porto. Ela deixa o rádio reserva desligado para poupar a bateria.'],
       [mara('Establishes the routine that the ending will revisit.','Apresenta a rotina que volta no desfecho.')]);
-    nodes[0].image = scene.preview;
     beat('chamado','sinal','scene','call-to-adventure',272,152,
       ['A voice through the static','Uma voz na estática'],
       ['Bento reports a faulty tide gauge. Three boats are returning through a channel that will soon be unsafe. Mara grabs the spare radio.',
@@ -312,20 +321,32 @@ Enredo.sampleProject = ((app) => {
     }));
 
     return {
-      id:app.dom.uid(),title:local('After the Signal','Depois do sinal'),narrativeModel,chapters,nodes,edges,
+      id:app.dom.uid(),title:local('After the Signal','Depois do sinal'),narrativeModel,chapterGroups,chapters,nodes,edges,
       characters,characterRoles,characterArcs,arcPaths,relationships,relationshipKinds,
       portraits:Object.entries(portraits).map(([id,data]) => ({id,data})),tasks,sprints
     };
   }
 
-  async function saveOriginal(project) {
-    const beat = project.nodes.find(node => node.id === openingBeat);
-    const id = app.dom.uid();
-    const original = app.imageStore.imageFromBackup(app.sampleImages.scene.original);
-    await app.imageStore.saveOriginalImages([[id,original]]);
-    beat.originalImageId = id;
-    return beat;
+  async function saveImages(project) {
+    const {uid} = app.dom;
+    const {imageFromBackup,saveOriginalImages,discardOriginalImages} = app.imageStore;
+    const beats = project.nodes.filter(beat => illustrations[beat.id]).map(beat => ({beat,id:uid()}));
+    const covers = [project,...project.chapterGroups,...project.chapters].map(target => ({
+      target,image:artwork[target === project ? 'project' : target.id],id:'cover-' + uid()
+    }));
+    await saveOriginalImages(
+      beats.map(({beat,id}) => [id,imageFromBackup(illustrations[beat.id].original)]),
+      covers.map(({image,id}) => [id,{source:imageFromBackup(image.original),thumbnail:imageFromBackup(image.preview)}])
+    );
+    for (const {beat,id} of beats) beat.originalImageId = id;
+    for (const {target,id} of covers) target.cover = {assetId:id,focusX:0.5,focusY:0.5};
+
+    return () => {
+      discardOriginalImages([...beats,...covers].map(({id}) => id));
+      for (const {beat} of beats) delete beat.originalImageId;
+      for (const {target} of covers) delete target.cover;
+    };
   }
 
-  return {create,saveOriginal};
+  return {create,saveImages};
 })(Enredo);

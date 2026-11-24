@@ -66,10 +66,10 @@ Enredo.projects = ((app) => {
     const button = $('addSample');
     if (button.disabled) return;
     button.disabled = true;
-    let beat;
+    let discardImages;
     try {
       const p = app.sampleProject.create();
-      beat = await app.sampleProject.saveOriginal(p);
+      discardImages = await app.sampleProject.saveImages(p);
       const title = p.title;
       const titles = new Set(app.store.state.projects.map(item => item.title));
       for (let number = 2; titles.has(p.title); number += 1) p.title = title + ' (' + number + ')';
@@ -79,9 +79,9 @@ Enredo.projects = ((app) => {
         app.store.state.chapter = p.chapters[0].id;
       },{fit:true,saveError:'projectSaveFailed',afterSave:() => app.workspace.enterProject(p)})) {
         $('chapterTitle').focus();
-      } else app.imageStore.discardOriginalImages([beat.originalImageId]);
+      } else discardImages();
     } catch {
-      app.preferences.flash(beat ? 'projectSaveFailed' : 'imageSaveFailed');
+      app.preferences.flash(discardImages ? 'projectSaveFailed' : 'imageSaveFailed');
     } finally {
       button.disabled = false;
     }

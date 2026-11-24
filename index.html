@@ -41,7 +41,11 @@
   </aside>
   <main class="main">
     <header class="topbar">
-      <div class="crumb" id="projectCrumb" hidden><span data-i18n="home">My space</span><span data-icon="right"></span><strong class="clip" id="breadcrumb"></strong></div>
+      <nav class="crumb" id="projectCrumb" aria-label="Breadcrumbs" data-i18n-label="breadcrumbs" hidden>
+        <button type="button" class="crumb-home" id="breadcrumbHome" data-i18n="home">My space</button>
+        <span class="crumb-separator" data-icon="right" aria-hidden="true"></span>
+        <button type="button" class="crumb-project clip" id="breadcrumb" data-project-overview></button>
+      </nav>
       <div class="top-actions">
         <span class="save" id="saveStatus" role="status"></span>
         <label class="language-picker">
