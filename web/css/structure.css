@@ -1,9 +1,7 @@
 .workspace.structure-mode,.workspace.no-map{grid-template-columns:minmax(0,1fr)}
 .workspace.no-map:not(.structure-mode){flex:none;height:auto;min-height:0}
 .workspace.no-map .chapter-empty{margin:14px}
-.workspace.no-map:not(.structure-mode) .graph-actions,.workspace.no-map .workspace-actions,
-.structure-mode .workspace-actions,.structure-mode .map-tool{display:none}
-.structure-mode .graph-actions .undo-control{display:inline-grid}
+.workspace.no-map .map-tool,.structure-mode .map-tool{display:none}
 .structure-mode .graph-shell{min-height:0}
 .structure-view{flex:1;min-height:0;overflow:auto;padding:clamp(12px,3vw,24px);background:var(--surface-subtle)}
 .structure-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
@@ -56,7 +54,6 @@
 .android .structure-preserved summary{align-content:center}
 @media(max-width:940px){.workspace.structure-mode{min-height:0}.structure-view{overflow:visible}}
 @media(max-width:600px){
-  .graph-actions .undo-control{display:inline-grid}
   .structure-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
   .structure-stage-status{max-width:6rem}
 }

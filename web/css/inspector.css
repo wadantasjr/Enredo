@@ -28,8 +28,8 @@ html[data-theme="dark"] select{background-image:url("data:image/svg+xml,%3Csvg x
 .node-actions button{font-size:.8rem;padding:5px;min-height:28px}
 .node-actions .remove{color:var(--danger)}
 .hint{margin:5px 0;color:var(--muted);font-size:.875rem}
-.overview-chapters{display:grid;gap:7px;margin-top:12px}
-.overview-chapters .chapter-link{border:1px solid var(--line)}
+.overview-chapters{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;margin-top:12px}
+.overview-chapters .chapter-link{width:100%;min-width:0;border:1px solid var(--line)}
 .footer-note{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;color:var(--quiet);font-size:.77rem}
 .footer-note span{display:flex;align-items:center;gap:5px}
 .footer-note svg{width:14px;height:14px}

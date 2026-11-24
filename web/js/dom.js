@@ -6,6 +6,7 @@ Enredo.dom = (() => {
   const icons = {
     expand: '<path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/>',
     contract: '<path d="M4 9h5V4m6 0v5h5M4 15h5v5m6 0v-5h5"/>',
+    leftPanel: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M10 4v16"/>',
     sidePanel: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16"/>',
     branch: '<circle cx="6" cy="5" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="19" r="2"/><path d="M6 7v10M6 13h5a7 7 0 0 0 7-5"/>',
     book: '<path d="M12 6a8 8 0 0 0-9-2v15a9 9 0 0 1 9 1 9 9 0 0 1 9-1V4a8 8 0 0 0-9 2zm0 0v14"/>',

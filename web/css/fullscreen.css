@@ -1,7 +1,10 @@
 .diagram-fullscreen{overflow:hidden}
-.diagram-fullscreen .sidebar,.diagram-fullscreen .topbar,.diagram-fullscreen #editorView>.heading,
+.diagram-fullscreen .app{display:grid;position:fixed;inset:0;z-index:15;min-height:0;background:var(--fullscreen-bg)}
+.diagram-fullscreen .main,.diagram-fullscreen #editorView{display:contents}
+.diagram-fullscreen .sidebar{min-height:0;overflow:auto;overscroll-behavior:contain}
+.diagram-fullscreen .topbar,.diagram-fullscreen #editorView>.heading,
 .diagram-fullscreen #editorFooter,.diagram-fullscreen .graph-footer{display:none}
-.diagram-fullscreen .workspace{position:fixed;inset:0;z-index:15;height:auto;min-height:0;border:0;border-radius:0;background:var(--fullscreen-bg);
+.diagram-fullscreen .workspace{height:auto;min-width:0;min-height:0;border:0;border-radius:0;
   grid-template-columns:minmax(0,1fr) clamp(215px,34vw,292px);grid-template-rows:auto minmax(0,1fr)}
 .diagram-fullscreen .graph-shell{min-height:0}
 .diagram-fullscreen .graph{flex:1;height:auto;min-height:0}
@@ -9,7 +12,12 @@
 .diagram-fullscreen .inspector-header{min-height:44px}
 .diagram-fullscreen .inspector-body{overscroll-behavior:contain}
 @media(max-width:720px) and (orientation:portrait),(max-width:480px){
-  .diagram-fullscreen .workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) min(40dvh,320px)}
+  .diagram-fullscreen .workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) minmax(0,.65fr)}
   .diagram-fullscreen .inspector{border-left:0;border-top:1px solid var(--line)}
+}
+@media(max-width:600px){
+  .diagram-fullscreen .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+  .diagram-fullscreen .app.navigation-collapsed{grid-template-rows:minmax(0,1fr)}
+  .diagram-fullscreen .sidebar{max-height:30dvh}
 }
 .diagram-fullscreen .workspace.details-collapsed{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}

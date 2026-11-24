@@ -103,7 +103,8 @@ Enredo.chapterGroups = ((app) => {
     const p = project();
     const body = '<div class="fields">' + field(t('groupName'),input('title',group?.title ?? '',t('groupName'),true)) +
       field(t('groupDescription'),'<textarea name="description" maxlength="4000">' + esc(group?.description ?? '') + '</textarea>') +
-      (group ? app.imageEditor.coverControls('group',group.id,group.cover) : '') + '</div>';
+      (group ? app.imageEditor.coverControls('group',group.id,group.cover) +
+        '<div>' + app.imageGallery.launcher('group',group) + '</div>' : '') + '</div>';
     app.dialogs.showDialog({title:t(group ? 'editGroup' : 'newGroup'),body,submitKey:group ? 'save' : 'createGroup',onSubmit:data => {
       const title = data.get('title').trim();
       if (!title) return;
@@ -221,11 +222,11 @@ Enredo.chapterGroups = ((app) => {
       if (ungrouped.length) projectGroups.push(presentationGroup(null,p,projectGroups.length));
       $('presentationContent').innerHTML = '<div class="project-presentation-hero">' +
         app.imageEditor.coverMarkup(p.cover,'project-presentation-cover') + '<div><span class="eyebrow">' + tx('project') + '</span>' +
-        '<h2>' + esc(p.title || t('untitled')) + '</h2><p>' + chapterCount + ' · ' + nodeCount + '</p>' +
+        '<h2>' + esc(p.title || t('untitled')) + '</h2><p>' + chapterCount + ' · ' + nodeCount + '</p><div class="presentation-actions">' +
         (p.chapters.length
           ? '<button type="button" class="btn primary" data-chapter="' + esc(app.store.chapter()?.id ?? p.chapters[0].id) + '">' + tx('openEditor') + '</button>'
           : '<button type="button" class="btn primary" data-create-project-chapter="true">' + tx('createChapter') + '</button>') +
-        '</div></div><h3 class="presentation-section-title">' + tx('groups') + '</h3>' +
+        app.imageGallery.launcher('project',p) + '</div></div></div><h3 class="presentation-section-title">' + tx('groups') + '</h3>' +
         (projectGroups.length ? '<ul class="presentation-group-list">' + projectGroups.join('') + '</ul>' : '');
     } else {
       const group = view.type === 'group' ? groups(p).find(item => item.id === view.id) : null;
@@ -236,7 +237,8 @@ Enredo.chapterGroups = ((app) => {
         app.imageEditor.coverMarkup(group?.cover,'group-presentation-cover') + '<div><span class="eyebrow">' + tx('group') + '</span>' +
         '<h2>' + esc(title) + '</h2>' + (group?.description ? '<p class="group-description">' + esc(group.description) + '</p>' : '') +
         '<p>' + app.workspace.countText(members.length,'countChapter') + '</p>' +
-        (group ? '<button type="button" class="btn" data-new-group-chapter="' + esc(group.id) + '">' + icon('plus') + ' ' + tx('newChapter') + '</button>' : '') +
+        (group ? '<div class="presentation-actions"><button type="button" class="btn" data-new-group-chapter="' + esc(group.id) + '">' +
+          icon('plus') + ' ' + tx('newChapter') + '</button>' + app.imageGallery.launcher('group',group) + '</div>' : '') +
         '</div></div><h3 class="presentation-section-title">' + tx('chapters') + '</h3>' +
         (members.length ? '<ul class="presentation-chapter-list">' + members.map(chapter => presentationChapter(chapter,p)).join('') +
           '</ul>' : '<p class="hint">' + tx('noGroupChapters') + '</p>');
@@ -449,6 +451,7 @@ Enredo.chapterGroups = ((app) => {
 
   return {
     bindEvents,
+    groupChapters,
     openGroup,
     openProjectPresentation,
     renderNavigation,

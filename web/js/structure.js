@@ -120,7 +120,7 @@ Enredo.structure = ((app) => {
     if (!node || !app.session.isStructureView()) return;
     app.session.selection = id;
     app.store.state.chapter = node.chapter;
-    app.workspace.switchView('whole-story');
+    app.workspace.switchView('whole-story',{revealSelection:true});
     app.diagram.reveal(id);
     $('graph').scrollIntoView({block:'nearest'});
     app.diagram.cardFor(id)?.focus({preventScroll:true});

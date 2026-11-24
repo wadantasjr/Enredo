@@ -4,13 +4,15 @@ Enredo.diagramLayout = ((app) => {
   function autoLayout() {
     const p = app.store.project();
     if (app.session.isStructureView() || !app.store.chapter()) return;
-    const targets = app.session.isWholeStory() ? p.chapters : [app.store.chapter()];
+    const wholeStory = app.session.isWholeStory();
+    const targets = wholeStory ? p.chapters : [app.store.chapter()];
+    const position = node => wholeStory ? node.mapPosition : node;
     app.store.edit(() => {
-      for (const c of targets) layoutChapter(p,c.id);
+      for (const c of targets) layoutChapter(p,c.id,position);
     },{fit:true});
   }
 
-  function layoutChapter(p,chapterId) {
+  function layoutChapter(p,chapterId,position) {
     const nodes = p.nodes.filter(n => n.chapter === chapterId);
     if (nodes.length < 2) return;
     const ids = new Set(nodes.map(n => n.id));
@@ -38,7 +40,7 @@ Enredo.diagramLayout = ((app) => {
       }
     }
     const columns = new Map();
-    nodes.sort((a,b) => a.y-b.y || a.x-b.x);
+    nodes.sort((a,b) => position(a).y - position(b).y || position(a).x - position(b).x);
     for (const n of nodes) {
       const level = rank.get(n.id);
       if (!columns.has(level)) columns.set(level,[]);
@@ -52,8 +54,7 @@ Enredo.diagramLayout = ((app) => {
     for (const [level,column] of columns) {
       let y = (tallest - heights.get(level)) / 2;
       for (const n of column) {
-        n.x = level * (app.diagram.W + 80);
-        n.y = y;
+        Object.assign(position(n),{x:level * (app.diagram.W + 80),y});
         y += app.diagram.layoutNodeHeight(n) + gap;
       }
     }

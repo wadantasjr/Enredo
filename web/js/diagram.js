@@ -6,6 +6,7 @@ Enredo.diagram = ((app) => {
 
   const W = 170, H = 96, imageCardHeight = 168;
   const thumbnailWidth = 144, thumbnailHeight = 68;
+  const chapterContentOffset = 65;
 
   const layoutNodeHeight = node => node.image ? imageCardHeight : H;
   const nodeThumbnailScale = node => node.image ? app.preferences.thumbnailScale : 0;
@@ -18,7 +19,7 @@ Enredo.diagram = ((app) => {
   const view = {x:0,y:0,zoom:1};
   const defaultPositionScale = {x:1,y:1};
   let graphViewport = null;
-  let scene = {nodes:[],edges:[],headings:[],byId:new Map(),positionScale:defaultPositionScale};
+  let scene = {nodes:[],edges:[],sections:[],groupRules:[],byId:new Map(),positionScale:defaultPositionScale};
   let miniBounds = null;
 
   function bounds(nodes) {
@@ -27,8 +28,8 @@ Enredo.diagram = ((app) => {
     for (const n of nodes) {
       box.left = Math.min(box.left,n.x);
       box.top = Math.min(box.top,n.y);
-      box.right = Math.max(box.right,n.x + nodeWidth(n));
-      box.bottom = Math.max(box.bottom,n.y + nodeHeight(n));
+      box.right = Math.max(box.right,n.x + n.width);
+      box.bottom = Math.max(box.bottom,n.y + n.height);
     }
     return box;
   }
@@ -42,44 +43,144 @@ Enredo.diagram = ((app) => {
     return defaultPositionScale;
   }
 
-  function positionCards(nodes,scale) {
-    return nodes.map(n => ({...n,x:n.x * scale.x,y:n.y * scale.y}));
+  function positionCards(nodes,scale,wholeStory = false) {
+    return nodes.map(record => {
+      const position = wholeStory ? record.mapPosition : record;
+      return {...record,record,position,x:position.x * scale.x,y:position.y * scale.y,
+        width:nodeWidth(record),height:nodeHeight(record),positionScale:scale};
+    });
+  }
+
+  function wholeStoryLayout(project) {
+    const nodes = [], sections = [], groupRules = [], representatives = new Map();
+    const backgroundSize = project.mapBackgroundId ? project.mapBackgroundSize : null;
+    const byChapter = new Map(project.chapters.map(c => [c.id,[]]));
+    const chapterIndex = new Map(project.chapters.map((c,i) => [c.id,i]));
+    const collapsed = app.mapGrouping.collapsedSections(project);
+    for (const node of project.nodes) byChapter.get(node.chapter).push(node);
+    const countText = app.workspace.countText;
+    let offset = 0;
+
+    function addSection(type,record,title,details,collapsed,suggested,parent) {
+      const position = record.mapPosition ?? suggested;
+      const section = {type,id:record.id,record,title,details,collapsed,position,positionScale:defaultPositionScale,
+        x:(parent?.x ?? 0) + position.x,y:(parent?.y ?? 0) + position.y,width:250,height:collapsed ? H : 42,children:[]};
+      parent?.children.push(section);
+      sections.push(section);
+      return section;
+    }
+
+    function placeChapter(chapter,x,parent) {
+      const beats = byChapter.get(chapter.id);
+      const closed = collapsed.chapters.has(chapter.id);
+      const section = addSection('chapter',chapter,number(chapterIndex.get(chapter.id)) + '  ' + chapter.title,
+        countText(beats.length,'countNode'),closed,{x,y:parent ? 66 : -65},parent);
+      if (closed) {
+        for (const beat of beats) representatives.set(beat.id,section);
+        return section.width + 82;
+      }
+      const cards = positionCards(beats,backgroundSize ? defaultPositionScale : chapterPositionScale(beats),true);
+      if (backgroundSize) {
+        // Keep locations centered on the artwork as thumbnail sizes change.
+        for (const card of cards) {
+          card.x += (W - card.width) / 2;
+          card.y += (layoutNodeHeight(card) - card.height) / 2;
+        }
+      }
+      const box = bounds(cards);
+      for (const card of cards) {
+        card.x += section.x;
+        card.y += section.y + chapterContentOffset;
+        nodes.push(card);
+        section.children.push(card);
+      }
+      return Math.max(section.width,box.right) + 138;
+    }
+
+    for (const group of project.chapterGroups ?? []) {
+      const chapters = app.chapterGroups.groupChapters(project,group.id);
+      const beats = chapters.reduce((count,chapter) => count + byChapter.get(chapter.id).length,0);
+      const closed = collapsed.groups.has(group.id);
+      const details = countText(chapters.length,'countChapter') + ' · ' + countText(beats,'countNode');
+      const section = addSection('group',group,group.title,details,closed,{x:offset,y:-131});
+      if (closed) {
+        for (const chapter of chapters) {
+          for (const beat of byChapter.get(chapter.id)) representatives.set(beat.id,section);
+        }
+        offset += section.width + 112;
+      } else {
+        let chapterOffset = 0;
+        for (const chapter of chapters) chapterOffset += placeChapter(chapter,chapterOffset,section);
+        if (chapters.length && !backgroundSize) {
+          section.rule = {id:group.id,x:section.x,y:section.y + 51,width:chapterOffset - 72};
+          groupRules.push(section.rule);
+        }
+        offset += Math.max(chapterOffset,section.width + 112) + 32;
+      }
+    }
+    for (const chapter of app.chapterGroups.groupChapters(project,null)) offset += placeChapter(chapter,offset);
+    return {nodes,sections,groupRules,representatives,backgroundSize};
+  }
+
+  function visibleEdges(edges,byId,representatives) {
+    const outgoing = new Map();
+    for (const edge of edges) {
+      const visibleFrom = byId.get(edge.from), visibleTo = byId.get(edge.to);
+      const from = visibleFrom ?? representatives.get(edge.from), to = visibleTo ?? representatives.get(edge.to);
+      if (!from || !to || from === to) continue;
+      if (!outgoing.has(from)) outgoing.set(from,new Map());
+      const destinations = outgoing.get(from);
+      if (!destinations.has(to)) destinations.set(to,[]);
+      const parallel = destinations.get(to);
+      const projected = !visibleFrom || !visibleTo;
+      if (projected && parallel.length) parallel[0].count++;
+      else parallel.push({from,to,edge:projected ? null : edge,label:edge.label,count:1});
+    }
+    const visible = [];
+    for (const destinations of outgoing.values()) {
+      for (const parallel of destinations.values()) {
+        parallel.forEach((wire,index) => visible.push({...wire,index,bend:(index - (parallel.length - 1)/2) * 31}));
+      }
+    }
+    return visible;
   }
 
   function buildScene() {
-    const p = app.store.project(), headings = [];
-    let nodes;
+    const p = app.store.project();
     let positionScale = defaultPositionScale;
+    let layout;
     if (app.session.isWholeStory()) {
-      nodes = [];
-      const byChapter = new Map(p.chapters.map(c => [c.id,[]]));
-      p.nodes.forEach(n => byChapter.get(n.chapter).push(n));
-      let offset = 0;
-      p.chapters.forEach((c,i) => {
-        const chapterNodes = byChapter.get(c.id);
-        const group = positionCards(chapterNodes,chapterPositionScale(chapterNodes));
-        const box = bounds(group);
-        headings.push({text:number(i) + '  ' + c.title,x:offset,y:-52});
-        for (const n of group) {
-          n.x += offset - box.left;
-          n.y -= box.top;
-          nodes.push(n);
-        }
-        offset += Math.max(box.right - box.left,250) + 138;
-      });
+      layout = wholeStoryLayout(p);
     } else {
       const chapterNodes = p.nodes.filter(n => n.chapter === app.store.chapter().id);
       positionScale = chapterPositionScale(chapterNodes);
-      nodes = positionCards(chapterNodes,positionScale);
+      layout = {nodes:positionCards(chapterNodes,positionScale),sections:[],groupRules:[],representatives:new Map()};
     }
+    const {nodes,sections,groupRules,representatives,backgroundSize} = layout;
     const byId = new Map(nodes.map(n => [n.id,n]));
-    return {nodes,headings,byId,positionScale,edges:p.edges.filter(e => byId.has(e.from) && byId.has(e.to))};
+    return {nodes,sections,groupRules,byId,positionScale,backgroundSize,edges:visibleEdges(p.edges,byId,representatives)};
+  }
+
+  function renderSection(section) {
+    const {type,id,title,details,x,y,width,height,collapsed} = section;
+    const name = t(type === 'group' ? 'mapGroupLabel' : 'mapChapterLabel',{name:title});
+    const label = collapsed ? name + ' · ' + details : name;
+    return '<button type="button" class="map-section ' + (collapsed ? 'node map-summary' : 'map-heading') +
+      '" data-map-section="' + type + '" data-map-id="' + esc(id) + '" aria-expanded="' + !collapsed +
+      '" aria-label="' + esc(label) + '" title="' + esc(name) + '" style="left:' + x + 'px;top:' + y +
+      'px;width:' + width + 'px;height:' + height + 'px">' +
+      '<span class="map-section-label">' + icon(type === 'group' ? 'folder' : 'book') + '<span class="' +
+      (collapsed ? 'node-title' : 'clip') + '">' + esc(title) + '</span>' + icon(collapsed ? 'right' : 'chevron') + '</span>' +
+      (collapsed ? '<span class="map-section-count">' + esc(details) + '</span><span class="port" aria-hidden="true"></span>' +
+        '<span class="port out" aria-hidden="true"></span>' : '') + '</button>';
   }
 
   function renderCards() {
     const model = app.narrative.activeNarrativeModel(app.store.project());
     $('cards').innerHTML =
-      scene.headings.map(c => '<span class="world-label" style="left:' + c.x + 'px;top:' + c.y + 'px">' + esc(c.text) + '</span>').join('') +
+      scene.groupRules.map(rule => '<span class="map-group-rule" data-map-rule="' + esc(rule.id) + '" aria-hidden="true" style="left:' + rule.x + 'px;top:' + rule.y +
+        'px;width:' + rule.width + 'px"></span>').join('') +
+      scene.sections.map(renderSection).join('') +
       scene.nodes.map(n => {
         const title = esc(n.title || t('untitled'));
         const active = app.structure.activeNarrativeStage(n,model);
@@ -92,7 +193,7 @@ Enredo.diagram = ((app) => {
         return '<button class="node' + (n.id === app.session.selection ? ' selected' : '') + (badge ? ' has-narrative-stage' : '') +
           (thumb ? ' has-image' : '') +
           (n.id === app.session.source ? ' connection-source' : '') + '" data-node="' + esc(n.id) + '" aria-pressed="' + (n.id === app.session.selection) +
-          '" style="left:' + n.x + 'px;top:' + n.y + 'px;width:' + nodeWidth(n) + 'px;height:' + nodeHeight(n) + 'px" title="' + title +
+          '" style="left:' + n.x + 'px;top:' + n.y + 'px;width:' + n.width + 'px;height:' + n.height + 'px" title="' + title +
           (badge ? ' · ' + esc(stageName) : '') + '">' + thumb + '<span class="tag" data-kind="' +
           n.kind + '">' + icon(n.kind) + tx(n.kind) + '</span><span class="node-title">' + title +
           '</span>' + badge + '<span class="port" aria-hidden="true"></span><span class="port out" aria-hidden="true"></span></button>';
@@ -100,69 +201,75 @@ Enredo.diagram = ((app) => {
   }
 
   function sameRow(a,b) {
-    return a.y < b.y + nodeHeight(b) + 10 && b.y < a.y + nodeHeight(a) + 10;
+    return a.y < b.y + b.height + 10 && b.y < a.y + a.height + 10;
   }
 
   function renderWires() {
-    const arrows = '<defs><marker id="tip" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1l6 3-6 3" fill="none" stroke="var(--wire)" stroke-width="1.1"/></marker>' +
-      '<marker id="tip-active" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1l6 3-6 3" fill="none" stroke="var(--wire-active)" stroke-width="1.1"/></marker></defs>';
-    const labels = [], groups = new Map();
-    for (const edge of scene.edges) {
-      const key = JSON.stringify([edge.from,edge.to]);
-      if (!groups.has(key)) groups.set(key,[]);
-      groups.get(key).push(edge);
-    }
-    const lines = scene.edges.map(e => {
-      const from = scene.byId.get(e.from), to = scene.byId.get(e.to);
-      const x1 = from.x + nodeWidth(from) + 4, x2 = to.x - 5, y1 = from.y + nodeHeight(from) / 2, y2 = to.y + nodeHeight(to) / 2;
+    const labels = [];
+    const selected = scene.byId.get(app.session.selection);
+    const fontScale = app.preferences.fontSize/100;
+    const lines = scene.edges.map(({from,to,edge,label:originalLabel,count,index,bend}) => {
+      const x1 = from.x + from.width + 4, x2 = to.x - 5, y1 = from.y + from.height / 2, y2 = to.y + to.height / 2;
       const adjacent = x2 - x1 > 16;
       const reach = Math.max(20,Math.min(130,(x2 - x1) * .55));
       const bypassCards = !adjacent && sameRow(from,to);
-      const group = groups.get(JSON.stringify([e.from,e.to]));
-      const index = group.indexOf(e);
-      const bend = (index - (group.length - 1)/2) * 31;
       const bypass = Math.min(from.y,to.y) - 35 - index*24;
       const startBend = bypassCards ? bypass : y1 + bend;
       const endBend = bypassCards ? bypass : y2 + bend;
       const d = adjacent ? 'M ' + x1 + ' ' + y1 + ' C ' + (x1+reach) + ' ' + (y1+bend) + ' ' + (x2-reach) + ' ' + (y2+bend) + ' ' + x2 + ' ' + y2 :
         'M ' + x1 + ' ' + y1 + ' C ' + (x1 + 30) + ' ' + y1 + ' ' + (x1 + 30) + ' ' + startBend + ' ' + (x1 + 14) + ' ' + startBend +
         ' L ' + (x2 - 14) + ' ' + endBend + ' C ' + (x2 - 30) + ' ' + endBend + ' ' + (x2-30) + ' ' + y2 + ' ' + x2 + ' ' + y2;
-      const active = from.id === app.session.selection || to.id === app.session.selection;
-      const id = ' data-edge="' + esc(e.id) + '"';
+      const active = from === selected || to === selected;
+      const id = edge ? ' data-edge="' + esc(edge.id) + '"' : '';
       const tip = active ? 'tip-active' : 'tip';
-      if (e.label && (view.zoom >= .43 || active)) {
-        const chars = [...e.label];
-        const label = chars.length > 24 ? chars.slice(0,23).join('') + '…' : e.label;
+      const fullLabel = count > 1 ? app.workspace.countText(count,'countConnection') : originalLabel;
+      if (fullLabel && (view.zoom >= .43 || active)) {
+        const chars = [...fullLabel];
+        const label = chars.length > 24 ? chars.slice(0,23).join('') + '…' : fullLabel;
         const width = Math.max(34,[...label].length * 7.3 + 13);
-        const x = (x1 + x2) / 2, y = bypassCards ? bypass : (y1 + y2)/2 + bend*(adjacent ? .75 : 1);
-        labels.push('<g class="wire-label"' + id + ' transform="translate(' + x + ' ' + y + ') scale(' + app.preferences.fontSize/100 + ')"><title>' + esc(e.label) +
+        const x = (x1 + x2) / 2;
+        const routeY = bypassCards ? bypass : (y1 + y2)/2 + bend*(adjacent ? .75 : 1);
+        const y = routeY - 10*fontScale - 7;
+        labels.push('<g class="wire-label' + (edge ? '' : ' wire-summary-label') + '"' + id + ' transform="translate(' + x + ' ' + y + ') scale(' + fontScale + ')"><title>' + esc(fullLabel) +
           '</title><rect x="' + (-width/2) + '" y="-10" width="' + width + '" height="20" rx="6"/><text text-anchor="middle" y="4">' +
           esc(label) + '</text></g>');
       }
-      return '<path class="wire' + (active ? ' active' : '') + '" d="' + d + '" marker-end="url(#' + tip + ')"/>' +
-        '<path class="wire-hit"' + id + ' d="' + d + '"><title>' + tx('editConnection') + '</title></path>';
+      return '<path class="wire' + (active ? ' active' : '') + (edge ? '' : ' wire-summary') + '" d="' + d + '" marker-end="url(#' + tip + ')"/>' +
+        (edge ? '<path class="wire-hit"' + id + ' d="' + d + '"><title>' + tx('editConnection') + '</title></path>' : '');
     });
-    $('wires').innerHTML = arrows + lines.join('') + labels.join('');
+    // Give the paths a real SVG viewport so repaints do not depend on overflow from a 1px layer.
+    const box = mapBounds(), padding = 140;
+    const left = box.left - padding, top = box.top - padding;
+    const width = box.right - box.left + 2 * padding, height = box.bottom - box.top + 2 * padding;
+    const layer = $('wires');
+    layer.style.left = left + 'px';
+    layer.style.top = top + 'px';
+    layer.setAttribute('width',width);
+    layer.setAttribute('height',height);
+    layer.setAttribute('viewBox',[left,top,width,height].join(' '));
+    $('wirePaths').innerHTML = lines.join('') + labels.join('');
   }
 
   function mapBounds() {
-    const b = bounds(scene.nodes);
-    if (scene.headings.length) {
-      b.left = Math.min(b.left,scene.headings[0].x);
-      const last = scene.headings.at(-1);
-      b.right = Math.max(b.right,last.x + 170);
-      b.top = Math.min(b.top,-52);
+    const b = bounds([...scene.nodes,...scene.sections]);
+    if (scene.backgroundSize) {
+      b.left = Math.min(b.left,0);
+      b.top = Math.min(b.top,0);
+      b.right = Math.max(b.right,scene.backgroundSize.width);
+      b.bottom = Math.max(b.bottom,scene.backgroundSize.height);
     }
-    if (scene.edges.some(e => {
-      const a = scene.byId.get(e.from), b = scene.byId.get(e.to);
-      return b.x - a.x <= nodeWidth(a) + 25 && sameRow(a,b);
-    })) b.top -= 35;
+    for (const {from,to,index} of scene.edges) {
+      if (to.x - from.x <= from.width + 25 && sameRow(from,to)) {
+        b.top = Math.min(b.top,Math.min(from.y,to.y) - 35 - index*24);
+      }
+    }
     return b;
   }
 
   function renderMinimap() {
     const map = $('minimap');
-    map.hidden = scene.nodes.length < 2;
+    const cards = [...scene.nodes,...scene.sections.filter(section => section.collapsed)];
+    map.hidden = cards.length < 2;
     if (map.hidden) return;
     const b = mapBounds();
     const scale = Math.min(110 / (b.right-b.left),60 / (b.bottom-b.top));
@@ -173,8 +280,8 @@ Enredo.diagram = ((app) => {
     const w = $('graph').clientWidth*scale/view.zoom, h = $('graph').clientHeight*scale/view.zoom;
     const rect = (x,y,w,h,color,stroke = '') => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h +
       '" rx="2" fill="' + color + '"' + (stroke ? ' stroke="' + stroke + '"' : '') + '/>';
-    map.innerHTML = rect(x,y,w,h,'var(--minimap-viewport)','var(--minimap-viewport-line)') + scene.nodes.map(n => rect(n.x*scale+dx,n.y*scale+dy,nodeWidth(n)*scale,nodeHeight(n)*scale,
-      n.id === app.session.selection ? 'var(--minimap-selected)' : 'var(--minimap-node)')).join('');
+    map.innerHTML = rect(x,y,w,h,'var(--minimap-viewport)','var(--minimap-viewport-line)') + cards.map(n => rect(n.x*scale+dx,n.y*scale+dy,n.width*scale,n.height*scale,
+      n === scene.byId.get(app.session.selection) ? 'var(--minimap-selected)' : 'var(--minimap-node)')).join('');
   }
 
   function updateView() {
@@ -184,6 +291,14 @@ Enredo.diagram = ((app) => {
     $('zoomIn').disabled = view.zoom >= 2.8;
     $('zoomOut').disabled = view.zoom <= .10;
     renderMinimap();
+  }
+
+  function keepPosition(previous,next) {
+    if (!next || (previous.x === next.x && previous.y === next.y)) return;
+    view.x += (previous.x - next.x) * view.zoom;
+    view.y += (previous.y - next.y) * view.zoom;
+    updateView();
+    renderWires();
   }
 
   function fitMap() {
@@ -217,7 +332,6 @@ Enredo.diagram = ((app) => {
   }
 
   function renderMode() {
-    $('graph').classList.toggle('overview',app.session.isWholeStory());
     $('graph').classList.toggle('connecting',app.session.connectMode);
     $('connect').classList.toggle('on',app.session.connectMode);
     $('connect').setAttribute('aria-pressed',app.session.connectMode);
@@ -237,7 +351,7 @@ Enredo.diagram = ((app) => {
     if (!n) return;
     resizeGraph();
     const left = n.x * view.zoom + view.x, top = n.y * view.zoom + view.y;
-    const width = nodeWidth(n), height = nodeHeight(n);
+    const {width,height} = n;
     if (left >= 13 && top >= 13 && left + width*view.zoom <= graph.clientWidth-13 &&
         top + height*view.zoom <= graph.clientHeight-55) return;
     view.x = graph.clientWidth/2 - (n.x + width/2)*view.zoom;
@@ -247,6 +361,32 @@ Enredo.diagram = ((app) => {
 
   function cardFor(id) {
     return $('cards').querySelector('[data-node="' + CSS.escape(id) + '"]');
+  }
+
+  function sectionFor(type,id) {
+    return scene.sections.find(section => section.type === type && section.id === id);
+  }
+
+  function sectionButton(type,id) {
+    return $('cards').querySelector('[data-map-section="' + type + '"][data-map-id="' + CSS.escape(id) + '"]');
+  }
+
+  function dragParts(item,button) {
+    const parts = [];
+    const sections = new Set(scene.sections);
+    function add(part,element) {
+      if (element) parts.push({part,element,x:part.x,y:part.y});
+    }
+    function visit(part,element) {
+      add(part,element);
+      if (!sections.has(part)) return;
+      if (part.rule) add(part.rule,$('cards').querySelector('[data-map-rule="' + CSS.escape(part.rule.id) + '"]'));
+      for (const child of part.children) {
+        visit(child,sections.has(child) ? sectionButton(child.type,child.id) : cardFor(child.id));
+      }
+    }
+    visit(item,button);
+    return parts;
   }
 
   function rebuildScene() {
@@ -266,8 +406,8 @@ Enredo.diagram = ((app) => {
     const anchor = scene.nodes.reduce((closest,n) =>
       !closest || distance(n) < distance(closest) ? n : closest,null);
     rebuildScene();
-    if (anchor) {
-      const next = scene.byId.get(anchor.id);
+    const next = scene.byId.get(anchor?.id);
+    if (next) {
       view.x += (anchor.x - next.x) * view.zoom;
       view.y += (anchor.y - next.y) * view.zoom;
     }
@@ -291,9 +431,12 @@ Enredo.diagram = ((app) => {
   return {
     H,
     W,
+    chapterContentOffset,
     bindEvents,
     cardFor,
+    dragParts,
     fitMap,
+    keepPosition,
     layoutNodeHeight,
     rebuildScene,
     refreshThumbnailSize,
@@ -302,6 +445,8 @@ Enredo.diagram = ((app) => {
     renderMode,
     renderWires,
     reveal,
+    sectionButton,
+    sectionFor,
     get scene() { return scene; },
     stopConnect,
     updateView,

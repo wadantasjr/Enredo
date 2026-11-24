@@ -62,41 +62,52 @@ Enredo.projectFiles = ((app) => {
         throw new Error('Invalid Enredo project format');
       }
       const p = app.storyData.normalizeProject({...data.project,id:uid()});
-      const files = new Map();
+      const files = new Map(), previews = new Map();
+      const galleryOwners = app.imageStore.galleryImageOwners(p);
       if (data.version === 2) {
         const ids = new Map();
-        const coverIds = new Set([p.cover?.assetId,...(p.chapterGroups ?? []).map(group => group.cover?.assetId),
-          ...p.chapters.map(chapter => chapter.cover?.assetId)].filter(Boolean));
-        for (const key of app.imageStore.originalImageIds(data.project)) {
+        const covers = [p,...(p.chapterGroups ?? []),...p.chapters].map(item => item.cover).filter(Boolean);
+        const coverIds = new Set(covers.map(cover => cover.assetId));
+        const galleryIds = app.imageStore.galleryImageIds(p);
+        for (const key of app.imageStore.originalImageIds(p)) {
           if (!data.images || !Object.hasOwn(data.images,key)) throw new Error('Original image is missing from backup');
           const image = app.imageStore.imageFromBackup(data.images[key]);
-          if (coverIds.has(key)) {
-            ids.set(key,await app.imageStore.saveCoverFromBackup(image));
-            continue;
-          }
-          if (!ids.has(key)) {
+          if (key === p.mapBackgroundId) {
+            const id = uid();
+            previews.set(id,await app.imageStore.prepareMapBackground(image));
+            ids.set(key,id);
+          } else if (coverIds.has(key)) {
+            const id = 'cover-' + uid();
+            previews.set(id,await app.imageStore.prepareCoverBackup(image));
+            ids.set(key,id);
+          } else if (galleryIds.has(key)) {
+            const id = 'gallery-' + uid();
+            previews.set(id,await app.imageStore.prepareGalleryImage(image));
+            ids.set(key,id);
+          } else {
             const id = uid();
             files.set(id,image);
             ids.set(key,id);
           }
         }
-        for (const node of p.nodes) if (node.originalImageId) {
-          const mapped = ids.get(node.originalImageId);
-          if (!mapped) throw new Error('Original image is missing from backup');
-          node.originalImageId = mapped;
+        for (const node of p.nodes) if (node.originalImageId) node.originalImageId = ids.get(node.originalImageId);
+        if (p.mapBackgroundId) p.mapBackgroundId = ids.get(p.mapBackgroundId);
+        for (const cover of covers) cover.assetId = ids.get(cover.assetId);
+        for (const owner of galleryOwners) {
+          for (const image of owner.galleryImages ?? []) image.assetId = ids.get(image.assetId);
         }
-        if (p.cover?.assetId) p.cover.assetId = ids.get(p.cover.assetId);
-        for (const group of p.chapterGroups ?? []) if (group.cover?.assetId) group.cover.assetId = ids.get(group.cover.assetId);
-        for (const chapter of p.chapters) if (chapter.cover?.assetId) chapter.cover.assetId = ids.get(chapter.cover.assetId);
       } else {
         for (const node of p.nodes) delete node.originalImageId;
         delete p.cover;
+        delete p.mapBackgroundId;
+        delete p.mapBackgroundSize;
         for (const group of p.chapterGroups ?? []) delete group.cover;
         for (const chapter of p.chapters) delete chapter.cover;
+        for (const owner of galleryOwners) delete owner.galleryImages;
       }
-      if (files.size) {
+      if (files.size || previews.size) {
         try {
-          await app.imageStore.saveOriginalImages(files);
+          await app.imageStore.saveOriginalImages(files,previews);
         } catch {
           app.preferences.flash('projectSaveFailed');
           return;
@@ -108,7 +119,7 @@ Enredo.projectFiles = ((app) => {
         app.store.state.active = p.id;
         app.store.state.chapter = p.chapters[0]?.id ?? null;
       },{fit:true,saveError:'projectSaveFailed',afterSave:() => app.workspace.enterProject(p)})) {
-        if (files.size) app.imageStore.discardOriginalImages(files.keys());
+        if (files.size || previews.size) app.imageStore.discardOriginalImages([...files.keys(),...previews.keys()]);
         return;
       }
       $('chapterTitle').focus();

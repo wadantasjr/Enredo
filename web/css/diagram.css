@@ -1,4 +1,5 @@
 .workspace{flex:1;min-height:570px;display:grid;grid-template-columns:minmax(0,1fr) 292px;grid-template-rows:auto 1fr;border:1px solid var(--line);border-radius:13px;box-shadow:var(--workspace-shadow);overflow:hidden}
+.workspace.details-collapsed{grid-template-columns:minmax(0,1fr)}
 .graph-shell{display:flex;flex-direction:column;min-width:0}
 .graph-bar{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:0 9px 0 12px;min-height:53px;border-bottom:1px solid var(--line)}
 .tabs{align-self:stretch;display:flex;flex-wrap:wrap;column-gap:12px;min-width:0}
@@ -6,28 +7,46 @@
 .tab:hover,.tab.active{color:var(--accent-dark)}
 .tab.active{border-bottom-color:var(--accent)}
 .tab svg{width:16px;height:16px}
-/* Reserve space for the map tools so the tabs wrap at the same width in every view. */
-.workspace-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:4px;margin-left:auto;min-width:min(100%,186px);min-height:33px}
-.graph-actions{gap:2px;flex-wrap:wrap;justify-content:flex-end}
+.workspace-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:4px;margin-left:auto;min-width:0;min-height:33px}
 .workspace-actions{display:flex;align-items:center;gap:2px;flex:none}
 .split{width:1px;height:20px;background:var(--line);margin:0 4px}
 .graph{position:relative;isolation:isolate;flex:1;min-height:450px;overflow:hidden;background-color:var(--canvas);background-image:radial-gradient(circle,var(--grid-dot) 1px,transparent 1.1px);background-size:20px 20px;touch-action:none;cursor:grab}
-.graph.panning,.graph.panning .node{cursor:grabbing}
+.map-background{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.45;pointer-events:none}
+.graph.panning,.graph.panning :is(.node,.map-section){cursor:grabbing}
 .graph.connecting,.graph.connecting .node{cursor:crosshair}
 .world{position:absolute;inset:0;transform-origin:0 0;pointer-events:none}
-.wires{position:absolute;inset:0;width:1px;height:1px;overflow:visible}
+.world>.map-background{inset:0 auto auto 0;object-fit:fill;opacity:.74}
+.wires{position:absolute;pointer-events:none}
+.map-background:not([hidden])~.wires{--wire:var(--world-label-ink)}
 .wire{fill:none;stroke:var(--wire);stroke-width:1.65;pointer-events:none}
 .wire.active{stroke:var(--wire-active);stroke-width:2}
+.wire-summary{stroke-dasharray:6 3}
 .wire-hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer}
 .wire-label{pointer-events:auto;cursor:pointer}
 .wire-label rect{fill:var(--wire-label-bg);stroke:var(--wire-label-line);stroke-width:1}
 .wire-label text{font:650 12px "Aptos","Segoe UI",sans-serif;fill:var(--wire-label-ink)}
 .wire-label:hover rect{fill:var(--wire-label-hover)}
-.world-label{position:absolute;display:block;color:var(--world-label-ink);font-size:.9375rem;font-weight:750;white-space:nowrap;background:var(--world-label-bg);border:1px solid var(--world-label-line);border-radius:6px;padding:5px 9px}
+.wire-summary-label{pointer-events:none}
+.map-section{pointer-events:auto;cursor:grab;user-select:none}
+.map-heading{position:absolute;display:flex;align-items:center;padding:5px 9px;color:var(--world-label-ink);font-size:.9375rem;font-weight:750;background:var(--world-label-bg);border:1px solid var(--world-label-line);border-radius:7px;text-align:left}
+.map-heading:hover{border-color:var(--node-hover-line)}
+.map-group-rule{position:absolute;height:10px;border:1px solid var(--world-label-line);border-bottom:0;border-radius:6px 6px 0 0}
+.map-section-label{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:7px;align-items:center;width:100%}
+.map-section-label svg{width:16px;height:16px}
+.node.map-summary{background:var(--world-label-bg);border-color:var(--world-label-line);color:var(--world-label-ink)}
+.node.map-summary:hover{border-color:var(--node-hover-line)}
+.map-section-count{color:var(--muted);font-size:.8125rem;line-height:1.2}
+#mapGrouping{min-height:33px;padding:4px 7px;gap:5px}
+.android #mapGrouping{min-height:44px}
+.map-grouping-choices{display:grid;gap:6px;margin-bottom:15px}
+.map-grouping-choices .btn{justify-content:flex-start;white-space:normal;text-align:left}
+.map-grouping-save{display:flex;align-items:center;gap:7px;font-weight:650}
+.map-grouping-save input[type="checkbox"]{flex:none;width:auto;margin:0;padding:0;accent-color:var(--accent)}
+#mapGroupingHint{margin:5px 0 0}
+.map-background-actions{display:flex;gap:7px;flex-wrap:wrap}
 .node{position:absolute;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;padding:8px 12px;border:1px solid var(--node-line);border-radius:10px;background:var(--node-bg);box-shadow:0 4px 9px #34235014;text-align:left;pointer-events:auto;cursor:grab;user-select:none;color:var(--ink)}
 html[data-theme="dark"] .node{box-shadow:0 4px 9px #00000055}
 .node:hover,.node.selected{border-color:var(--node-hover-line)}
-.graph.overview:not(.connecting) .node{cursor:pointer}
 .node.selected{background:var(--node-selected-bg);box-shadow:0 0 0 3px var(--node-selected-ring),0 4px 12px var(--node-selected-shadow)}
 .node.connection-source{border-style:dashed;border-color:var(--accent);box-shadow:0 0 0 4px var(--node-source-ring)}
 .node-title{font-size:1rem;font-weight:750;letter-spacing:-.02em;line-height:1.15;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}

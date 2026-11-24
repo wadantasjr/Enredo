@@ -1,7 +1,9 @@
 package app.enredo.editor;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -22,6 +24,7 @@ final class EditorWebViewClient extends WebViewClient {
 
     private static final String IMPORT_URL = ORIGIN + "/project-import.json";
     private static final String IMAGE_URL = ORIGIN + "/node-image";
+    private static final String GALLERY_IMAGE_URL = ORIGIN + "/gallery-image";
     private static final Pattern WEB_ASSET = Pattern.compile("web/(css|js)/[a-z][a-z0-9-]*\\.(css|js)");
     private static final String POLICY = "default-src 'none'; script-src 'self'; "
             + "style-src 'self' 'unsafe-inline'; img-src data: blob:; connect-src 'self'; "
@@ -53,10 +56,14 @@ final class EditorWebViewClient extends WebViewClient {
                 return unavailable(404, "Not Found");
             }
             if (IMPORT_URL.equals(url)) {
-                return readPickedDocument(documents.takeProject(), "application/json", "UTF-8");
+                return readPickedDocument(documents.takeProject(), "application/json", "UTF-8", NO_CACHE);
             }
             if (IMAGE_URL.equals(url)) {
-                return readPickedDocument(documents.takeImage(), null, null);
+                return readPickedDocument(documents.takeImage(), null, null, NO_CACHE);
+            }
+            if (GALLERY_IMAGE_URL.equals(url)) {
+                Uri uri = documents.takeGalleryImage();
+                return readPickedDocument(uri, null, null, galleryImageHeaders(uri));
             }
             if (url.startsWith(ORIGIN + "/")) {
                 String asset = url.substring(ORIGIN.length() + 1);
@@ -85,7 +92,26 @@ final class EditorWebViewClient extends WebViewClient {
                 context.getAssets().open("index.html"));
     }
 
-    private WebResourceResponse readPickedDocument(Uri uri, String mimeType, String encoding) throws IOException {
+    private Map<String, String> galleryImageHeaders(Uri uri) {
+        if (uri == null) return NO_CACHE;
+        try (Cursor cursor = context.getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int column = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                String name = column < 0 ? null : cursor.getString(column);
+                if (name != null) {
+                    Map<String, String> headers = new HashMap<>(NO_CACHE);
+                    headers.put("X-Enredo-Image-Name", Uri.encode(name));
+                    return headers;
+                }
+            }
+        } catch (RuntimeException error) {
+            Log.w(TAG, "Could not read gallery image name", error);
+        }
+        return NO_CACHE;
+    }
+
+    private WebResourceResponse readPickedDocument(Uri uri, String mimeType, String encoding,
+                                                   Map<String, String> headers) throws IOException {
         if (uri != null) {
             if (mimeType == null) {
                 String detectedType = context.getContentResolver().getType(uri);
@@ -94,7 +120,7 @@ final class EditorWebViewClient extends WebViewClient {
             }
             InputStream document = context.getContentResolver().openInputStream(uri);
             if (document != null) {
-                return new WebResourceResponse(mimeType, encoding, 200, "OK", NO_CACHE, document);
+                return new WebResourceResponse(mimeType, encoding, 200, "OK", headers, document);
             }
         }
         return unavailable(404, "Not Found");

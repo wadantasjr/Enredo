@@ -1,8 +1,6 @@
 .workspace.management-mode{grid-template-columns:minmax(0,1fr);min-height:0}
 .management-mode .graph-shell{min-height:0}
-.management-mode .workspace-actions,.management-mode .map-tool{display:none}
-.management-mode .graph-actions .undo-control{display:inline-grid}
-.workspace.management-mode.no-map .graph-actions{display:flex}
+.management-mode .map-tool{display:none}
 
 .management-view{flex:1;min-width:0;min-height:0;overflow:auto;scrollbar-gutter:stable;background:var(--surface-subtle);padding:clamp(12px,3vw,24px)}
 .management-heading,.management-toolbar,.management-actions,.management-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:8px}

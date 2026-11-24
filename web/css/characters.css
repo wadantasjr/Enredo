@@ -1,6 +1,5 @@
 .workspace.characters-mode{grid-template-columns:minmax(0,1fr)}
 .characters-mode .graph-shell{min-height:0}
-.characters-mode .workspace-actions{display:none}
 .characters-mode .map-tool{display:none}
 .characters-view{flex:1;min-height:0;overflow:auto;padding:clamp(12px,3vw,24px);background:var(--surface-subtle)}
 .characters-heading,.character-section-heading,.character-profile-heading,.character-relationship-card>header{display:flex;align-items:center;justify-content:space-between;gap:10px}

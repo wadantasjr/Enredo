@@ -53,6 +53,7 @@
 .presentation-mode .graph-shell{grid-column:1/-1;min-height:0}
 .chapter-presentation{flex:1;min-height:0;overflow:auto;padding:clamp(14px,3vw,28px);background:var(--surface-subtle)}
 .project-presentation-hero,.group-presentation-hero{display:grid;grid-template-columns:minmax(180px,36%) minmax(0,1fr);align-items:center;gap:clamp(14px,3vw,28px);max-width:1120px;margin:0 auto 24px}
+.presentation-actions{display:flex;flex-wrap:wrap;gap:6px}
 .project-presentation-cover,.group-presentation-cover{width:100%;box-shadow:var(--shadow)}
 .chapter-presentation h2{margin:0 0 7px;font-size:clamp(1.45rem,3vw,2rem);line-height:1.2;overflow-wrap:anywhere}
 .chapter-presentation p{color:var(--muted);margin:5px 0 12px;overflow-wrap:anywhere}

@@ -23,7 +23,7 @@ In the top bar, select **My space** to return to your project library or select 
 ### Explore the sample project
 
 - Open **Project overview** from **My space** to see the project cover and the two illustrated groups, **The warning** and **The rescue**. Open either group to browse its chapter covers.
-- In **Timeline**, select **The night shift** to see its notes, original image, focal character, narrative stage, connection and linked task. Switch to **Whole story** to trace the two routes into the lighthouse and the two endings.
+- In **Timeline**, select **The night shift** to see its notes, original image, focal character, narrative stage, connection and linked task. In **Whole story**, follow the cards from the harbor watch room along both coastal routes to the lighthouse, then back to the docks for the two endings. New copies from **Add sample** include the illustrated map.
 - In **Inside the lighthouse**, open **Water at the stairs** or **The keeper’s log** to see more original images.
 - Open **Structure** to find the beats associated with all 12 stages. In **Characters**, explore Mara’s two phases and compare what changes in her arc and relationships on each ending path.
 - In **Project Management**, open **Kanban** to see all four task statuses. Filter by sprint or backlog, then use **Schedule** and **Gantt** to see how the work overlaps.
@@ -34,9 +34,15 @@ In the top bar, select **My space** to return to your project library or select 
 - Attach one image to each beat. Its thumbnail appears at the top of the diagram card and in the details panel, where you can open the original at full size.
 - Use the image button next to **Aa** to set diagram thumbnails to **1x** (default), **2x**, or **3x**, or hide them. The details panel still shows the image.
 - Label connections to show which choice leads to each path.
-- Drag cards to rearrange the map and switch between **Timeline** and **Whole story**.
+- Drag story beat cards in **Timeline** or **Whole story**. Each view saves its own positions. Older projects start with their existing beat positions in both views.
+- Use the left and right panel icons in the diagram toolbar to show or hide project navigation and the details panel independently. Both controls are also available in full screen.
+- Drag the right edge of project navigation to adjust its width whenever it appears on the left, including in full screen. You can also focus the divider and use the left and right arrow keys. The minimum width is 232 pixels, and the browser remembers your setting.
+- In **Whole story**, drag a chapter or group to move it with its contents. Click its title or summary card to collapse or expand it. **Grouping** sets the entire map to groups, chapters, or individual story beats. Chapters without a group appear as chapter cards when grouping by group. Connections between visible cards remain on the map.
+- **Save grouping in the project** is on by default. Saved groupings travel with the project backup. Turn it off to try a different grouping for the current session, or turn it back on to save the current grouping.
+- Use **Background image** in the **Whole story** toolbar to choose, replace, or remove an image. Uploaded images fill the diagram viewport. The sample’s illustrated map pans and zooms with its cards. The project backup includes the original background image.
 - Create free-form chapter groups such as acts or parts. Expand them in the navigation, move chapters between groups with **Move chapter to group** or drag and drop, and reorder them with the chapter menu.
 - Add optional covers to projects, groups, and chapters in **Project details**, **Edit group**, and **Edit chapter**. Choose a JPG, PNG, or WebP image, adjust its 16:9 crop, and replace or remove it at any time. Chapter covers appear in navigation and chapter lists. Items without covers use a default image.
+- Open **Image gallery** from the project or group overview, a character profile, a beat’s details, or an existing task’s edit dialog. Select multiple images for references, concept art, or other uses. Each image has its own **Notes** field and can be opened at full size or removed.
 - Choose a **Narrative Model** when you create a project. Use **Structure** to explore the model and find associated beats across chapters. Set a beat’s optional **Narrative Stage** in its details panel. See the [narrative models guide](docs/narrative-models.md).
 - Use **Characters** to create one central profile with separate life phases. Add an optional portrait to each phase; phases without one use the central portrait. Use **Merge another profile** to combine duplicate entries and transfer arcs, map links, relationships, and portraits. Resolve relationships between the two profiles and duplicate links to the same story beat before merging.
 - Record a character’s arcs and events by story path. Link an event to a map connection to use that connection’s name; later edits to the map label update the path name.
@@ -55,7 +61,7 @@ In the top bar, select **My space** to return to your project library or select 
 
 Enredo starts in English. Use the language selector at the top to choose **Português**. The browser remembers your choice the next time you open the editor.
 
-Projects, groups, and original images are saved automatically in your browser. To back up or transfer a story with its covers, original images, and thumbnails, open it and choose **Files → Export project (.json)**. In the destination browser or computer, choose **Files → Import project (.json)**.
+Projects, groups, and original images are saved automatically in your browser. To back up or transfer a story with its covers, original images, galleries, and image notes, open it and choose **Files → Export project (.json)**. In the destination browser or computer, choose **Files → Import project (.json)**.
 
 Projects without a saved model open in **Free Structure**. Backups include the selected model and beat associations, including associations preserved after a model change.
 
@@ -70,10 +76,11 @@ If you already use `Enredo.html`, export your projects there and import the JSON
 The [Enredo APK](https://github.com/wadantasjr/Enredo/releases/latest/download/Enredo.apk) runs offline on Android 8.0 or later with an up-to-date Android System WebView. The app saves projects on your device and starts in Portuguese if your device is set to Portuguese. To transfer a project between Android and the browser, use **Files → Export project (.json)** in one version and **Files → Import project (.json)** in the other.
 
 Use **Project details**, **Edit group**, or **Edit chapter** to choose a JPG, PNG, or WebP cover. Android opens its image picker for the selection.
+In **Image gallery**, use **Add images** to select several files in the Android picker.
 
 - Tap **Aa** at the top to set the text size between 75% and 130%. The Android app starts at 85% and remembers your choice.
-- Pinch with two fingers to zoom the diagram. Drag the background with one finger to move the map, or drag a card in **Timeline** to reposition it.
-- Tap **Full screen diagram** in the diagram toolbar to expand the workspace. Use the details icon to collapse or reopen the panel. To return to the editor, tap **Exit full screen** or use Android's **Back** action.
+- Pinch with two fingers to zoom the diagram. Drag the background with one finger to move the map, or drag a card in **Timeline** or **Whole story** to reposition it.
+- Tap **Full screen diagram** in the diagram toolbar to expand the workspace. To return to the editor, tap **Exit full screen** or use Android's **Back** action.
 
 #### Build on Windows
 
@@ -105,7 +112,7 @@ Na barra superior, selecione **Meu espaço** para voltar à lista de projetos ou
 ### Explore o projeto de exemplo
 
 - Abra **Apresentação do projeto** em **Meu espaço** para ver a capa do projeto e os dois grupos ilustrados, **O aviso** e **O resgate**. Abra um dos grupos para ver as capas dos capítulos.
-- Na **Timeline**, selecione **O turno da noite** para ver as notas, a imagem original, a personagem focal, a etapa narrativa, a conexão e a tarefa vinculada. Alterne para **História inteira** para acompanhar as duas rotas até o farol e os dois desfechos.
+- Na **Timeline**, selecione **O turno da noite** para ver as notas, a imagem original, a personagem focal, a etapa narrativa, a conexão e a tarefa vinculada. Em **História inteira**, siga os cartões da sala de vigia pelas duas rotas costeiras até o farol e volte às docas para ver os dois desfechos. Novas cópias criadas em **Adicionar exemplo** incluem o mapa ilustrado.
 - Em **Dentro do farol**, abra **Água na escada** ou **O caderno do faroleiro** para ver mais imagens originais.
 - Abra **Estrutura** para localizar as situações associadas às 12 etapas. Em **Personagens**, explore as duas fases de Mara e compare como seu arco e seus relacionamentos mudam em cada desfecho.
 - Em **Gestão de projeto**, abra o **Kanban** para ver os quatro status das tarefas. Filtre por sprint ou backlog e use **Cronograma** e **Gantt** para ver quais trabalhos se sobrepõem.
@@ -116,9 +123,15 @@ Na barra superior, selecione **Meu espaço** para voltar à lista de projetos ou
 - Anexar uma imagem a cada situação. A miniatura aparece no topo do cartão e no painel de detalhes, onde você pode abrir a imagem no tamanho original.
 - Usar o botão de imagem ao lado de **Aa** para ajustar as miniaturas do diagrama para **1x** (padrão), **2x** ou **3x**, ou ocultá-las. A imagem continua disponível no painel de detalhes.
 - Nomear as conexões para indicar qual escolha leva a cada caminho.
-- Arrastar cartões para reorganizar o mapa e alternar entre **Timeline** e **História inteira**.
+- Arraste os cartões das situações na **Timeline** ou em **História inteira**. Cada visualização salva suas próprias posições. Projetos antigos começam com as posições existentes em ambas.
+- Use os ícones de painel esquerdo e direito na barra do diagrama para mostrar ou ocultar a navegação do projeto e o painel de detalhes de forma independente. Os dois controles também estão disponíveis em tela cheia.
+- Arraste a borda direita da navegação do projeto para ajustar a largura quando ela estiver à esquerda, inclusive em tela cheia. Você também pode focar o divisor e usar as setas para a esquerda e para a direita. A largura mínima é de 232 pixels, e o navegador lembra o ajuste.
+- Em **História inteira**, arraste um capítulo ou grupo para movê-lo com seu conteúdo. Clique no título ou no cartão de resumo para recolher ou expandir. Use **Agrupamento** para mostrar o mapa inteiro por grupo, por capítulo ou por situação. Capítulos sem grupo aparecem como cartões de capítulo ao agrupar por grupo. As conexões entre cartões visíveis continuam no mapa.
+- **Salvar agrupamento no projeto** vem ativado. O agrupamento salvo acompanha o backup. Desmarque para experimentar outro agrupamento durante a sessão ou marque novamente para salvar o agrupamento atual.
+- Use **Imagem de fundo** na barra de ferramentas de **História inteira** para escolher, trocar ou remover uma imagem. Imagens carregadas preenchem a área visível do diagrama. O mapa ilustrado do exemplo acompanha os cartões ao mover o diagrama e mudar o zoom. O backup do projeto inclui a imagem de fundo original.
 - Criar grupos de capítulos com nomes livres, como atos ou partes. Expanda cada grupo na navegação, mova capítulos entre grupos com **Mover capítulo para grupo** ou arrastar e soltar, e reordene pelo menu do capítulo.
 - Adicionar capas opcionais ao projeto, aos grupos e aos capítulos em **Detalhes do projeto**, **Editar grupo** e **Editar capítulo**. Escolha uma imagem JPG, PNG ou WebP, ajuste o recorte 16:9 e substitua ou remova a capa quando quiser. As capas dos capítulos aparecem na navegação e nas listas. Itens sem capa usam uma imagem padrão.
+- Abrir a **Galeria de imagens** na visão geral do projeto ou grupo, na ficha de um personagem, nos detalhes de uma situação ou na edição de uma tarefa existente. Selecione várias imagens para referências, concepts e outros usos. Cada imagem tem um campo de **Observações** e pode ser aberta em tamanho original ou removida.
 - Escolher um **Modelo Narrativo** ao criar um projeto. Use **Estrutura** para consultar o modelo e localizar situações de vários capítulos. No painel de detalhes, escolha a **Etapa Narrativa** de cada situação. Veja o [guia de modelos narrativos](docs/narrative-models.md).
 - Use **Personagens** para criar uma ficha central com fases diferentes. Adicione um retrato opcional a cada fase; as fases sem imagem usam o retrato central. Use **Unir outra ficha** para combinar cadastros duplicados e transferir arcos, vínculos com o mapa, relacionamentos e retratos. Resolva relacionamentos entre as duas fichas e vínculos duplicados com a mesma situação antes de uni-las.
 - Registre arcos e acontecimentos por caminho. Ao ligar um acontecimento a uma conexão do mapa, o caminho usa o nome dessa conexão. Se o rótulo mudar no mapa, o nome também muda.
@@ -137,7 +150,7 @@ Na barra superior, selecione **Meu espaço** para voltar à lista de projetos ou
 
 O Enredo abre em inglês por padrão. No seletor de idioma no topo da tela, escolha **Português**. O navegador guarda essa preferência para a próxima vez que você abrir o editor.
 
-O Enredo salva projetos, grupos e imagens originais automaticamente no navegador. Para guardar uma cópia ou transferir a história com capas, imagens originais e miniaturas, abra o projeto e escolha **Arquivos → Exportar projeto (.json)**. No navegador ou computador de destino, use **Arquivos → Importar projeto (.json)**.
+O Enredo salva projetos, grupos e imagens originais automaticamente no navegador. Para guardar uma cópia ou transferir a história com capas, imagens originais, galerias e observações das imagens, abra o projeto e escolha **Arquivos → Exportar projeto (.json)**. No navegador ou computador de destino, use **Arquivos → Importar projeto (.json)**.
 
 Projetos sem modelo salvo abrem em **Estrutura Livre**. O JSON inclui o modelo e as associações das situações, inclusive as que ficam guardadas após a troca de modelo.
 
@@ -152,10 +165,11 @@ Se já estiver usando o `Enredo.html`, exporte seus projetos por lá e importe o
 O [APK do Enredo](https://github.com/wadantasjr/Enredo/releases/latest/download/Enredo.apk) funciona offline em aparelhos com Android 8.0 ou superior e o Android System WebView atualizado. O editor usa armazenamento local do aplicativo e, na primeira abertura, usa português se esse for o idioma do aparelho. Para transferir um projeto entre o Android e a versão de navegador, use **Arquivos → Exportar projeto (.json)** em uma versão e **Arquivos → Importar projeto (.json)** na outra.
 
 Use **Detalhes do projeto**, **Editar grupo** ou **Editar capítulo** para escolher uma capa JPG, PNG ou WebP. O Android abre o seletor de imagens.
+Na **Galeria de imagens**, use **Adicionar imagens** para selecionar vários arquivos no seletor do Android.
 
 - Toque em **Aa** no topo para ajustar o tamanho da fonte entre 75% e 130%. O Android começa em 85% e guarda a sua escolha.
-- No diagrama, faça o gesto de pinça com dois dedos para mudar o zoom. Com um dedo, arraste o fundo para mover o mapa ou arraste um cartão na **Timeline** para mudar sua posição.
-- Toque em **Diagrama em tela cheia** na barra do diagrama para expandir o espaço de trabalho. Use o ícone de detalhes para recolher ou reabrir o painel. Para voltar ao editor, toque em **Sair da tela cheia** ou use **Voltar** no Android.
+- No diagrama, faça o gesto de pinça com dois dedos para mudar o zoom. Com um dedo, arraste o fundo para mover o mapa ou arraste um cartão na **Timeline** ou em **História inteira** para mudar sua posição.
+- Toque em **Diagrama em tela cheia** na barra do diagrama para expandir o espaço de trabalho. Para voltar ao editor, toque em **Sair da tela cheia** ou use **Voltar** no Android.
 
 #### Compilar no Windows
 

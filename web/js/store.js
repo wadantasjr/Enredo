@@ -111,11 +111,24 @@ Enredo.store = ((app) => {
   }
 
   function mapLayoutChanged(before,after) {
+    const mapPositionChanged = (record,next) => record.mapPosition?.x !== next.mapPosition?.x || record.mapPosition?.y !== next.mapPosition?.y;
+    const wholeStory = app.session.lastMapMode === 'whole-story';
     if (before.chapters.length !== after.chapters.length ||
         before.chapters.some((c,i) => c.id !== after.chapters[i].id)) return true;
+    if (wholeStory) {
+      const groups = before.chapterGroups ?? [], nextGroups = after.chapterGroups ?? [];
+      if (groups.length !== nextGroups.length || groups.some((group,i) => group.id !== nextGroups[i].id ||
+          group.mapCollapsed !== nextGroups[i].mapCollapsed || mapPositionChanged(group,nextGroups[i])) ||
+          before.chapters.some((chapter,i) => {
+            const next = after.chapters[i];
+            return chapter.groupId !== next.groupId || chapter.groupOrder !== next.groupOrder ||
+              chapter.mapCollapsed !== next.mapCollapsed || mapPositionChanged(chapter,next);
+          })) return true;
+    }
     if (before.nodes.length !== after.nodes.length || before.nodes.some((n,i) => {
       const next = after.nodes[i];
-      return n.id !== next.id || n.chapter !== next.chapter || n.x !== next.x || n.y !== next.y ||
+      const moved = wholeStory ? mapPositionChanged(n,next) : n.x !== next.x || n.y !== next.y;
+      return n.id !== next.id || n.chapter !== next.chapter || moved ||
         app.diagram.layoutNodeHeight(n) !== app.diagram.layoutNodeHeight(next);
     })) return true;
     return before.edges.length !== after.edges.length ||

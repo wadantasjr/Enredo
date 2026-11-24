@@ -1,8 +1,8 @@
 Enredo.imageEditor = ((app) => {
   'use strict';
 
-  const { $, uid } = app.dom;
-  const { t } = app.preferences;
+  const { $, uid, bindActions, icon } = app.dom;
+  const { t, tx } = app.preferences;
 
   let imagePick = null;
   let imageViewerUrl;
@@ -27,6 +27,57 @@ Enredo.imageEditor = ((app) => {
   function chooseImageFile() {
     if (app.platform.android) app.platform.android.chooseImage();
     else $('nodeImageFile').click();
+  }
+
+  function showMapBackgroundOptions() {
+    const project = app.store.project();
+    const hasImage = !!project.mapBackgroundId;
+    const button = $('mapBackgroundButton');
+    app.dialogs.showDialog({title:t('mapBackground'),body:'<div class="map-background-actions">' +
+      '<button type="button" class="btn primary" id="chooseMapBackground">' + icon('upload') + ' ' +
+      tx(hasImage ? 'replaceNodeImage' : 'chooseMapBackground') + '</button>' +
+      (hasImage ? '<button type="button" class="btn" id="removeMapBackground">' + icon('trash') + ' ' + tx('removeNodeImage') + '</button>' : '') +
+      '</div>',extra:form => {
+      form.querySelector('#chooseMapBackground').onclick = () => {
+        app.dialogs.closeDialog();
+        button.focus({preventScroll:true});
+        imagePick = {type:'background',project};
+        chooseImageFile();
+      };
+      if (hasImage) form.querySelector('#removeMapBackground').onclick = () => {
+        app.dialogs.closeDialog();
+        if (imagePick?.type === 'background' && imagePick.project === project) imagePick = null;
+        app.store.edit(() => {
+          delete project.mapBackgroundId;
+          delete project.mapBackgroundSize;
+        },{saveError:'imageSaveFailed'});
+        button.focus({preventScroll:true});
+      };
+    }});
+    $('chooseMapBackground').focus();
+  }
+
+  function renderMapBackground(id,size) {
+    const image = $('mapBackgroundImage');
+    const assetId = id ?? '';
+    const onMap = assetId && size;
+    const layer = $(onMap ? 'world' : 'graph');
+    if (image.parentElement !== layer) layer.prepend(image);
+    image.style.width = onMap ? size.width + 'px' : '';
+    image.style.height = onMap ? size.height + 'px' : '';
+    $('mapBackgroundButton').classList.toggle('on',!!assetId);
+    if (image.dataset.assetId === assetId) return;
+    image.dataset.assetId = assetId;
+    image.hidden = true;
+    image.removeAttribute('src');
+    if (!assetId) return;
+    app.imageStore.thumbnailUrl(assetId).then(url => {
+      if (image.dataset.assetId !== assetId) return;
+      image.src = url;
+      image.hidden = false;
+    }).catch(() => {
+      if (image.dataset.assetId === assetId) delete image.dataset.assetId;
+    });
   }
 
   function coverMarkup(cover,className = '') {
@@ -56,7 +107,7 @@ Enredo.imageEditor = ((app) => {
     root.querySelectorAll('img[data-cover-id]').forEach(image => {
       const id = image.dataset.coverId;
       image.style.objectPosition = (image.dataset.focusX || '50') + '% ' + (image.dataset.focusY || '50') + '%';
-      app.imageStore.coverPreviewUrl(id).then(url => {
+      app.imageStore.thumbnailUrl(id).then(url => {
         if (!image.isConnected || image.dataset.coverId !== id) return;
         image.addEventListener('error',() => {
           if (image.dataset.coverId !== id) return;
@@ -96,6 +147,7 @@ Enredo.imageEditor = ((app) => {
   }
 
   function pickIsCurrent(pick) {
+    if (pick.type === 'background') return imagePick === pick && pick.project === app.store.project();
     return imagePick === pick && app.store.state.projects.includes(pick.project) &&
       (pick.type === 'node' ? pick.project.nodes.includes(pick.node) : pick.type === 'character'
         ? pick.project.characters.includes(pick.character) && (!pick.phase || pick.character.phases.includes(pick.phase))
@@ -183,6 +235,18 @@ Enredo.imageEditor = ((app) => {
     refreshCoverControls(document);
   }
 
+  function openImageViewer(file,title,preview) {
+    const viewer = $('imageViewer');
+    if (viewer.open) return;
+    if (imageViewerUrl) URL.revokeObjectURL(imageViewerUrl);
+    imageViewerUrl = file ? URL.createObjectURL(file) : null;
+    $('imageViewerTitle').textContent = title;
+    $('imageViewerSize').textContent = '';
+    $('imageViewerPhoto').src = imageViewerUrl ?? preview;
+    viewer.showModal();
+    $('imageViewport').scrollTo(0,0);
+  }
+
   async function viewNodeImage() {
     const node = app.store.selectedNode(), viewer = $('imageViewer');
     if (!node?.image || viewer.open) return;
@@ -191,12 +255,7 @@ Enredo.imageEditor = ((app) => {
       const file = originalImageId ? await app.imageStore.readOriginalImage(originalImageId) : null;
       if (node !== app.store.selectedNode() || image !== node.image || originalImageId !== node.originalImageId ||
           app.session.atHome || !app.session.hasMapView() || $('dialog').open || viewer.open) return;
-      imageViewerUrl = file ? URL.createObjectURL(file) : null;
-      $('imageViewerTitle').textContent = t(file ? 'viewOriginalImage' : 'viewSavedImage');
-      $('imageViewerSize').textContent = '';
-      $('imageViewerPhoto').src = imageViewerUrl ?? image;
-      viewer.showModal();
-      $('imageViewport').scrollTo(0,0);
+      openImageViewer(file,t(file ? 'viewOriginalImage' : 'viewSavedImage'),image);
     } catch {
       if (node === app.store.selectedNode()) app.preferences.flash('imageViewFailed');
     }
@@ -217,14 +276,16 @@ Enredo.imageEditor = ((app) => {
         waitingForCrop = true;
         return;
       }
-      const image = pick.type === 'node'
+      const background = pick.type === 'background' ? await app.imageStore.prepareMapBackground(file) : null;
+      const image = background ? null : pick.type === 'node'
         ? await app.imageStore.prepareNodeImage(file)
         : await app.imageStore.prepareCharacterPortrait(file);
       if (!pickIsCurrent(pick)) return;
-      if (pick.type === 'node') {
+      if (pick.type === 'node' || background) {
         const id = uid();
         try {
-          await app.imageStore.saveOriginalImages([[id,file]]);
+          if (background) await app.imageStore.saveOriginalImages([],[[id,background]]);
+          else await app.imageStore.saveOriginalImages([[id,file]]);
           savedId = id;
         } catch {
           if (pickIsCurrent(pick)) app.preferences.flash('imageSaveFailed');
@@ -234,6 +295,10 @@ Enredo.imageEditor = ((app) => {
       if (!pickIsCurrent(pick)) return;
       committed = app.store.edit(() => {
         if (pick.type === 'node') Object.assign(pick.node,{image,originalImageId:savedId});
+        else if (background) {
+          pick.project.mapBackgroundId = savedId;
+          delete pick.project.mapBackgroundSize;
+        }
         else app.characterData.setPortrait(pick.project,pick.character.id,image,pick.phase?.id ?? null);
       },{saveError:'imageSaveFailed'});
       if (pick.type === 'node' && app.store.selectedNode()?.id === pick.node.id && app.store.project()?.id === pick.project.id) {
@@ -287,6 +352,7 @@ Enredo.imageEditor = ((app) => {
   }
 
   function bindEvents() {
+    bindActions({mapBackgroundButton:showMapBackgroundOptions});
     $('inspector').addEventListener('click',event => {
       const button = event.target.closest('button');
       if (button?.id === 'chooseNodeImage') chooseNodeImage();
@@ -300,6 +366,7 @@ Enredo.imageEditor = ((app) => {
     });
     $('imageViewerClose').addEventListener('click',() => $('imageViewer').close());
     $('imageViewer').addEventListener('close',() => {
+      if ($('imageViewer').open) return;
       if (imageViewerUrl) URL.revokeObjectURL(imageViewerUrl);
       imageViewerUrl = null;
       $('imageViewerPhoto').removeAttribute('src');
@@ -380,7 +447,9 @@ Enredo.imageEditor = ((app) => {
     coverMarkup,
     cancelCoverCrop,
     importAndroidImage,
+    openImageViewer,
     renderCoverPreviews,
+    renderMapBackground,
     refreshCoverControls
   };
 })(Enredo);

@@ -14,11 +14,28 @@ Enredo.imageStore = (() => {
 
   const validOriginalImageId = value => typeof value === 'string' && /^[a-z0-9-]{1,80}$/i.test(value);
 
+  function galleryImageOwners(project) {
+    const collections = [project.chapterGroups,project.nodes,project.characters,project.tasks];
+    return [project,...collections.flatMap(items => Array.isArray(items)
+      ? items.filter(item => item && typeof item === 'object' && !Array.isArray(item)) : [])];
+  }
+
+  function galleryImageIds(project) {
+    const ids = new Set();
+    for (const owner of galleryImageOwners(project)) {
+      if (!Array.isArray(owner.galleryImages)) continue;
+      for (const image of owner.galleryImages) if (validOriginalImageId(image?.assetId)) ids.add(image.assetId);
+    }
+    return ids;
+  }
+
   function originalImageIds(project) {
     const ids = new Set((project.nodes ?? []).map(node => node.originalImageId).filter(Boolean));
     if (project.cover?.assetId) ids.add(project.cover.assetId);
+    if (project.mapBackgroundId) ids.add(project.mapBackgroundId);
     for (const group of project.chapterGroups ?? []) if (group.cover?.assetId) ids.add(group.cover.assetId);
     for (const chapter of project.chapters ?? []) if (chapter.cover?.assetId) ids.add(chapter.cover.assetId);
+    for (const id of galleryImageIds(project)) ids.add(id);
     return ids;
   }
 
@@ -74,20 +91,22 @@ Enredo.imageStore = (() => {
     return file;
   }
 
-  async function readCoverThumbnail(id) {
+  async function readThumbnail(id) {
     const image = await imageTransaction('readonly',store => store.get('thumb-' + id));
-    if (!(image instanceof Blob)) throw new Error('Cover thumbnail is missing');
+    if (!(image instanceof Blob)) throw new Error('Image thumbnail is missing');
     return image;
   }
 
-  async function coverPreviewUrl(id) {
+  async function thumbnailUrl(id) {
     if (previewUrls.has(id)) return previewUrls.get(id);
-    const url = URL.createObjectURL(await readCoverThumbnail(id));
+    const image = await readThumbnail(id);
+    if (previewUrls.has(id)) return previewUrls.get(id);
+    const url = URL.createObjectURL(image);
     previewUrls.set(id,url);
     return url;
   }
 
-  function saveOriginalImages(files,covers = []) {
+  function saveOriginalImages(files,previewImages = []) {
     return imageTransaction('readwrite',store => {
       let request;
       for (const [id,file] of files) {
@@ -95,7 +114,7 @@ Enredo.imageStore = (() => {
           ? file : file.slice(0,file.size,'application/octet-stream');
         request = store.add(original,id);
       }
-      for (const [id,{source,thumbnail}] of covers) {
+      for (const [id,{source,thumbnail}] of previewImages) {
         store.add(source,id);
         request = store.add(thumbnail,'thumb-' + id);
       }
@@ -125,7 +144,7 @@ Enredo.imageStore = (() => {
       let request;
       for (const id of ids) {
         store.delete(id);
-        if (id.startsWith('cover-')) request = store.delete('thumb-' + id);
+        request = store.delete('thumb-' + id);
       }
       return request;
     }).catch(() => {});
@@ -322,10 +341,19 @@ Enredo.imageStore = (() => {
     }
   }
 
-  async function saveCoverFromBackup(file) {
-    const prepared = await prepareCoverBackup(file);
-    return saveCoverImage(prepared.source,prepared.thumbnail);
+  async function prepareImageWithPreview(file,maxBytes,smallPreview) {
+    if (!file.size || file.size > nodeImageFileLimit) throw new Error('Invalid image size');
+    const bitmap = await createImageBitmap(file);
+    try {
+      const source = originalImageType.test(file.type) ? file : file.slice(0,file.size,'application/octet-stream');
+      return {source,thumbnail:await encodeCoverBitmap(bitmap,maxBytes,smallPreview)};
+    } finally {
+      bitmap.close();
+    }
   }
+
+  const prepareGalleryImage = file => prepareImageWithPreview(file,nodeImageMaxLength,true);
+  const prepareMapBackground = file => prepareImageWithPreview(file,coverImageLimit,false);
 
   async function prepareNodeImage(file) {
     const bitmap = await createImageBitmap(file);
@@ -368,22 +396,26 @@ Enredo.imageStore = (() => {
   }
 
   return {
-    coverPreviewUrl,
+    galleryImageOwners,
     discardOriginalImages,
     imageFromBackup,
     imageIdsInSnapshot,
     imageIdsInState,
     nodeImageFileLimit,
+    galleryImageIds,
     originalImageDataUrl,
     originalImageIds,
     prepareCoverImage,
+    prepareCoverBackup,
+    prepareGalleryImage,
+    prepareMapBackground,
     prepareNodeImage,
     prepareCharacterPortrait,
     pruneUnusedImages,
     readOriginalImage,
     saveCoverImage,
-    saveCoverFromBackup,
     saveOriginalImages,
+    thumbnailUrl,
     validNodeImage,
     validOriginalImageId
   };

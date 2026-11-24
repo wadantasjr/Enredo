@@ -49,15 +49,23 @@ Enredo.diagramInput = ((app) => {
       const previous = drag;
       drag = null;
       graph.classList.remove('panning');
-      if (!previous?.n || !previous.started) return;
+      if (!previous?.item || !previous.started || previous.scene !== app.diagram.scene) return;
+      const {item,section,position} = previous;
       if (cancelled) {
-        Object.assign(previous.n,{x:previous.x,y:previous.y});
         app.session.selection = previous.selection;
-      } else {
-        if (previous.n.x !== previous.x || previous.n.y !== previous.y) app.store.remember(previous.before);
-        app.store.save();
+        app.workspace.render();
+        return;
       }
-      app.workspace.render();
+      if (position.x === previous.x && position.y === previous.y) return;
+      const saved = app.store.edit(() => {
+        if (previous.wholeStory) item.record.mapPosition = position;
+        else Object.assign(item.record,position);
+      },{saveError:'projectSaveFailed'});
+      if (saved && previous.wholeStory) {
+        const next = section ? app.diagram.sectionFor(item.type,item.id) : app.diagram.scene.byId.get(item.id);
+        app.diagram.keepPosition(item,next);
+        if (section) app.diagram.sectionButton(item.type,item.id)?.focus({preventScroll:true});
+      }
     }
 
     graph.addEventListener('pointerdown',event => {
@@ -81,11 +89,18 @@ Enredo.diagramInput = ((app) => {
         }
       }
       if (control || (!touch && target.closest('[data-edge]'))) return;
-      const card = target.closest('[data-node]');
-      if (!touch && card && (app.session.isWholeStory() || app.session.connectMode) && event.button !== 1) return;
-      const n = card && !app.session.isWholeStory() && !app.session.connectMode && event.button !== 1 ? app.store.nodeById(card.dataset.node) : null;
-      drag = {pointer:event.pointerId,startX:event.clientX,startY:event.clientY,n,
-        x:n?.x ?? app.diagram.view.x,y:n?.y ?? app.diagram.view.y,started:false};
+      const button = target.closest('[data-node],[data-map-section]');
+      const section = button?.dataset.mapSection;
+      if (!touch && button && app.session.connectMode && event.button !== 1) return;
+      const scene = app.diagram.scene;
+      let item;
+      if (button && !app.session.connectMode && event.button !== 1) {
+        item = section ? app.diagram.sectionFor(section,button.dataset.mapId) : scene.byId.get(button.dataset.node);
+      }
+      const {x,y} = item?.position ?? app.diagram.view;
+      drag = {pointer:event.pointerId,startX:event.clientX,startY:event.clientY,item,button,section,scene,
+        wholeStory:app.session.isWholeStory(),x,y,started:false};
+      if (item) button.setPointerCapture(event.pointerId);
       if (event.button === 1) event.preventDefault();
     });
 
@@ -104,33 +119,45 @@ Enredo.diagramInput = ((app) => {
         finishDrag(true);
         return;
       }
+      if (drag.item && drag.scene !== app.diagram.scene) {
+        finishDrag(true);
+        return;
+      }
       const dx = event.clientX - drag.startX, dy = event.clientY - drag.startY;
       if (!drag.started && Math.hypot(dx,dy) < 4) return;
       if (!drag.started) {
         drag.started = true;
         suppressClick = true;
-        graph.setPointerCapture(event.pointerId);
+        if (!drag.item) graph.setPointerCapture(event.pointerId);
         graph.classList.add('panning');
-        if (drag.n) {
-          drag.before = app.characterData.captureHistory(app.store.state);
+        if (drag.item) {
+          drag.parts = app.diagram.dragParts(drag.item,drag.button);
           drag.selection = app.session.selection;
-          app.session.selection = drag.n.id;
-          app.storyBeats.renderInspector();
-          app.diagram.renderCards();
-          drag.card = app.diagram.cardFor(app.session.selection);
+          if (!drag.section) {
+            const previousCard = drag.selection && app.diagram.cardFor(drag.selection);
+            if (previousCard && previousCard !== drag.button) {
+              previousCard.classList.remove('selected');
+              previousCard.setAttribute('aria-pressed','false');
+            }
+            // Keep the pointer target in the DOM throughout the drag.
+            drag.button.classList.add('selected');
+            drag.button.setAttribute('aria-pressed','true');
+            app.session.selection = drag.item.id;
+            app.storyBeats.renderInspector();
+          }
         }
       }
-      if (drag.n) {
-        const node = drag.n;
-        const {positionScale,byId} = app.diagram.scene;
+      if (drag.item) {
+        const {positionScale:scale} = drag.item;
         const zoom = app.diagram.view.zoom;
-        node.x = Math.round(drag.x + dx/(zoom * positionScale.x));
-        node.y = Math.round(drag.y + dy/(zoom * positionScale.y));
-        const displayed = byId.get(node.id);
-        displayed.x = node.x * positionScale.x;
-        displayed.y = node.y * positionScale.y;
-        drag.card.style.left = displayed.x + 'px';
-        drag.card.style.top = displayed.y + 'px';
+        drag.position = {x:Math.round(drag.x + dx/(zoom * scale.x)),y:Math.round(drag.y + dy/(zoom * scale.y))};
+        const offsetX = (drag.position.x - drag.x) * scale.x, offsetY = (drag.position.y - drag.y) * scale.y;
+        for (const {part,element,x,y} of drag.parts) {
+          part.x = x + offsetX;
+          part.y = y + offsetY;
+          element.style.left = part.x + 'px';
+          element.style.top = part.y + 'px';
+        }
         app.diagram.renderWires();
         app.diagram.renderMinimap();
       } else {
@@ -154,13 +181,18 @@ Enredo.diagramInput = ((app) => {
     graph.addEventListener('pointerup',finish);
     graph.addEventListener('pointercancel',event => finish(event,true));
     graph.addEventListener('lostpointercapture',event => {
-      if (event.target === graph) finish(event,true);
+      if (event.target === graph || (drag?.item && event.target === drag.button)) finish(event,true);
+    });
+    graph.addEventListener('dragstart',event => {
+      if (event.target.closest('[data-node],[data-map-section]')) event.preventDefault();
     });
     graph.addEventListener('click',event => {
       if (suppressClick && event.detail > 0) return;
       const card = event.target.closest('[data-node]');
       const edge = event.target.closest('[data-edge]');
-      if (card) activateCard(card.dataset.node,event.detail === 0);
+      const section = event.target.closest('[data-map-section]');
+      if (section) app.mapGrouping.toggle(section.dataset.mapSection,section.dataset.mapId);
+      else if (card) activateCard(card.dataset.node,event.detail === 0);
       else if (edge && !app.session.connectMode) app.paths.edgeDialog(edge.dataset.edge);
       else if (event.target === graph && app.session.selection && !app.session.connectMode) {
         app.session.selection = null;

@@ -7,7 +7,8 @@ Enredo.projects = ((app) => {
   function editProject() {
     const p = app.store.project();
     app.dialogs.showDialog({title:t('projectDetails'),body:'<div class="fields">' +
-      field(t('name'),input('title',p.title,'',true)) + app.imageEditor.coverControls('project',p.id,p.cover) + '</div>',submitKey:'save',
+      field(t('name'),input('title',p.title,'',true)) + app.imageEditor.coverControls('project',p.id,p.cover) +
+      '<div>' + app.imageGallery.launcher('project',p) + '</div></div>',submitKey:'save',
       onSubmit: data => {
         const title = data.get('title').trim();
         if (!title) return;

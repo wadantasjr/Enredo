@@ -39,6 +39,7 @@ Enredo.storyBeats = ((app) => {
       '<button type="button" class="btn" id="chooseNodeImage">' + icon('upload') + ' ' +
       tx(n.image ? 'replaceNodeImage' : 'addNodeImage') + '</button>' +
       (n.image ? '<button type="button" class="btn" id="removeNodeImage">' + icon('trash') + ' ' + tx('removeNodeImage') + '</button>' : '') +
+      app.imageGallery.launcher('beat',n) +
       '</div></div>' +
       '<label class="field"><span>' + tx('notes') + '</span><textarea id="nodeNotes" placeholder="' + tx('notesHint') + '" rows="3">' +
       esc(n.notes[0] === '\n' ? '\n' + n.notes : n.notes) + '</textarea></label></div>' +
@@ -55,9 +56,12 @@ Enredo.storyBeats = ((app) => {
     return app.storyData.kinds.map(value => option(value,t(value),value === active)).join('');
   }
 
-  function openSpot(chapterId,x,y,height) {
-    const nodes = app.store.project().nodes.filter(n => n.chapter === chapterId && Math.abs(n.x - x) < app.diagram.W + 15);
-    while (nodes.some(n => y < n.y + app.diagram.layoutNodeHeight(n) + 23 && n.y < y + height + 23)) y += height + 28;
+  function openSpot(chapterId,x,y,height,position) {
+    const nodes = app.store.project().nodes.filter(n => n.chapter === chapterId && Math.abs(position(n).x - x) < app.diagram.W + 15);
+    while (nodes.some(n => {
+      const top = position(n).y;
+      return y < top + app.diagram.layoutNodeHeight(n) + 23 && top < y + height + 23;
+    })) y += height + 28;
     return {x:Math.round(x),y:Math.round(y)};
   }
 
@@ -65,19 +69,25 @@ Enredo.storyBeats = ((app) => {
     const graph = $('graph');
     const image = copy ? origin.image : undefined;
     const height = copy ? app.diagram.layoutNodeHeight(origin) : app.diagram.H;
-    let x = 0, y = 0;
-    if (origin?.chapter === chapterId) {
-      x = copy ? origin.x + 24 : origin.x + app.diagram.W + 64;
-      y = copy ? origin.y + height + 28 : origin.y;
-    } else if (app.session.viewMode === 'timeline' && chapterId === app.store.chapter()?.id && app.diagram.scene.nodes.length) {
-      const {positionScale} = app.diagram.scene;
-      x = ((graph.clientWidth/2 - app.diagram.view.x)/app.diagram.view.zoom - app.diagram.W/2)/positionScale.x;
-      y = ((graph.clientHeight/2 - app.diagram.view.y)/app.diagram.view.zoom - height/2)/positionScale.y;
+    function placement(wholeStory) {
+      const position = node => wholeStory ? node.mapPosition : node;
+      let x = 0, y = 0;
+      if (origin?.chapter === chapterId) {
+        const start = position(origin);
+        x = start.x + (copy ? 24 : app.diagram.W + 64);
+        y = start.y + (copy ? height + 28 : 0);
+      } else if (!wholeStory && app.session.viewMode === 'timeline' && chapterId === app.store.chapter()?.id && app.diagram.scene.nodes.length) {
+        const {positionScale} = app.diagram.scene;
+        x = ((graph.clientWidth/2 - app.diagram.view.x)/app.diagram.view.zoom - app.diagram.W/2)/positionScale.x;
+        y = ((graph.clientHeight/2 - app.diagram.view.y)/app.diagram.view.zoom - height/2)/positionScale.y;
+      }
+      return openSpot(chapterId,x,y,height,position);
     }
-    const n = {id:uid(),chapter:chapterId,kind,title,notes:copy ? origin.notes : '',...openSpot(chapterId,x,y,height),
+    const n = {id:uid(),chapter:chapterId,kind,title,notes:copy ? origin.notes : '',...placement(false),mapPosition:placement(true),
       narrativeStage:copy && origin.narrativeStage ? {...origin.narrativeStage} : null,
       participants:copy ? app.characterData.participantsOf(origin).map(person => ({...person})) : [],
       ...(copy && origin.focalCharacterId ? {focalCharacterId:origin.focalCharacterId} : {}),
+      ...(copy && origin.galleryImages?.length ? {galleryImages:origin.galleryImages.map(image => ({...image}))} : {}),
       ...(image ? {image,...(origin.originalImageId ? {originalImageId:origin.originalImageId} : {})} : {})};
     app.store.project().nodes.push(n);
     return n;
@@ -96,7 +106,9 @@ Enredo.storyBeats = ((app) => {
         app.dialogs.closeDialog();
         const wasEmpty = !app.diagram.scene.nodes.length;
         app.store.edit(() => {
-          app.session.selection = appendNode({chapterId:data.get('chapter') ?? chapterId,title,kind:data.get('kind')}).id;
+          const targetChapter = data.get('chapter') ?? chapterId;
+          app.session.selection = appendNode({chapterId:targetChapter,title,kind:data.get('kind')}).id;
+          app.mapGrouping.expandChapter(app.store.project(),targetChapter);
           app.diagram.stopConnect();
         },{fit:wasEmpty});
         app.diagram.reveal(app.session.selection);

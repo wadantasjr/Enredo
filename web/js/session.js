@@ -4,6 +4,8 @@ Enredo.session = {
   charactersOpen: false,
   managementOpen: false,
   presentation: null,
+  navigationCollapsed: false,
+  fullscreenNavigationCollapsed: true,
   detailsCollapsed: false,
   diagramScroll: 0,
   viewMode: 'timeline',

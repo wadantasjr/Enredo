@@ -4,6 +4,56 @@ Enredo.workspace = ((app) => {
   const { $, esc, number, icon, bindActions } = app.dom;
   const { t, tx } = app.preferences;
 
+  function bindNavigationResize() {
+    const root = $('app'), handle = $('navigationResizer');
+    const widthKey = 'enredo.navigation-width';
+    const minimum = parseInt(getComputedStyle(root).getPropertyValue('--navigation-min-width'),10);
+    let preferred = minimum, width = minimum, maximum = minimum;
+    let drag;
+    try { preferred = Number(localStorage.getItem(widthKey)) || minimum; } catch {}
+
+    function applyWidth(requested) {
+      maximum = Math.max(minimum,Math.min(480,Math.floor(root.clientWidth * 0.42)));
+      width = Math.max(minimum,Math.min(maximum,requested));
+      root.style.setProperty('--navigation-width',width + 'px');
+      handle.setAttribute('aria-valuemax',maximum);
+      handle.setAttribute('aria-valuenow',width);
+    }
+
+    function saveWidth() {
+      preferred = width;
+      try { localStorage.setItem(widthKey,String(width)); } catch {}
+    }
+
+    handle.setAttribute('aria-valuemin',minimum);
+    applyWidth(preferred);
+    window.addEventListener('resize',() => applyWidth(drag ? width : preferred));
+
+    handle.addEventListener('pointerdown',event => {
+      if (event.button !== 0 || drag) return;
+      handle.setPointerCapture(event.pointerId);
+      handle.classList.add('resizing');
+      drag = {id:event.pointerId,x:event.clientX,width};
+    });
+    handle.addEventListener('pointermove',event => {
+      if (event.pointerId === drag?.id) applyWidth(drag.width + event.clientX - drag.x);
+    });
+    handle.addEventListener('lostpointercapture',event => {
+      if (event.pointerId !== drag?.id) return;
+      if (width !== drag.width) saveWidth();
+      drag = null;
+      handle.classList.remove('resizing');
+    });
+    handle.addEventListener('keydown',event => {
+      const targets = {ArrowLeft:width - 16,ArrowRight:width + 16,Home:minimum,End:maximum};
+      if (!Object.hasOwn(targets,event.key)) return;
+      event.preventDefault();
+      const previous = width;
+      applyWidth(targets[event.key]);
+      if (width !== previous) saveWidth();
+    });
+  }
+
   function resetEditor() {
     app.session.viewMode = 'timeline';
     app.session.charactersOpen = false;
@@ -132,6 +182,10 @@ Enredo.workspace = ((app) => {
     $('chapterTitle').textContent = presentation?.type === 'ungrouped' ? t('ungrouped') : shownGroup?.title ?? (timeline && c ? c.title : p.title);
     $('renameChapter').hidden = !timeline || !c;
     $('addNode').hidden = !showMap;
+    const showWholeStory = showMap && app.session.isWholeStory();
+    $('mapGrouping').hidden = !showWholeStory;
+    $('mapBackgroundButton').hidden = !showWholeStory;
+    app.imageEditor.renderMapBackground(showWholeStory ? p.mapBackgroundId : null,p.mapBackgroundSize);
     $('emptyChapters').hidden = !!c || !app.session.hasMapView();
     $('graph').hidden = !showMap;
     $('legend').hidden = !showMap;
@@ -148,7 +202,6 @@ Enredo.workspace = ((app) => {
     $('editorWorkspace').classList.toggle('no-map',!c);
     $('editorWorkspace').setAttribute('aria-label',t(presentation ? (presentation.type === 'project' ? 'projectOverview' : 'group') :
       management ? 'projectManagement' : characters ? 'characters' : structure ? 'structure' : 'storyMap'));
-    $('graphActions').setAttribute('aria-label',t(app.session.hasMapView() ? 'mapTools' : 'historyTools'));
     $('overviewTab').disabled = !c;
     for (const [id,active] of [['currentTab',timeline],['overviewTab',showMap && app.session.isWholeStory()],
       ['structureTab',structure],['charactersTab',characters],['projectManagementTab',management]]) {
@@ -180,30 +233,39 @@ Enredo.workspace = ((app) => {
   }
 
   function renderWorkspaceControls() {
+    const {atHome,diagramFullscreen,navigationCollapsed,fullscreenNavigationCollapsed,detailsCollapsed} = app.session;
+    const hasDiagram = !atHome && app.session.hasMapView() && !!app.store.chapter();
     const fullscreenButton = $('toggleFullscreen');
-    const fullscreenLabel = t(app.session.diagramFullscreen ? 'exitFullscreen' : 'diagramFullscreen');
+    const fullscreenLabel = t(diagramFullscreen ? 'exitFullscreen' : 'diagramFullscreen');
     fullscreenButton.title = fullscreenLabel;
     fullscreenButton.setAttribute('aria-label',fullscreenLabel);
-    fullscreenButton.innerHTML = icon(app.session.diagramFullscreen ? 'contract' : 'expand');
-    fullscreenButton.hidden = app.session.charactersOpen || app.session.managementOpen || !!app.session.presentation;
+    fullscreenButton.innerHTML = icon(diagramFullscreen ? 'contract' : 'expand');
+    fullscreenButton.hidden = !hasDiagram;
 
-    const detailsButton = $('toggleDetails');
-    const detailsLabel = t(app.session.detailsCollapsed ? 'showDetails' : 'hideDetails');
-    detailsButton.hidden = !app.session.diagramFullscreen || !app.session.hasMapView();
-    detailsButton.title = detailsLabel;
-    detailsButton.setAttribute('aria-label',detailsLabel);
-    detailsButton.setAttribute('aria-expanded',!app.session.detailsCollapsed);
-    detailsButton.classList.toggle('on',!app.session.detailsCollapsed);
-    $('detailPanel').hidden = app.session.detailsCollapsed || !app.session.hasMapView() || !app.store.chapter();
-    $('editorWorkspace').classList.toggle('details-collapsed',app.session.detailsCollapsed);
-    $('addNodeFullscreen').hidden = !app.session.diagramFullscreen;
+    const navigationVisible = atHome || !(diagramFullscreen ? fullscreenNavigationCollapsed : navigationCollapsed);
+    renderPanelToggle('toggleNavigation',navigationVisible,'showNavigation','hideNavigation');
+    $('navigationPanel').hidden = !navigationVisible;
+    $('app').classList.toggle('navigation-collapsed',!navigationVisible);
+
+    $('toggleDetails').hidden = !hasDiagram;
+    renderPanelToggle('toggleDetails',hasDiagram && !detailsCollapsed,'showDetails','hideDetails');
+    $('detailPanel').hidden = !hasDiagram || detailsCollapsed;
+    $('editorWorkspace').classList.toggle('details-collapsed',detailsCollapsed);
+    $('addNodeFullscreen').hidden = !diagramFullscreen;
+  }
+
+  function renderPanelToggle(id,expanded,show,hide) {
+    const button = $(id);
+    button.title = t(expanded ? hide : show);
+    button.setAttribute('aria-label',button.title);
+    button.setAttribute('aria-expanded',expanded);
+    button.classList.toggle('on',expanded);
   }
 
   function setDiagramFullscreen(active) {
     if (active === app.session.diagramFullscreen || (active && (app.session.atHome || !app.session.hasMapView() || !app.store.chapter()))) return;
     if (active) app.session.diagramScroll = window.scrollY;
     app.session.diagramFullscreen = active;
-    app.session.detailsCollapsed = false;
     closeMenus();
     document.documentElement.classList.toggle('diagram-fullscreen',active);
     renderWorkspaceControls();
@@ -211,9 +273,8 @@ Enredo.workspace = ((app) => {
     if (!active) window.scrollTo(0,app.session.diagramScroll);
   }
 
-  function toggleDiagramDetails() {
-    if (!app.session.diagramFullscreen) return;
-    app.session.detailsCollapsed = !app.session.detailsCollapsed;
+  function togglePanel(preference) {
+    app.session[preference] = !app.session[preference];
     renderWorkspaceControls();
   }
 
@@ -230,6 +291,7 @@ Enredo.workspace = ((app) => {
     $('exportProject').hidden = app.session.atHome;
     app.store.renderHistory();
     if (app.session.atHome) {
+      renderWorkspaceControls();
       renderHome();
       return;
     }
@@ -259,22 +321,24 @@ Enredo.workspace = ((app) => {
     }
     if (!currentChapter) return;
     app.diagram.rebuildScene();
+    const {nodes,sections,byId} = app.diagram.scene;
+    if (app.session.selection && !byId.has(app.session.selection)) app.session.selection = null;
     app.diagram.renderCards();
     app.storyBeats.renderInspector();
     app.diagram.renderMode();
-    $('emptyCanvas').hidden = app.diagram.scene.nodes.length > 0;
-    $('connect').disabled = app.diagram.scene.nodes.length < 2;
-    $('layout').disabled = app.diagram.scene.nodes.length < 2;
+    $('emptyCanvas').hidden = nodes.length > 0 || sections.length > 0;
+    $('connect').disabled = nodes.length < 2;
+    $('layout').disabled = (app.session.isWholeStory() ? app.store.project().nodes.length : nodes.length) < 2;
     if (app.session.mapNeedsFit) {
       app.diagram.fitMap();
       app.session.mapNeedsFit = false;
     } else {
-      app.diagram.renderWires();
       app.diagram.updateView();
+      app.diagram.renderWires();
     }
   }
 
-  function switchView(next) {
+  function switchView(next,{revealSelection = false} = {}) {
     if (app.session.atHome || (!app.session.charactersOpen && !app.session.managementOpen && !app.session.presentation && app.session.viewMode === next) ||
         (next === 'whole-story' && !app.store.chapter())) return;
     const previousMapMode = app.session.isStructureView() ? app.session.lastMapMode : app.session.viewMode;
@@ -286,7 +350,9 @@ Enredo.workspace = ((app) => {
     app.session.lastMapMode = previousMapMode;
     app.diagram.stopConnect();
     if (next !== 'structure') {
-      if (next === 'timeline' && app.store.selectedNode()) app.store.state.chapter = app.store.selectedNode().chapter;
+      const selected = app.store.selectedNode();
+      if (next === 'timeline' && selected) app.store.state.chapter = selected.chapter;
+      if (next === 'whole-story' && revealSelection && selected) app.mapGrouping.expandChapter(app.store.project(),selected.chapter);
       app.store.save();
     }
     render(next !== 'structure' && next !== previousMapMode);
@@ -303,9 +369,10 @@ Enredo.workspace = ((app) => {
     app.session.managementOpen = false;
     const changedChapter = app.session.viewMode === 'timeline' && n.chapter !== app.store.chapter()?.id;
     if (changedChapter) app.store.state.chapter = n.chapter;
+    const expanded = app.mapGrouping.expandChapter(app.store.project(),n.chapter);
     app.session.selection = id;
     app.store.save();
-    render(changedChapter);
+    render(changedChapter || expanded);
     if (recenter) app.diagram.reveal(id);
   }
 
@@ -317,7 +384,7 @@ Enredo.workspace = ((app) => {
   }
 
   function handleEditorShortcut(event) {
-    if ($('dialog').open || $('imageViewer').open || $('coverCropDialog').open) return;
+    if ($('dialog').open || $('imageViewer').open || $('coverCropDialog').open || $('imageGallery').open) return;
     if (event.key === 'Escape') {
       closeMenus();
       if (app.session.charactersOpen) app.characters.goBack();
@@ -345,11 +412,13 @@ Enredo.workspace = ((app) => {
   }
 
   function bindEvents() {
+    bindNavigationResize();
     bindActions({
       goHome:openHome,
       breadcrumbHome:openHome,
       toggleFullscreen:() => setDiagramFullscreen(!app.session.diagramFullscreen),
-      toggleDetails:toggleDiagramDetails,
+      toggleNavigation:() => togglePanel(app.session.diagramFullscreen ? 'fullscreenNavigationCollapsed' : 'navigationCollapsed'),
+      toggleDetails:() => togglePanel('detailsCollapsed'),
       currentTab:() => switchView('timeline'),
       overviewTab:() => switchView('whole-story'),
       structureTab:() => switchView('structure'),

@@ -130,6 +130,7 @@ Enredo.characters = ((app) => {
       '<div class="character-profile-title"><h3>' + esc(character.name) + (alias ? ' <small>“' + esc(alias) + '”</small>' : '') +
       '</h3><p>' + esc(title) + '</p></div><div class="character-profile-actions">' + back +
       '<button type="button" class="btn" id="editCharacter">' + icon('edit') + ' ' + tx('editCharacter') + '</button>' +
+      app.imageGallery.launcher('character',character) +
       (data.mergeCandidates(p,character.id).length ? '<button type="button" class="btn" id="mergeCharacter">' + icon('branch') + ' ' + tx('mergeCharacter') + '</button>' : '') +
       '<button type="button" class="btn danger" id="deleteCharacter">' + icon('trash') + ' ' + tx('delete') + '</button></div></header>' +
       '<nav class="character-sections" aria-label="' + tx('characterSections') + '">' +

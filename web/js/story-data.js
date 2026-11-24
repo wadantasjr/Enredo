@@ -14,7 +14,7 @@ Enredo.storyData = ((app) => {
     const string = value => typeof value === 'string';
     if (!p || !string(p.id) || !string(p.title) || !Array.isArray(p.chapters) ||
         !Array.isArray(p.nodes) || !Array.isArray(p.edges)) return false;
-    if (!validCover(p.cover)) return false;
+    if (!validCover(p.cover) || (p.mapBackgroundId != null && !app.imageStore.validOriginalImageId(p.mapBackgroundId))) return false;
     if (!p.chapters.every(c => c && string(c.id) && string(c.title) && validCover(c.cover))) return false;
     const chapterIds = new Set(p.chapters.map(c => c.id));
     if (chapterIds.size !== p.chapters.length) return false;
@@ -38,18 +38,27 @@ Enredo.storyData = ((app) => {
 
   const hasId = value => typeof value === 'string' && value.trim().length > 0;
 
-  function normalizeProject(project) {
+  function normalizeMapPosition({mapPosition,...record},fallback) {
+    const position = Number.isFinite(mapPosition?.x) && Number.isFinite(mapPosition?.y) ? mapPosition : fallback;
+    return position ? {...record,mapPosition:{x:position.x,y:position.y}} : record;
+  }
+
+  function normalizeProject({mapBackgroundSize,...project}) {
     const nextGroupOrder = new Map();
+    const {width,height} = mapBackgroundSize ?? {};
+    const hasMapSize = project.mapBackgroundId && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0;
     const normalized = {
       ...project,
+      ...(hasMapSize ? {mapBackgroundSize:{width,height}} : {}),
       narrativeModel: hasId(project.narrativeModel) ? project.narrativeModel : app.narrative.defaultModelId,
       ...(project.cover ? {cover:{focusX:0.5,focusY:0.5,...project.cover}} : {}),
       ...(Array.isArray(project.chapterGroups) ? {chapterGroups:project.chapterGroups.map(group => ({
-        ...group,
+        ...normalizeMapPosition(group),
         description:group.description ?? '',
         ...(group.cover ? {cover:{focusX:0.5,focusY:0.5,...group.cover}} : {})
       }))} : {}),
-      chapters:project.chapters.map(chapter => {
+      chapters:project.chapters.map(record => {
+        const chapter = normalizeMapPosition(record);
         const cover = chapter.cover ? {cover:{focusX:0.5,focusY:0.5,...chapter.cover}} : {};
         if (!chapter.groupId) {
           const {groupOrder,...fields} = chapter;
@@ -63,11 +72,25 @@ Enredo.storyData = ((app) => {
       nodes: project.nodes.map(node => {
         const {image,originalImageId,...fields} = node;
         const stage = node.narrativeStage;
-        return { ...fields, narrativeStage: hasId(stage?.modelId) && hasId(stage?.stepId) ? { ...stage } : null,
+        return { ...normalizeMapPosition(fields,node), narrativeStage: hasId(stage?.modelId) && hasId(stage?.stepId) ? { ...stage } : null,
           ...(app.imageStore.validNodeImage(image) ? {image,...(app.imageStore.validOriginalImageId(originalImageId) ? {originalImageId} : {})} : {}) };
       })
     };
-    return app.characterData.normalizeProject(app.projectManagementData.normalizeProject(normalized));
+    const result = app.characterData.normalizeProject(app.projectManagementData.normalizeProject(normalized));
+    for (const owner of app.imageStore.galleryImageOwners(result)) {
+      if (!Object.hasOwn(owner,'galleryImages')) continue;
+      const galleryImages = new Map();
+      for (const image of Array.isArray(owner.galleryImages) ? owner.galleryImages : []) {
+        if (app.imageStore.validOriginalImageId(image?.assetId) && !galleryImages.has(image.assetId)) {
+          galleryImages.set(image.assetId,{assetId:image.assetId,
+            name:typeof image.name === 'string' ? image.name.slice(0,160) : '',
+            notes:typeof image.notes === 'string' ? image.notes : ''});
+        }
+      }
+      if (galleryImages.size) owner.galleryImages = [...galleryImages.values()];
+      else delete owner.galleryImages;
+    }
+    return result;
   }
 
   function normalizeState(state) {

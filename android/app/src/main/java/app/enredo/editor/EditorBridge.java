@@ -28,6 +28,11 @@ public final class EditorBridge {
     }
 
     @JavascriptInterface
+    public void chooseImages() {
+        activity.runOnUiThread(documents::chooseImages);
+    }
+
+    @JavascriptInterface
     public void exportProject(String filename, String json) {
         activity.runOnUiThread(() -> documents.exportProject(filename, json));
     }

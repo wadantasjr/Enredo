@@ -352,6 +352,10 @@ Enredo.characterData = ((app) => {
     target.notes = '';
     target.personality = {};
     target.motivation = {};
+    if (source.galleryImages?.length) {
+      const galleryImages = new Map([...(target.galleryImages ?? []),...source.galleryImages].map(image => [image.assetId,image]));
+      target.galleryImages = [...galleryImages.values()];
+    }
     target.phases = phaseOrder === 'targetFirst'
       ? [...targetPhases,targetPhase,...sourcePhases,sourcePhase]
       : [...sourcePhases,sourcePhase,...targetPhases,targetPhase];

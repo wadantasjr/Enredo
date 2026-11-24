@@ -21,6 +21,7 @@ Enredo.dialogs = ((app) => {
     $('dialogCancel').onclick = closeDialog;
     if (remove) $('dialogRemove').onclick = remove;
     extra?.(form);
+    app.imageEditor.renderCoverPreviews(form);
     if (!$('dialog').open) $('dialog').showModal();
     const first = form.querySelector('input:not([hidden]), select');
     if (first) {
@@ -43,7 +44,7 @@ Enredo.dialogs = ((app) => {
   }
 
   function showHelp() {
-    const helpItems = ['helpHome','helpChapter','helpCovers','helpPath','helpStory','helpStructure','helpCharacters','helpManagement',
+    const helpItems = ['helpHome','helpChapter','helpCovers','helpImageGallery','helpPath','helpStory','helpMapGrouping','helpMapBackground','helpStructure','helpCharacters','helpManagement',
       app.platform.android ? 'touchHelpZoom' : 'helpZoom',app.platform.android ? 'deviceHelpFiles' : 'helpFiles'];
     const body = '<ul>' + helpItems.map(key => '<li>' + t(key) + '</li>').join('') + '</ul>';
     showDialog({title:t('helpTitle'),body});

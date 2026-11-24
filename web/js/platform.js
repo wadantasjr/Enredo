@@ -8,6 +8,7 @@ Enredo.platform = ((app) => {
   function handleAndroidBack() {
     if ($('coverCropDialog').open) app.imageEditor.cancelCoverCrop();
     else if ($('imageViewer').open) $('imageViewer').close();
+    else if ($('imageGallery').open) app.imageGallery.close();
     else if ($('dialog').open) app.dialogs.closeDialog();
     else if (document.querySelector('[data-menu][aria-expanded="true"]')) app.workspace.closeMenus();
     else if (app.session.connectMode) app.diagramInput.toggleConnect();

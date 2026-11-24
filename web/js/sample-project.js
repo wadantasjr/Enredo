@@ -3,10 +3,25 @@ Enredo.sampleProject = ((app) => {
 
   const narrativeModel = 'journey-12';
   const openingBeat = 'radio';
-  const {scene,artwork,portraits} = app.sampleImages;
+  const {scene,artwork,portraits,coastalMap} = app.sampleImages;
   const illustrations = {[openingBeat]:scene,queda:artwork.farol,registro:artwork.log};
+  const mapScale = 1.75;
+  const mapSize = {width:1536 * mapScale,height:1024 * mapScale};
+  // Positions are measured on the coastal illustration. Chapter and beat offsets are relative to their parent.
+  const mapGroups = {warning:[224,37],rescue:[1089,42]};
+  const mapChapters = {sinal:[229,85],farol:[1060,285],mare:[1090,131]};
+  const mapBeatCenters = {
+    radio:[263,250],chamado:[449,257],escolha:[484,327],voz:[792,404],costa:[748,608],encontro:[1136,569],
+    porta:[1242,559],sirene:[1369,453],queda:[1431,585],registro:[1363,324],
+    subida:[1288,157],transmissao:[1424,163],amanhecer:[277,431],silencio:[327,516]
+  };
+
+  function mapOffset([x,y],[originX,originY] = [0,0]) {
+    return {x:(x - originX) * mapScale,y:(y - originY) * mapScale};
+  }
 
   function create() {
+    const {W,layoutNodeHeight,chapterContentOffset} = app.diagram;
     const pt = app.preferences.language === 'pt';
     const local = (en,br) => pt ? br : en;
     const textFields = fields => Object.fromEntries(Object.entries(fields).map(([key,values]) => [key,local(...values)]));
@@ -20,18 +35,22 @@ Enredo.sampleProject = ((app) => {
       {id:'rescue',title:local('The rescue','O resgate'),description:local(
         'Inside the lighthouse, Mara and Bento look for a way to guide the boats home.',
         'Dentro do farol, Mara e Bento procuram uma forma de trazer os barcos de volta ao porto.')}
-    ];
+    ].map(group => ({...group,mapPosition:mapOffset(mapGroups[group.id])}));
     const chapters = [
       {id:'sinal',title:local('The last signal','O último sinal'),groupId:'warning',groupOrder:0},
       {id:'farol',title:local('Inside the lighthouse','Dentro do farol'),groupId:'rescue',groupOrder:0},
       {id:'mare',title:local('The tide rises','A maré sobe'),groupId:'rescue',groupOrder:1}
-    ];
+    ].map(chapter => ({...chapter,mapPosition:mapOffset(mapChapters[chapter.id],mapGroups[chapter.groupId])}));
     const mara = (en,br,phaseId = 'mara-watch') => ({characterId:'mara',phaseId,dramaticFunction:local(en,br)});
     const bento = (en,br) => ({characterId:'bento',phaseId:null,dramaticFunction:local(en,br)});
     const nodes = [];
     function beat(id,chapter,kind,stepId,x,y,title,notes,participants) {
-      nodes.push({id,chapter,kind,title:local(...title),notes:local(...notes),x,y,participants,
-        ...(illustrations[id] ? {image:illustrations[id].preview} : {}),
+      const image = illustrations[id]?.preview;
+      const mapPosition = mapOffset(mapBeatCenters[id],mapChapters[chapter]);
+      mapPosition.x -= W / 2;
+      mapPosition.y -= chapterContentOffset + layoutNodeHeight({image}) / 2;
+      nodes.push({id,chapter,kind,title:local(...title),notes:local(...notes),x,y,mapPosition,participants,
+        ...(image ? {image} : {}),
         focalCharacterId:participants[0].characterId,narrativeStage:{modelId:narrativeModel,stepId}});
     }
 
@@ -334,17 +353,24 @@ Enredo.sampleProject = ((app) => {
     const covers = [project,...project.chapterGroups,...project.chapters].map(target => ({
       target,image:artwork[target === project ? 'project' : target.id],id:'cover-' + uid()
     }));
+    const mapId = uid();
+    const map = imageFromBackup(coastalMap);
     await saveOriginalImages(
       beats.map(({beat,id}) => [id,imageFromBackup(illustrations[beat.id].original)]),
-      covers.map(({image,id}) => [id,{source:imageFromBackup(image.original),thumbnail:imageFromBackup(image.preview)}])
+      [...covers.map(({image,id}) => [id,{source:imageFromBackup(image.original),thumbnail:imageFromBackup(image.preview)}]),
+        [mapId,{source:map,thumbnail:map}]]
     );
     for (const {beat,id} of beats) beat.originalImageId = id;
     for (const {target,id} of covers) target.cover = {assetId:id,focusX:0.5,focusY:0.5};
+    project.mapBackgroundId = mapId;
+    project.mapBackgroundSize = {...mapSize};
 
     return () => {
-      discardOriginalImages([...beats,...covers].map(({id}) => id));
+      discardOriginalImages([...beats,...covers].map(({id}) => id).concat(mapId));
       for (const {beat} of beats) delete beat.originalImageId;
       for (const {target} of covers) delete target.cover;
+      delete project.mapBackgroundId;
+      delete project.mapBackgroundSize;
     };
   }
 
