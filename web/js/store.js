@@ -23,9 +23,24 @@ Enredo.store = ((app) => {
 
   let storageFailed = false;
 
+  function historyEntry(snapshot) {
+    return {snapshot,imageIds:app.imageStore.imageIdsInSnapshot(snapshot)};
+  }
+
+  function referencedImageIds() {
+    const ids = app.imageStore.imageIdsInState(state);
+    for (const entry of [...undoStack,...redoStack]) for (const id of entry.imageIds) ids.add(id);
+    return ids;
+  }
+
+  function pruneUnusedImages() {
+    app.imageStore.pruneUnusedImages(referencedImageIds());
+  }
+
   async function initialize() {
     if (state) {
       save();
+      pruneUnusedImages();
       return;
     }
     const p = app.sampleProject.create();
@@ -37,6 +52,7 @@ Enredo.store = ((app) => {
       app.imageStore.discardOriginalImages([beat.originalImageId]);
       delete beat.originalImageId;
     }
+    pruneUnusedImages();
   }
 
   const project = () => state.projects.find(p => p.id === state.active) ?? state.projects[0];
@@ -72,7 +88,7 @@ Enredo.store = ((app) => {
   }
 
   function remember(before) {
-    undoStack.push(before);
+    undoStack.push(historyEntry(before));
     if (undoStack.length > 80) undoStack.shift();
     redoStack.length = 0;
     renderHistory();
@@ -88,7 +104,10 @@ Enredo.store = ((app) => {
       app.preferences.flash(saveError);
       return false;
     }
-    if (JSON.stringify(after) !== JSON.stringify(before)) remember(before);
+    if (JSON.stringify(after) !== JSON.stringify(before)) {
+      remember(before);
+      pruneUnusedImages();
+    }
     afterSave?.();
     app.workspace.render(fit);
     return true;
@@ -110,12 +129,13 @@ Enredo.store = ((app) => {
     const [take,put] = direction === 'undo' ? [undoStack,redoStack] : [redoStack,undoStack];
     if (!take.length) return;
     const previousProject = project(), previousChapter = chapter()?.id;
-    put.push(app.characterData.captureHistory(state));
-    state = app.characterData.restoreHistory(take.pop());
+    put.push(historyEntry(app.characterData.captureHistory(state)));
+    state = app.characterData.restoreHistory(take.pop().snapshot);
     const restoredProject = project();
     if (previousProject?.id !== restoredProject?.id) app.workspace.resetEditor();
     else app.diagram.stopConnect();
     save();
+    pruneUnusedImages();
     const keepFraming = app.session.isStructureView() && previousProject && restoredProject &&
       (app.session.lastMapMode !== 'timeline' || previousChapter === chapter()?.id) && !mapLayoutChanged(previousProject,restoredProject);
     app.workspace.render(!keepFraming);

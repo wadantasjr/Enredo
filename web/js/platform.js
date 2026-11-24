@@ -6,7 +6,8 @@ Enredo.platform = ((app) => {
   const android = window.EnredoAndroid;
 
   function handleAndroidBack() {
-    if ($('imageViewer').open) $('imageViewer').close();
+    if ($('coverCropDialog').open) app.imageEditor.cancelCoverCrop();
+    else if ($('imageViewer').open) $('imageViewer').close();
     else if ($('dialog').open) app.dialogs.closeDialog();
     else if (document.querySelector('[data-menu][aria-expanded="true"]')) app.workspace.closeMenus();
     else if (app.session.connectMode) app.diagramInput.toggleConnect();

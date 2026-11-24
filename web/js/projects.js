@@ -6,7 +6,8 @@ Enredo.projects = ((app) => {
 
   function editProject() {
     const p = app.store.project();
-    app.dialogs.showDialog({title:t('renameProject'),body:field(t('name'),input('title',p.title,'',true)),submitKey:'save',
+    app.dialogs.showDialog({title:t('projectDetails'),body:'<div class="fields">' +
+      field(t('name'),input('title',p.title,'',true)) + app.imageEditor.coverControls('project',p.id,p.cover) + '</div>',submitKey:'save',
       onSubmit: data => {
         const title = data.get('title').trim();
         if (!title) return;
@@ -103,12 +104,31 @@ Enredo.projects = ((app) => {
       }});
   }
 
-  function chapterDialog(existing = null) {
+  function setChapterGroup(p,chapter,groupId) {
+    const targetId = groupId && p.chapterGroups?.some(group => group.id === groupId) ? groupId : null;
+    if (targetId === (chapter.groupId ?? null)) return;
+    if (targetId) {
+      chapter.groupId = targetId;
+      chapter.groupOrder = p.chapters.filter(item => item !== chapter && item.groupId === targetId)
+        .reduce((last,item,index) => Math.max(last,Number.isInteger(item.groupOrder) ? item.groupOrder : index),-1) + 1;
+    } else {
+      delete chapter.groupId;
+      delete chapter.groupOrder;
+    }
+  }
+
+  function chapterDialog(existing = null,defaultGroupId = null) {
     const p = app.store.project();
     const position = existing ? field(t('chapterPosition'),'<select name="position">' +
       p.chapters.map((c,i) => option(i,number(i),existing.id === c.id)).join('') + '</select>') : '';
+    const groups = p.chapterGroups ?? [];
+    const selectedGroup = existing?.groupId ?? defaultGroupId ?? '';
+    const groupField = groups.length ? field(t('chapterGroup'),'<select name="groupId">' +
+      option('',t('noGroup'),!selectedGroup) + groups.map(group => option(group.id,group.title,group.id === selectedGroup)).join('') +
+      '</select>') : '';
+    const coverField = existing ? app.imageEditor.coverControls('chapter',existing.id,existing.cover) : '';
     app.dialogs.showDialog({title:t(existing ? 'editChapter' : 'newChapter'),body:'<div class="fields">' +
-      field(t('chapterName'),input('title',existing?.title ?? '',t('chapterName'),true)) + position + '</div>',
+      field(t('chapterName'),input('title',existing?.title ?? '',t('chapterName'),true)) + groupField + position + coverField + '</div>',
       submitKey:existing ? 'save' : 'createChapter',onSubmit:data => {
         const title = data.get('title').trim();
         if (!title) return;
@@ -116,15 +136,19 @@ Enredo.projects = ((app) => {
         app.store.edit(() => {
           if (existing) {
             existing.title = title;
+            if (groups.length) setChapterGroup(p,existing,data.get('groupId'));
             p.chapters.splice(p.chapters.indexOf(existing),1);
             p.chapters.splice(Number(data.get('position')),0,existing);
           } else {
             const c = {id:uid(),title};
+            setChapterGroup(p,c,groups.length ? data.get('groupId') : defaultGroupId);
             p.chapters.push(c);
             app.workspace.enterProject(p,c.id);
           }
         },{fit:!existing});
         if (!existing) $('chapterTitle').focus();
+        else Array.from($('chapters').querySelectorAll('[data-chapter]'))
+          .find(button => button.dataset.chapter === existing.id)?.focus({preventScroll:true});
       },remove:existing ? () => removeChapter(p,existing) : null});
   }
 
@@ -170,7 +194,7 @@ Enredo.projects = ((app) => {
       if (!button) return;
       const {chapter:chapterId,project:projectId,deleteProject:projectToDelete,deleteChapter:chapterToDelete} = button.dataset;
       if (chapterId !== undefined) app.workspace.navigate(app.store.project().id,chapterId);
-      if (projectId !== undefined) app.workspace.navigate(projectId);
+      if (projectId !== undefined) app.chapterGroups.openProjectPresentation(projectId);
       if (projectToDelete !== undefined) removeProject(app.store.state.projects.find(p => p.id === projectToDelete));
       if (chapterToDelete !== undefined) {
         const p = app.store.project();
@@ -182,6 +206,8 @@ Enredo.projects = ((app) => {
   }
 
   return {
-    bindEvents
+    bindEvents,
+    chapterDialog,
+    removeChapter
   };
 })(Enredo);

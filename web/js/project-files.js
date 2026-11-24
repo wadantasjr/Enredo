@@ -65,21 +65,34 @@ Enredo.projectFiles = ((app) => {
       const files = new Map();
       if (data.version === 2) {
         const ids = new Map();
-        for (const [index,node] of p.nodes.entries()) {
-          const key = data.project.nodes[index].originalImageId;
-          if (key === undefined) continue;
-          if (!node.originalImageId || !data.images || !Object.hasOwn(data.images,key)) {
-            throw new Error('Original image is missing from backup');
+        const coverIds = new Set([p.cover?.assetId,...(p.chapterGroups ?? []).map(group => group.cover?.assetId),
+          ...p.chapters.map(chapter => chapter.cover?.assetId)].filter(Boolean));
+        for (const key of app.imageStore.originalImageIds(data.project)) {
+          if (!data.images || !Object.hasOwn(data.images,key)) throw new Error('Original image is missing from backup');
+          const image = app.imageStore.imageFromBackup(data.images[key]);
+          if (coverIds.has(key)) {
+            ids.set(key,await app.imageStore.saveCoverFromBackup(image));
+            continue;
           }
           if (!ids.has(key)) {
             const id = uid();
-            files.set(id,app.imageStore.imageFromBackup(data.images[key]));
+            files.set(id,image);
             ids.set(key,id);
           }
-          node.originalImageId = ids.get(key);
         }
+        for (const node of p.nodes) if (node.originalImageId) {
+          const mapped = ids.get(node.originalImageId);
+          if (!mapped) throw new Error('Original image is missing from backup');
+          node.originalImageId = mapped;
+        }
+        if (p.cover?.assetId) p.cover.assetId = ids.get(p.cover.assetId);
+        for (const group of p.chapterGroups ?? []) if (group.cover?.assetId) group.cover.assetId = ids.get(group.cover.assetId);
+        for (const chapter of p.chapters) if (chapter.cover?.assetId) chapter.cover.assetId = ids.get(chapter.cover.assetId);
       } else {
         for (const node of p.nodes) delete node.originalImageId;
+        delete p.cover;
+        for (const group of p.chapterGroups ?? []) delete group.cover;
+        for (const chapter of p.chapters) delete chapter.cover;
       }
       if (files.size) {
         try {
