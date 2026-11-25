@@ -2,6 +2,7 @@ Enredo.session = {
   atHome: true,
   diagramFullscreen: false,
   charactersOpen: false,
+  universeOpen: false,
   managementOpen: false,
   presentation: null,
   navigationCollapsed: false,
@@ -22,5 +23,5 @@ Enredo.session = {
   },
   isStoryOverview(mode = this.viewMode) { return this.positionField(mode) !== null; },
   isStructureView() { return this.viewMode === 'structure'; },
-  hasMapView() { return !this.isStructureView() && !this.charactersOpen && !this.managementOpen && !this.presentation; }
+  hasMapView() { return !this.isStructureView() && !this.charactersOpen && !this.universeOpen && !this.managementOpen && !this.presentation; }
 };

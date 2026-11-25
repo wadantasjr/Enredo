@@ -94,6 +94,7 @@ Enredo.store = ((app) => {
   function edit(callback,{fit = false, saveError, afterSave} = {}) {
     const before = app.characterData.captureHistory(state);
     callback();
+    app.universeData.pruneState(state);
     const after = app.characterData.captureHistory(state);
     if (!save(JSON.stringify(state),!saveError) && saveError) {
       state = app.characterData.restoreHistory(before);

@@ -45,6 +45,7 @@ Enredo.storyBeats = ((app) => {
       esc(n.notes[0] === '\n' ? '\n' + n.notes : n.notes) + '</textarea></label></div>' +
       app.projectManagement.renderBeatTasks(n,p) +
       app.characters.renderNodeParticipants(n,p) +
+      app.universe.renderNodeReferences(n,p) +
       '<section class="paths"><div class="paths-title"><span>' + tx('outgoingPaths') + '</span><span class="count">' + outgoing.length +
       '</span></div><div class="path-list">' + (list || '<p class="hint">' + tx('noPaths') + '</p>') +
       '</div><button class="btn path-add" id="addPath">' + icon('plus') + ' ' + tx('addPath') + '</button></section>' +

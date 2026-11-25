@@ -49,7 +49,7 @@
 .project-card-copy{display:block;padding:13px 16px 15px}
 .project-card-actions{justify-content:space-between;gap:5px;flex-wrap:wrap}
 
-.workspace.presentation-mode{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+.workspace.presentation-mode{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
 .presentation-mode .graph-shell{grid-column:1/-1;min-height:0}
 .chapter-presentation{flex:1;min-height:0;overflow:auto;padding:clamp(14px,3vw,28px);background:var(--surface-subtle)}
 .project-presentation-hero,.group-presentation-hero{display:grid;grid-template-columns:minmax(180px,36%) minmax(0,1fr);align-items:center;gap:clamp(14px,3vw,28px);max-width:1120px;margin:0 auto 24px}

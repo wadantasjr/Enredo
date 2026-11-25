@@ -15,7 +15,7 @@ Enredo.imageStore = (() => {
   const validOriginalImageId = value => typeof value === 'string' && /^[a-z0-9-]{1,80}$/i.test(value);
 
   function galleryOwners(project) {
-    const collections = [project.chapterGroups,project.chapters,project.nodes,project.characters,project.tasks];
+    const collections = [project.chapterGroups,project.chapters,project.nodes,project.characters,project.tasks,project.worldEntries];
     return [project,...collections.flatMap(items => Array.isArray(items)
       ? items.filter(item => item && typeof item === 'object' && !Array.isArray(item)) : [])];
   }

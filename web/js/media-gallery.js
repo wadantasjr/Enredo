@@ -3,7 +3,7 @@ Enredo.mediaGallery = ((app) => {
 
   const { $, esc, icon, uid, bindActions } = app.dom;
   const { t, tx } = app.preferences;
-  const collections = {chapter:'chapters',character:'characters',group:'chapterGroups',beat:'nodes',task:'tasks'};
+  const collections = {chapter:'chapters',character:'characters',group:'chapterGroups',beat:'nodes',task:'tasks',universe:'worldEntries'};
   const imagesOnly = type => type === 'character' || type === 'task';
   let gallery = null;
   let busy = false;

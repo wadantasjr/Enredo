@@ -381,6 +381,7 @@ Enredo.characterData = ((app) => {
       if (relation.fromCharacterId === sourceId) relation.fromCharacterId = targetId;
       if (relation.toCharacterId === sourceId) relation.toCharacterId = targetId;
     }
+    app.universeData.replaceReference(project,'character',sourceId,targetId);
     project.characters = project.characters.filter(character => character.id !== sourceId);
     for (const portraitId of sourcePortraitIds) prunePortrait(project,portraitId);
     return {...summary,ok:true,targetPhaseId:targetPhase.id,sourcePhaseId:sourcePhase.id};

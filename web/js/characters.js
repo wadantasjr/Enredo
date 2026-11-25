@@ -178,7 +178,7 @@ Enredo.characters = ((app) => {
       '<button type="button" class="btn danger" id="deletePhase">' + icon('trash') + ' ' + tx('delete') + '</button></div></div>' : '';
     return '<div class="character-profile-content">' + phaseActions + portrait +
       '<section class="character-section"><h4>' + tx(phase ? 'phaseProfile' : 'centralProfile') + '</h4>' + fields + '</section>' +
-      roles + traits + phases + '</div>';
+      roles + traits + phases + (!phase ? app.universe.renderCharacterReferences(character,p) : '') + '</div>';
   }
 
   function renderPortrait(p,character,phase = null) {
@@ -986,6 +986,7 @@ Enredo.characters = ((app) => {
     view.section = 'profile';
     view.graph = false;
     if (originNodeId) view.originNodeId = originNodeId;
+    app.session.universeOpen = false;
     app.session.charactersOpen = true;
     app.diagram.stopConnect();
     app.workspace.render();
