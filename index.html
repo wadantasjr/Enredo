@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="web/css/fullscreen.css">
 <link rel="stylesheet" href="web/css/structure.css">
 <link rel="stylesheet" href="web/css/characters.css">
+  <link rel="stylesheet" href="web/css/universe.css">
 <link rel="stylesheet" href="web/css/project-management.css">
 <link rel="stylesheet" href="web/css/chapter-groups.css">
 <link rel="stylesheet" href="web/css/project-pdf.css">
@@ -98,17 +99,41 @@
     <div class="content" id="editorView" hidden>
       <section class="heading">
         <div><div class="eyebrow" id="chapterLabel"></div><div class="heading-title"><h1 id="chapterTitle" tabindex="-1"></h1><button class="icon-btn small" id="renameChapter" title="Edit chapter" aria-label="Edit chapter" data-i18n-label="editChapter" data-i18n-title="editChapter" data-icon="edit"></button></div><p id="stats"></p></div>
-        <div class="heading-actions"><div id="chapterGallery" hidden></div><button class="btn primary" id="addNode"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
+        <div class="heading-actions"><div id="chapterGallery" hidden></div><div id="chapterUniverseLinks" hidden></div><button class="btn primary" id="addNode"><span data-icon="plus"></span> <span data-i18n="addNode">Add story beat</span></button></div>
       </section>
       <section class="workspace" id="editorWorkspace" aria-label="Timeline">
         <div class="graph-bar" id="graphBar">
-          <div class="tabs" role="group" aria-label="View" data-i18n-label="view">
-            <button type="button" class="tab" id="currentTab" aria-controls="graph"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
-            <button type="button" class="tab" id="overviewTab" aria-controls="graph"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
-            <button type="button" class="tab" id="storyMapTab" aria-controls="graph"><span data-icon="image"></span> <span data-i18n="storyMap">Map</span></button>
-            <button type="button" class="tab" id="structureTab" aria-controls="structureView"><span data-icon="panel"></span> <span data-i18n="structure">Structure</span></button>
-            <button type="button" class="tab" id="charactersTab" aria-controls="charactersView"><span data-icon="people"></span> <span data-i18n="characters">Characters</span></button>
-            <button type="button" class="tab" id="projectManagementTab" aria-controls="projectManagementView"><span data-icon="tasks"></span> <span data-i18n="projectManagement">Project Management</span></button>
+          <div class="workspace-navigation" id="workspaceNavigation" role="group" aria-label="Workspace navigation" data-i18n-label="workspaceNavigation">
+            <div class="workspace-nav-story">
+              <div class="workspace-nav-group" role="group" aria-labelledby="narrativeAreaHeading">
+                <span class="workspace-nav-label" id="narrativeAreaHeading" data-i18n="narrativeArea">Narrative</span>
+                <div class="tabs workspace-nav-tabs" role="group" aria-label="Story creation tools" data-i18n-label="storyCreationTools">
+                  <button type="button" class="tab" id="storySummaryTab" aria-controls="chapterPresentation" aria-pressed="false"><span data-icon="book"></span> <span data-i18n="storySummary">Story summary</span></button>
+                  <button type="button" class="tab" id="structureTab" aria-controls="structureView" aria-pressed="false"><span data-icon="panel"></span> <span data-i18n="structure">Structure</span></button>
+                  <button type="button" class="tab" id="currentTab" aria-controls="graph" aria-pressed="false"><span data-icon="timeline"></span> <span data-i18n="timeline">Timeline</span></button>
+                </div>
+              </div>
+              <div class="workspace-nav-group" role="group" aria-labelledby="reviewAreaHeading">
+                <span class="workspace-nav-label" id="reviewAreaHeading" data-i18n="reviewArea">Review</span>
+                <div class="tabs workspace-nav-tabs" role="group" aria-label="Story review views" data-i18n-label="reviewTools">
+                  <button type="button" class="tab" id="overviewTab" aria-controls="graph" aria-pressed="false"><span data-icon="branch"></span> <span data-i18n="wholeStory">Whole story</span></button>
+                  <button type="button" class="tab" id="storyMapTab" aria-controls="graph" aria-pressed="false"><span data-icon="image"></span> <span data-i18n="storyMap">Map</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="workspace-nav-group" role="group" aria-labelledby="referencesAreaHeading">
+              <span class="workspace-nav-label" id="referencesAreaHeading" data-i18n="referencesArea">References</span>
+              <div class="tabs workspace-nav-tabs" role="group" aria-label="Story references" data-i18n-label="referenceTools">
+                <button type="button" class="tab" id="charactersTab" aria-controls="charactersView" aria-pressed="false"><span data-icon="people"></span> <span data-i18n="characters">Characters</span></button>
+                <button type="button" class="tab" id="universeTab" aria-controls="universeView" aria-pressed="false"><span data-icon="globe"></span> <span data-i18n="universe">Universe</span></button>
+              </div>
+            </div>
+            <div class="workspace-nav-group" role="group" aria-labelledby="productionAreaHeading">
+              <span class="workspace-nav-label" id="productionAreaHeading" data-i18n="productionArea">Production</span>
+              <div class="tabs workspace-nav-tabs" role="group" aria-label="Production tools" data-i18n-label="productionTools">
+                <button type="button" class="tab" id="projectManagementTab" aria-controls="projectManagementView" aria-pressed="false"><span data-icon="tasks"></span> <span data-i18n="projectManagement">Project Management</span></button>
+              </div>
+            </div>
           </div>
           <div class="workspace-tools" role="group" id="graphActions" aria-label="Editor tools" data-i18n-label="editorTools">
             <button class="icon-btn" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo" data-i18n-label="undo" data-i18n-title="undo" data-shortcut="Ctrl+Z" data-icon="undo"></button>
@@ -141,6 +166,7 @@
             <div id="presentationContent"></div>
           </section>
           <section class="characters-view" id="charactersView" aria-label="Characters" data-i18n-label="characters" hidden></section>
+          <section class="universe-view" id="universeView" aria-labelledby="universeTitle" hidden></section>
           <section class="management-view" id="projectManagementView" aria-labelledby="managementTitle" hidden>
             <header class="management-heading">
               <h2 id="managementTitle" tabindex="-1" data-i18n="projectManagement">Project Management</h2>
@@ -292,6 +318,7 @@
 <script src="web/js/character-data.js"></script>
 <script src="web/js/project-management-data.js"></script>
 <script src="web/js/project-summary.js"></script>
+<script src="web/js/universe-data.js"></script>
 <script src="web/js/story-data.js"></script>
 <script src="web/js/session.js"></script>
 <script src="web/js/image-store.js"></script>
@@ -314,6 +341,7 @@
 <script src="web/js/project-management.js"></script>
 <script src="web/js/project-files.js"></script>
 <script src="web/js/chapter-groups.js"></script>
+<script src="web/js/universe.js"></script>
 <script src="web/js/project-pdf.js"></script>
 <script src="web/js/main.js"></script>
 </body>

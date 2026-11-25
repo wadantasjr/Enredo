@@ -341,7 +341,7 @@ Enredo.sampleProject = ((app) => {
 
     return {
       id:app.dom.uid(),title:local('After the Signal','Depois do sinal'),narrativeModel,chapterGroups,chapters,nodes,edges,
-      characters,characterRoles,characterArcs,arcPaths,relationships,relationshipKinds,
+      characters,characterRoles,characterArcs,arcPaths,relationships,relationshipKinds,worldEntries:[],
       portraits:Object.entries(portraits).map(([id,data]) => ({id,data})),tasks,sprints
     };
   }

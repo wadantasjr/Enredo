@@ -6,7 +6,7 @@ Enredo.projectSummary = ((app) => {
   const tags = new Set(['div','p','br','b','strong','i','em','u','ul','ol','li']);
   const ignoredTags = new Set(['script','style','template']);
   const linkHref = (kind,id) => '#enredo-summary-' + kind + '/' + encodeURIComponent(JSON.stringify(id));
-  const isStoryLink = href => /^#enredo-summary-(group|chapter|beat)\//.test(href ?? '');
+  const isStoryLink = href => /^#enredo-summary-(group|chapter|beat|world)\//.test(href ?? '');
 
   function render(value, resolveLink = href => href) {
     const fragment = document.createDocumentFragment();
@@ -56,13 +56,15 @@ Enredo.projectSummary = ((app) => {
   }
 
   function destinations(project) {
-    const title = item => item.title.trim() || t('untitled');
+    const title = item => (item.title ?? item.name ?? '').trim() || t('untitled');
     const chapters = new Map(project.chapters.map(chapter => [chapter.id,title(chapter)]));
     return [
       ['groups',(project.chapterGroups ?? []).map(group => ({kind:'group',id:group.id,label:title(group)}))],
       ['chapters',project.chapters.map(chapter => ({kind:'chapter',id:chapter.id,label:chapters.get(chapter.id)}))],
       ['summaryBeats',project.nodes.map(node => ({kind:'beat',id:node.id,chapter:node.chapter,
-        label:chapters.get(node.chapter) + ' / ' + title(node)}))]
+        label:chapters.get(node.chapter) + ' / ' + title(node)}))],
+      ['universe',(project.worldEntries ?? []).map(entry => ({kind:'world',id:entry.id,
+        label:t('worldCategory-' + entry.category) + ' / ' + title(entry)}))]
     ];
   }
 
@@ -238,6 +240,7 @@ Enredo.projectSummary = ((app) => {
       event.preventDefault();
       if (target.kind === 'group') app.chapterGroups.openGroup(target.id);
       else if (target.kind === 'chapter') app.workspace.navigate(project.id,target.id);
+      else if (target.kind === 'world') app.universe.openEntry(target.id);
       else {
         app.workspace.navigate(project.id,target.chapter);
         app.workspace.inspect(target.id,true);

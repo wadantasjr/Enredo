@@ -33,6 +33,10 @@ Enredo.projectPdf = ((app) => {
     }
   }
 
+  function addContent(parent, title, content) {
+    parent.append(element('div','pdf-details',element('h4','',title),content));
+  }
+
   function reference(id, label) {
     const link = element('a','',label);
     link.setAttribute('href','#' + id);
@@ -114,6 +118,7 @@ Enredo.projectPdf = ((app) => {
     const images = [];
     const nodes = indexed(project.nodes,'beat'), people = indexed(project.characters,'character');
     const chapters = indexed(project.chapters,'chapter'), groups = indexed(project.chapterGroups,'group');
+    const worldEntries = indexed(project.worldEntries,'world');
     const relations = indexed(project.relationships,'relationship'), routes = indexed(project.arcPaths,'route');
     const sprints = indexed(project.sprints,'sprint'), tasks = indexed(project.tasks,'task');
     const edges = indexed(project.edges,'connection'), arcs = indexed(project.characterArcs,'arc');
@@ -179,6 +184,7 @@ Enredo.projectPdf = ((app) => {
     }
 
     const beatName = node => node.title || t('untitled');
+    const worldName = entry => entry.name || t('untitled');
     const beatLink = id => {
       const node = nodes.get(id);
       if (node) return reference(node.anchor,[chapters.get(node.chapter)?.title,beatName(node)].filter(Boolean).join(' / '));
@@ -293,7 +299,7 @@ Enredo.projectPdf = ((app) => {
     addFields(overview,[[t('narrativeModel'),model ? app.structure.narrativeText(model.name) : project.narrativeModel]]);
     if (project.summary) {
       const destinations = new Map();
-      for (const [kind,items] of [['group',groups],['chapter',chapters],['beat',nodes]]) {
+      for (const [kind,items] of [['group',groups],['chapter',chapters],['beat',nodes],['world',worldEntries]]) {
         for (const [id,item] of items) destinations.set(app.projectSummary.linkHref(kind,id),'#' + item.anchor);
       }
       const summary = app.projectSummary.render(project.summary,href => destinations.get(href));
@@ -331,6 +337,44 @@ Enredo.projectPdf = ((app) => {
     }
     for (const chapter of chapters.values()) {
       if (!groups.has(chapter.groupId)) renderChapter(story.group,chapterIndex,chapter);
+    }
+
+    if (worldEntries.size) {
+      const universe = section('universe',t('universe')).group;
+      for (const category of app.universeData.categories) {
+        const records = [...worldEntries.values()].filter(entry => entry.category === category);
+        if (!records.length) continue;
+        const categorySection = titled(universe,'section','pdf-details','h3',t('worldCategory-' + category));
+        for (const entry of records) {
+          const block = titled(categorySection,'article','pdf-record','h4',worldName(entry),entry.anchor);
+          const details = entry.details ?? {};
+          const fields = [[t('description'),entry.description],[t('notes'),entry.notes],
+            [t('worldEntryTags'),listOf(entry.tags).join(', ')]];
+          if (entry.category === 'location' && details.locationType) fields.unshift([t('locationType'),t('locationType-' + details.locationType)]);
+          if (entry.category === 'organization' && details.organizationType) fields.unshift([t('organizationType'),t('organizationType-' + details.organizationType)]);
+          if (entry.category === 'item' && details.itemType) fields.unshift([t('itemType'),t('itemType-' + details.itemType)]);
+          if (entry.category === 'history') fields.unshift([t('historicalPeriod'),details.period],[t('historicalDate'),details.date],[t('historicalImpact'),details.impact]);
+          addFields(block,fields);
+          const links = listOf(entry.references).flatMap(referenceItem => {
+            const collections = {universe:worldEntries,character:people,group:groups,chapter:chapters,node:nodes};
+            const target = collections[referenceItem.kind]?.get(referenceItem.id);
+            if (!target) return [];
+            const label = referenceItem.kind === 'universe' ? worldName(target) :
+              referenceItem.kind === 'character' ? target.name : referenceItem.kind === 'group' || referenceItem.kind === 'chapter'
+                ? target.title : [chapters.get(target.chapter)?.title,beatName(target)].filter(Boolean).join(' / ');
+            const link = reference(target.anchor,[referenceItem.relation,label].filter(Boolean).join(' / '));
+            return [element('li','',link)];
+          });
+          const incoming = [...worldEntries.values()].filter(other => other.id !== entry.id && listOf(other.references).some(referenceItem =>
+            referenceItem.kind === 'universe' && referenceItem.id === entry.id));
+          for (const other of incoming) links.push(element('li','',reference(other.anchor,worldName(other))));
+          if (links.length) addContent(block,t('worldEntryReferences'),element('ul','pdf-world-links',...links));
+          if (summaryUsesWorldEntry(project,entry.id)) {
+            addContent(block,t('worldEntryUsedInSummary'),reference('pdf-overview',t('projectOverview')));
+          }
+          gallery(block,entry);
+        }
+      }
     }
 
     if (people.size || roles.size || arcs.size || routes.size || relations.size || kinds.size) {
@@ -402,6 +446,14 @@ Enredo.projectPdf = ((app) => {
       }
     }
     return {fragment,images};
+  }
+
+  function summaryUsesWorldEntry(project,id) {
+    if (!project.summary) return false;
+    const template = document.createElement('template');
+    template.innerHTML = project.summary;
+    const href = app.projectSummary.linkHref('world',id);
+    return [...template.content.querySelectorAll('a[href]')].some(anchor => anchor.getAttribute('href') === href);
   }
 
   function finishPrint(failed = false) {

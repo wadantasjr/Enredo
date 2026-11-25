@@ -156,6 +156,7 @@ Enredo.chapterGroups = ((app) => {
     if (!group) return;
     if (app.session.diagramFullscreen) app.workspace.setDiagramFullscreen(false);
     app.session.charactersOpen = false;
+    app.session.universeOpen = false;
     app.session.managementOpen = false;
     app.session.presentation = {type:'group',id};
     collapsed.delete(id);
@@ -167,6 +168,7 @@ Enredo.chapterGroups = ((app) => {
   function openUngrouped() {
     if (app.session.diagramFullscreen) app.workspace.setDiagramFullscreen(false);
     app.session.charactersOpen = false;
+    app.session.universeOpen = false;
     app.session.managementOpen = false;
     app.session.presentation = {type:'ungrouped'};
     collapsed.delete('');
@@ -187,6 +189,7 @@ Enredo.chapterGroups = ((app) => {
     }
     if (app.session.diagramFullscreen) app.workspace.setDiagramFullscreen(false);
     app.session.charactersOpen = false;
+    app.session.universeOpen = false;
     app.session.managementOpen = false;
     app.session.presentation = {type:'project'};
     app.diagram.stopConnect();
@@ -249,7 +252,8 @@ Enredo.chapterGroups = ((app) => {
           app.mediaGallery.launcher('group',group) + '</div>' : '') +
         '</div></div><h3 class="presentation-section-title">' + tx('chapters') + '</h3>' +
         (members.length ? '<ul class="presentation-chapter-list">' + members.map(chapter => presentationChapter(chapter,p)).join('') +
-          '</ul>' : '<p class="hint">' + tx('noGroupChapters') + '</p>');
+          '</ul>' : '<p class="hint">' + tx('noGroupChapters') + '</p>') +
+        (group ? app.universe.usagePanel('group',group.id) : '');
     }
     app.imageEditor.renderCoverPreviews($('presentationContent'));
   }

@@ -33,7 +33,7 @@ Enredo.storyData = ((app) => {
     if (nodeIds.size !== p.nodes.length) return false;
     return p.edges.every(e => e && string(e.id) && nodeIds.has(e.from) &&
       nodeIds.has(e.to) && e.from !== e.to && string(e.label)) &&
-      new Set(p.edges.map(e => e.id)).size === p.edges.length;
+      new Set(p.edges.map(e => e.id)).size === p.edges.length && app.universeData.validProject(p);
   }
 
   const hasId = value => typeof value === 'string' && value.trim().length > 0;
@@ -91,7 +91,8 @@ Enredo.storyData = ((app) => {
           ...(app.imageStore.validNodeImage(image) ? {image,...(app.imageStore.validOriginalImageId(originalImageId) ? {originalImageId} : {})} : {}) };
       })
     };
-    const result = app.characterData.normalizeProject(app.projectManagementData.normalizeProject(normalized));
+    const result = app.universeData.normalizeProject(
+      app.characterData.normalizeProject(app.projectManagementData.normalizeProject(normalized)));
     for (const owner of app.imageStore.galleryOwners(result)) {
       for (const field of ['galleryImages','galleryDocuments']) {
         if (!Object.hasOwn(owner,field)) continue;

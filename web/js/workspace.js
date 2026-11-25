@@ -57,6 +57,7 @@ Enredo.workspace = ((app) => {
   function resetEditor() {
     app.session.viewMode = 'timeline';
     app.session.charactersOpen = false;
+    app.session.universeOpen = false;
     app.session.managementOpen = false;
     app.session.presentation = null;
     app.projectManagement.resetView();
@@ -93,11 +94,17 @@ Enredo.workspace = ((app) => {
     $('spaceTitle').focus();
   }
 
+  function openStorySummary() {
+    if (app.session.atHome) return;
+    app.chapterGroups.openProjectPresentation();
+  }
+
   function openCharacters() {
     if (app.session.atHome || app.session.charactersOpen) return;
     app.characters.clearOrigin();
     if (app.session.diagramFullscreen) setDiagramFullscreen(false);
     app.session.charactersOpen = true;
+    app.session.universeOpen = false;
     app.session.managementOpen = false;
     app.session.presentation = null;
     app.diagram.stopConnect();
@@ -106,10 +113,30 @@ Enredo.workspace = ((app) => {
     $('charactersTitle').focus();
   }
 
+  function openUniverse() {
+    if (app.session.atHome || app.session.universeOpen) return;
+    if (app.session.diagramFullscreen) setDiagramFullscreen(false);
+    app.session.charactersOpen = false;
+    app.characters.clearOrigin();
+    app.session.universeOpen = true;
+    app.session.managementOpen = false;
+    app.session.presentation = null;
+    app.diagram.stopConnect();
+    closeMenus();
+    render();
+    $('universeTitle').focus();
+  }
+
+  function closeUniverse() {
+    switchView(app.session.viewMode);
+    focusDiagramTab();
+  }
+
   function openProjectManagement() {
     if (app.session.atHome || app.session.managementOpen) return;
     if (app.session.diagramFullscreen) setDiagramFullscreen(false);
     app.session.charactersOpen = false;
+    app.session.universeOpen = false;
     app.characters.clearOrigin();
     app.session.managementOpen = true;
     app.session.presentation = null;
@@ -166,9 +193,10 @@ Enredo.workspace = ((app) => {
     const p = app.store.project(), c = app.store.chapter();
     const chapterIndex = p.chapters.indexOf(c);
     const characters = app.session.charactersOpen;
+    const universe = app.session.universeOpen;
     const management = app.session.managementOpen;
     const presentation = app.session.presentation;
-    const structure = !presentation && app.session.isStructureView() && !characters && !management;
+    const structure = !presentation && app.session.isStructureView() && !characters && !universe && !management;
     const mode = app.session.viewMode;
     const timeline = app.session.hasMapView() && mode === 'timeline';
     const showMap = !!c && app.session.hasMapView();
@@ -189,14 +217,16 @@ Enredo.workspace = ((app) => {
       '<button data-delete-project="' + esc(p.id) + '">' + icon('trash') + ' ' + tx('deleteProject') + '</button>';
     $('chapterLabel').textContent = presentation ? t(presentation.type === 'project' ? 'projectOverview' :
       presentation.type === 'ungrouped' ? 'ungrouped' : 'group') :
-      management ? t('project') : characters ? t('characters') : structure ? t('structure') :
+      management ? t('project') : universe ? t('universe') : characters ? t('characters') : structure ? t('structure') :
       showStoryMap ? t('storyMap') : mode === 'whole-story' ? t('wholeStory') :
       c ? t('chapterNumber',{number:number(chapterIndex)}) : t('project');
     const shownGroup = presentation?.type === 'group' ? p.chapterGroups?.find(group => group.id === presentation.id) : null;
-    $('chapterTitle').textContent = presentation?.type === 'ungrouped' ? t('ungrouped') : shownGroup?.title ?? (timeline && c ? c.title : p.title);
+    $('chapterTitle').textContent = universe ? t('universe') : presentation?.type === 'ungrouped' ? t('ungrouped') : shownGroup?.title ?? (timeline && c ? c.title : p.title);
     $('renameChapter').hidden = !timeline || !c;
     $('chapterGallery').hidden = !timeline || !c;
     $('chapterGallery').innerHTML = timeline && c ? app.mediaGallery.launcher('chapter',c) : '';
+    $('chapterUniverseLinks').hidden = !timeline || !c;
+    $('chapterUniverseLinks').innerHTML = timeline && c ? app.universe.chapterLauncher(c) : '';
     $('addNode').hidden = !showMap || imageOnly;
     $('connect').hidden = imageOnly;
     $('layout').hidden = imageOnly;
@@ -214,22 +244,24 @@ Enredo.workspace = ((app) => {
     $('legend').hidden = !showMap || imageOnly;
     $('structureView').hidden = !structure;
     $('charactersView').hidden = !characters;
+    $('universeView').hidden = !universe;
     $('projectManagementView').hidden = !management;
     $('chapterPresentation').hidden = !presentation;
-    $('graphBar').hidden = !!presentation;
+    $('graphActions').hidden = !!presentation;
     $('editorFooter').hidden = !showMap;
     $('editorWorkspace').classList.toggle('structure-mode',structure);
     $('editorWorkspace').classList.toggle('characters-mode',characters);
+    $('editorWorkspace').classList.toggle('universe-mode',universe);
     $('editorWorkspace').classList.toggle('management-mode',management);
     $('editorWorkspace').classList.toggle('presentation-mode',!!presentation);
     $('editorWorkspace').classList.toggle('no-map',!c);
     $('editorWorkspace').setAttribute('aria-label',t(presentation ? (presentation.type === 'project' ? 'projectOverview' : 'group') :
-      management ? 'projectManagement' : characters ? 'characters' : structure ? 'structure' :
+      management ? 'projectManagement' : universe ? 'universe' : characters ? 'characters' : structure ? 'structure' :
       showStoryMap ? 'storyMap' : mode === 'whole-story' ? 'wholeStory' : 'timeline'));
     $('overviewTab').disabled = !c;
     $('storyMapTab').disabled = !c;
-    for (const [id,active] of [['currentTab',timeline],['overviewTab',showMap && mode === 'whole-story'],['storyMapTab',showStoryMap],
-      ['structureTab',structure],['charactersTab',characters],['projectManagementTab',management]]) {
+    for (const [id,active] of [['storySummaryTab',presentation?.type === 'project'],['currentTab',timeline],['overviewTab',showMap && mode === 'whole-story'],['storyMapTab',showStoryMap],
+      ['structureTab',structure],['charactersTab',characters],['universeTab',universe],['projectManagementTab',management]]) {
       $(id).classList.toggle('active',active);
       $(id).setAttribute('aria-pressed',active);
     }
@@ -339,6 +371,10 @@ Enredo.workspace = ((app) => {
       app.projectManagement.render();
       return;
     }
+    if (app.session.universeOpen) {
+      app.universe.render();
+      return;
+    }
     if (app.session.charactersOpen) {
       app.characters.render();
       return;
@@ -372,10 +408,11 @@ Enredo.workspace = ((app) => {
   }
 
   function switchView(next,{revealSelection = false} = {}) {
-    if (app.session.atHome || (!app.session.charactersOpen && !app.session.managementOpen && !app.session.presentation && app.session.viewMode === next) ||
+    if (app.session.atHome || (!app.session.charactersOpen && !app.session.universeOpen && !app.session.managementOpen && !app.session.presentation && app.session.viewMode === next) ||
         (app.session.isStoryOverview(next) && !app.store.chapter())) return;
     const previousMapMode = app.session.isStructureView() ? app.session.lastMapMode : app.session.viewMode;
     app.session.charactersOpen = false;
+    app.session.universeOpen = false;
     app.session.managementOpen = false;
     app.session.presentation = null;
     app.characters.clearOrigin();
@@ -399,6 +436,7 @@ Enredo.workspace = ((app) => {
       app.session.viewMode = app.session.lastMapMode;
     }
     app.session.charactersOpen = false;
+    app.session.universeOpen = false;
     app.session.managementOpen = false;
     const changedChapter = app.session.viewMode === 'timeline' && n.chapter !== app.store.chapter()?.id;
     if (changedChapter) app.store.state.chapter = n.chapter;
@@ -421,6 +459,7 @@ Enredo.workspace = ((app) => {
     if (event.key === 'Escape') {
       closeMenus();
       if (app.session.charactersOpen) app.characters.goBack();
+      else if (app.session.universeOpen) closeUniverse();
       else if (app.session.managementOpen) closeProjectManagement();
       else if (app.session.connectMode) app.diagramInput.toggleConnect();
       else if (app.session.diagramFullscreen) setDiagramFullscreen(false);
@@ -459,10 +498,12 @@ Enredo.workspace = ((app) => {
         render(true);
       },
       currentTab:() => switchView('timeline'),
+      storySummaryTab:openStorySummary,
       overviewTab:() => switchView('whole-story'),
       storyMapTab:() => switchView('story-map'),
       structureTab:() => switchView('structure'),
       charactersTab:openCharacters,
+      universeTab:openUniverse,
       projectManagementTab:openProjectManagement,
       clearSelection:() => { app.session.selection = null; app.diagram.stopConnect(); render(); }
     });
@@ -493,6 +534,7 @@ Enredo.workspace = ((app) => {
     navigate,
     openCharacters,
     openHome,
+    openUniverse,
     render,
     renderWorkspaceControls,
     resetEditor,

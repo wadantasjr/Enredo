@@ -154,6 +154,8 @@
 .pdf-report h5 { margin: 3mm 0 1mm; color: var(--pdf-secondary); font-size: 9pt; }
 
 .pdf-field { margin-bottom: 2mm; }
+.pdf-world-links { display: grid; gap: 1.2mm; margin: 0; padding-left: 5mm; }
+.pdf-world-links a { overflow-wrap: anywhere; }
 .pdf-label { color: var(--pdf-secondary); font-size: 9pt; font-weight: 700; }
 .pdf-text { white-space: pre-wrap; }
 .pdf-story-summary { margin: 0 0 4mm; white-space: pre-wrap; }
